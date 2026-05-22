@@ -1,6 +1,6 @@
 # 01 — Project Setup & Folder Architecture
 
-> Stack: Solidity `^0.8.24` · Foundry · Base L2 · ERC-1155 · ERC-2981
+> Stack: Solidity `^0.8.24` · Foundry · Base L2 · ERC-1155 · ERC-2981 · Next.js · Wagmi
 
 ---
 
@@ -77,40 +77,43 @@ broadcast/
 
 ---
 
-## Arsitektur Folder Lengkap
+## Arsitektur Folder Lengkap (Monorepo)
 
-```
-smart-ticketing/
+Struktur proyek ini menggunakan pola Monorepo untuk memisahkan *smart contract* dan *frontend*.
+
+```text
+billet-monorepo/
 │
-├── foundry.toml
-├── .env
-├── .gitignore
+├── contracts/                       # Direktori Smart Contract (Fokus File 01, 02, 03)
+│   ├── foundry.toml
+│   ├── .env
+│   ├── src/
+│   │   ├── interfaces/
+│   │   │   └── ITicketMarketplace.sol   # Interface publik marketplace
+│   │   ├── libraries/
+│   │   │   └── PriceLib.sol             # Helper kalkulasi price ceiling & royalti
+│   │   ├── mock/
+│   │   │   └── MockERC20.sol            # Mock ERC20 Token untuk IDRX (Stablecoin)
+│   │   ├── TicketNFT.sol                # ERC-1155 + transfer gating
+│   │   └── TicketMarketplace.sol        # Monolithic marketplace + escrow (IDRX Payment)
+│   │
+│   ├── script/
+│   │   ├── Deploy.s.sol                 # Deploy ke Base / Base Sepolia
+│   │   └── Seed.s.sol                   # Seed listing untuk demo/testing manual
+│   │
+│   └── test/
+│       ├── helpers/
+│       ├── unit/
+│       └── integration/
 │
-├── src/
-│   ├── interfaces/
-│   │   └── ITicketMarketplace.sol   # Interface publik marketplace
-│   ├── libraries/
-│   │   └── PriceLib.sol             # Helper kalkulasi price ceiling & royalti
-│   ├── mock/
-│   │   └── MockERC20.sol            # Mock ERC20 Token untuk IDRX (Stablecoin)
-│   ├── TicketNFT.sol                # ERC-1155 + transfer gating
-│   └── TicketMarketplace.sol        # Monolithic marketplace + escrow (IDRX Payment)
-│
-├── script/
-│   ├── Deploy.s.sol                 # Deploy ke Base / Base Sepolia
-│   └── Seed.s.sol                   # Seed listing untuk demo/testing manual
-│
-├── test/
-│   ├── helpers/
-│   │   └── TestHelper.sol           # Base contract & shared fixtures
-│   ├── unit/
-│   │   ├── TicketNFT.t.sol          # Unit test ERC-1155 & transfer gating
-│   │   └── TicketMarketplace.t.sol  # Unit test listing, buy, resale, royalti
-│   └── integration/
-│       └── FullFlow.t.sol           # End-to-end: mint → list → buy → resale
-│
-└── lib/
-    └── openzeppelin-contracts/      # Auto-generated oleh forge install
+└── frontend/                        # Direktori Web3 DApp (Fokus File 04)
+    ├── src/
+    │   ├── app/                     # Routing & Pages (Next.js App Router)
+    │   ├── components/              # UI & Web3 Components
+    │   ├── hooks/                   # Custom Wagmi Hooks (Multi-step tx, Error Decoding)
+    │   └── config/                  # Konfigurasi Wagmi & ABI Contracts
+    ├── package.json
+    └── tailwind.config.ts
 ```
 
 ---

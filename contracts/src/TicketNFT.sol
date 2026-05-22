@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import {ERC1155} from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 
 contract TicketNFT is ERC1155, ERC2981, Ownable {
 
@@ -172,8 +172,7 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         require(index < length, "Index out of bounds");
         
         // Pindahkan elemen terakhir ke index yang dihapus, lalu pop
-        _ticketHolders[owner][tokenId][index] = _ticketHolders[owner][tokenId][length - 1];
-        _ticketHolders[owner][tokenId].pop();
+        delete _ticketHolders[owner][tokenId][index];
     }
 
     /// @notice Dapatkan jumlah tiket yang sudah digunakan (di-check-in).
@@ -181,7 +180,7 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         uint256 count = 0;
         uint256 length = _ticketHolders[owner][tokenId].length;
         for (uint256 i = 0; i < length; i++) {
-            if (_ticketHolders[owner][tokenId][i].used) {
+            if (_ticketHolders[owner][tokenId][i].registered && _ticketHolders[owner][tokenId][i].used) {
                 count++;
             }
         }
@@ -193,7 +192,7 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         uint256 count = 0;
         uint256 length = _ticketHolders[owner][tokenId].length;
         for (uint256 i = 0; i < length; i++) {
-            if (!_ticketHolders[owner][tokenId][i].used) {
+            if (_ticketHolders[owner][tokenId][i].registered && !_ticketHolders[owner][tokenId][i].used) {
                 count++;
             }
         }
@@ -206,10 +205,9 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         uint256 length = _ticketHolders[owner][tokenId].length;
         bool found = false;
         for (uint256 i = 0; i < length; i++) {
-            if (!_ticketHolders[owner][tokenId][i].used) {
-                // Pindahkan elemen terakhir ke index ini, lalu pop
-                _ticketHolders[owner][tokenId][i] = _ticketHolders[owner][tokenId][length - 1];
-                _ticketHolders[owner][tokenId].pop();
+            if (_ticketHolders[owner][tokenId][i].registered && !_ticketHolders[owner][tokenId][i].used) {
+                // Hapus dengan delete untuk mempertahankan index array
+                delete _ticketHolders[owner][tokenId][i];
                 found = true;
                 break;
             }
@@ -228,6 +226,7 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         
         uint256 length = _ticketHolders[from][tokenId].length;
         require(index < length, "Index out of bounds");
+        require(_ticketHolders[from][tokenId][index].registered, "Ticket not registered");
         require(!_ticketHolders[from][tokenId][index].used, "Ticket already used");
 
         // Invarian: saldo token user tidak boleh kurang dari jumlah unused ticket yang tersisa

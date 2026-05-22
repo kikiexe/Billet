@@ -51,6 +51,8 @@ interface ITicketMarketplace {
     error SaleEnded(uint256 end, uint256 current);
     error ArrayLengthMismatch();
     error InsufficientUnusedTickets(uint256 available, uint256 requested);
+    error ZeroAddress();
+    error InsufficientListingAmount(uint256 available, uint256 requested);
 
     // ─── Functions ───────────────────────────────────────────────────────────
 

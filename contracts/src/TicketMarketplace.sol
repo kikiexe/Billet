@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./TicketNFT.sol";
-import "./interfaces/ITicketMarketplace.sol";
-import "./libraries/PriceLib.sol";
+import {ERC1155Holder} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {TicketNFT} from "./TicketNFT.sol";
+import {ITicketMarketplace} from "./interfaces/ITicketMarketplace.sol";
+import {PriceLib} from "./libraries/PriceLib.sol";
 
 contract TicketMarketplace is
     ITicketMarketplace,
@@ -17,8 +17,8 @@ contract TicketMarketplace is
 {
     // ─── State Variables ─────────────────────────────────────────────────────
 
-    TicketNFT public immutable ticketNFT;
-    IERC20    public immutable paymentToken; // Koin IDRX Stablecoin
+    TicketNFT public immutable TICKET_NFT;
+    IERC20    public immutable PAYMENT_TOKEN; // Koin IDRX Stablecoin
 
     uint256 private _nextListingId;
 
@@ -27,11 +27,14 @@ contract TicketMarketplace is
 
     // ─── Constructor ─────────────────────────────────────────────────────────
 
-    constructor(address ticketNFTAddress, address paymentTokenAddress)
+    constructor(address ticketNftAddress, address paymentTokenAddress)
         Ownable(msg.sender)
     {
-        ticketNFT = TicketNFT(ticketNFTAddress);
-        paymentToken = IERC20(paymentTokenAddress);
+        if (ticketNftAddress == address(0)) revert ZeroAddress();
+        if (paymentTokenAddress == address(0)) revert ZeroAddress();
+
+        TICKET_NFT = TicketNFT(ticketNftAddress);
+        PAYMENT_TOKEN = IERC20(paymentTokenAddress);
     }
 
     // ─── Primary Listing ─────────────────────────────────────────────────────
@@ -85,23 +88,23 @@ contract TicketMarketplace is
         if (amount == 0) revert ZeroAmount();
 
         // 1. Tarik original price yang SAH langsung dari TicketNFT
-        uint256 trueOriginalPrice = ticketNFT.primaryPrice(tokenId);
+        uint256 trueOriginalPrice = TICKET_NFT.primaryPrice(tokenId);
 
         // 2. Terapkan price ceiling kustom dari kontrak NFT menggunakan data sah (Single Source of Truth)
-        uint256 ceilingBps = ticketNFT.priceCeilingBps(tokenId);
+        uint256 ceilingBps = TICKET_NFT.priceCeilingBps(tokenId);
         uint256 maxPrice = PriceLib.maxResalePrice(trueOriginalPrice, ceilingBps);
         if (pricePerUnit > maxPrice) {
             revert PriceCeilingExceeded(pricePerUnit, maxPrice);
         }
 
         // 3. Validasi bahwa penjual memiliki jumlah unused ticket yang memadai
-        uint256 unusedCount = ticketNFT.getUnusedTicketCount(msg.sender, tokenId);
+        uint256 unusedCount = TICKET_NFT.getUnusedTicketCount(msg.sender, tokenId);
         if (amount > unusedCount) {
             revert InsufficientUnusedTickets(unusedCount, amount);
         }
 
         // Transfer tiket dari seller ke kontrak (escrow)
-        ticketNFT.safeTransferFrom(msg.sender, address(this), tokenId, amount, "");
+        TICKET_NFT.safeTransferFrom(msg.sender, address(this), tokenId, amount, "");
 
         uint256 listingId = _nextListingId++;
         _listings[listingId] = Listing({
@@ -145,7 +148,7 @@ contract TicketMarketplace is
 
         // Validasi waktu penjualan tiket perdana (Primary Sale Only)
         if (!listing.isResale) {
-            (uint256 start, uint256 end) = ticketNFT.getSaleWindow(listing.tokenId);
+            (uint256 start, uint256 end) = TICKET_NFT.getSaleWindow(listing.tokenId);
             if (start != 0 && block.timestamp < start) {
                 revert SaleNotStarted(start, block.timestamp);
             }
@@ -156,13 +159,15 @@ contract TicketMarketplace is
 
         uint256 totalPrice = listing.pricePerUnit * amount;
         
+        if (amount > listing.amount) revert InsufficientListingAmount(listing.amount, amount);
+
         // Cek kecukupan saldo & allowance token IDRX pembeli
-        uint256 buyerBalance = paymentToken.balanceOf(msg.sender);
+        uint256 buyerBalance = PAYMENT_TOKEN.balanceOf(msg.sender);
         if (buyerBalance < totalPrice) {
             revert InsufficientPayment(buyerBalance, totalPrice);
         }
         
-        uint256 allowance = paymentToken.allowance(msg.sender, address(this));
+        uint256 allowance = PAYMENT_TOKEN.allowance(msg.sender, address(this));
         if (allowance < totalPrice) {
             revert InsufficientAllowance(allowance, totalPrice);
         }
@@ -173,13 +178,13 @@ contract TicketMarketplace is
 
         // Registrasi data identitas on-chain di NFT
         for (uint256 i = 0; i < amount; i++) {
-            ticketNFT.registerHolder(msg.sender, listing.tokenId, names[i], niks[i]);
+            TICKET_NFT.registerHolder(msg.sender, listing.tokenId, names[i], niks[i]);
         }
 
         // Jika ini adalah resale, hapus data identitas dari seller
         if (listing.isResale) {
             for (uint256 i = 0; i < amount; i++) {
-                ticketNFT.removeUnusedHolder(listing.seller, listing.tokenId);
+                TICKET_NFT.removeUnusedHolder(listing.seller, listing.tokenId);
             }
         }
 
@@ -191,24 +196,24 @@ contract TicketMarketplace is
         if (listing.isResale) {
             if (totalPrice > listing.originalPrice * amount) {
                 // Ambil royalti dinamis dari standard ERC-2981 NFT
-                (royaltyReceiver, royaltyAmount) = ticketNFT.royaltyInfo(listing.tokenId, totalPrice);
+                (royaltyReceiver, royaltyAmount) = TICKET_NFT.royaltyInfo(listing.tokenId, totalPrice);
             }
             sellerProceeds = totalPrice - royaltyAmount;
         }
 
         // Eksekusi transfer token IDRX secara atomik DULU (Checks-Effects-Interactions Compliance)
         if (royaltyAmount > 0) {
-            bool royaltyPaid = paymentToken.transferFrom(msg.sender, royaltyReceiver, royaltyAmount);
+            bool royaltyPaid = PAYMENT_TOKEN.transferFrom(msg.sender, royaltyReceiver, royaltyAmount);
             require(royaltyPaid, "Royalty transfer failed");
         }
         
         if (sellerProceeds > 0) {
-            bool proceedsPaid = paymentToken.transferFrom(msg.sender, listing.seller, sellerProceeds);
+            bool proceedsPaid = PAYMENT_TOKEN.transferFrom(msg.sender, listing.seller, sellerProceeds);
             require(proceedsPaid, "Proceeds transfer failed");
         }
 
         // Baru setelah itu transfer tiket ke buyer dari escrow
-        ticketNFT.safeTransferFrom(
+        TICKET_NFT.safeTransferFrom(
             address(this),
             msg.sender,
             listing.tokenId,
@@ -235,7 +240,7 @@ contract TicketMarketplace is
         listing.active = false;
 
         // Kembalikan tiket ke seller (berlaku untuk Resale User maupun Primary Organizer)
-        ticketNFT.safeTransferFrom(
+        TICKET_NFT.safeTransferFrom(
             address(this),
             msg.sender,
             listing.tokenId,

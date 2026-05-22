@@ -9,17 +9,17 @@ mkdir -p frontend/src/config/abi
 
 # Verifikasi keberadaan file sebelum menyalin
 if [ -f "contracts/out/TicketMarketplace.sol/TicketMarketplace.json" ]; then
-  cp contracts/out/TicketMarketplace.sol/TicketMarketplace.json frontend/src/config/abi/
-  echo "✓ TicketMarketplace ABI disinkronkan."
+  jq '.abi' contracts/out/TicketMarketplace.sol/TicketMarketplace.json > frontend/src/config/abi/TicketMarketplace.json
+  echo "TicketMarketplace ABI disinkronkan."
 else
-  echo "⚠ TicketMarketplace.json belum ditemukan. Tulis kontraknya terlebih dahulu."
+  echo "TicketMarketplace.json belum ditemukan. Tulis kontraknya terlebih dahulu."
 fi
 
 if [ -f "contracts/out/TicketNFT.sol/TicketNFT.json" ]; then
-  cp contracts/out/TicketNFT.sol/TicketNFT.json frontend/src/config/abi/
-  echo "✓ TicketNFT ABI disinkronkan."
+  jq '.abi' contracts/out/TicketNFT.sol/TicketNFT.json > frontend/src/config/abi/TicketNFT.json
+  echo "TicketNFT ABI disinkronkan."
 else
-  echo "⚠ TicketNFT.json belum ditemukan. Tulis kontraknya terlebih dahulu."
+  echo "TicketNFT.json belum ditemukan. Tulis kontraknya terlebih dahulu."
 fi
 
-echo "Sinkronisasi ABI selesai! ✨"
+echo "Sinkronisasi ABI selesai!"

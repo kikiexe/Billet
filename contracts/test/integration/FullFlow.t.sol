@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "../helpers/TestHelper.sol";
-import "../../src/libraries/PriceLib.sol";
+import {TestHelper} from "../helpers/TestHelper.sol";
+import {TicketNFT} from "../../src/TicketNFT.sol";
+import {ITicketMarketplace} from "../../src/interfaces/ITicketMarketplace.sol";
+import {PriceLib} from "../../src/libraries/PriceLib.sol";
 
 contract FullFlowTest is TestHelper {
 

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "../helpers/TestHelper.sol";
+import {TestHelper} from "../helpers/TestHelper.sol";
+import {TicketNFT} from "../../src/TicketNFT.sol";
+import {ITicketMarketplace} from "../../src/interfaces/ITicketMarketplace.sol";
 
 contract TicketNFTTest is TestHelper {
 
@@ -44,11 +46,11 @@ contract TicketNFTTest is TestHelper {
     function test_MintToMarketplace_RevertIfMarketplaceNotSet() public {
         // Deploy NFT baru tanpa set marketplace
         vm.startPrank(organizer);
-        TicketNFT freshNFT = new TicketNFT("uri");
-        freshNFT.configureTicketCategory(TOKEN_REGULER, 100, PRICE_REGULER, 11000, 500, 0, 0);
+        TicketNFT freshNft = new TicketNFT("uri");
+        freshNft.configureTicketCategory(TOKEN_REGULER, 100, PRICE_REGULER, 11000, 500, 0, 0);
 
         vm.expectRevert(TicketNFT.MarketplaceNotSet.selector);
-        freshNFT.mintToMarketplace(TOKEN_REGULER, 10);
+        freshNft.mintToMarketplace(TOKEN_REGULER, 10);
         vm.stopPrank();
     }
 

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "forge-std/Test.sol";
-import "../../src/TicketNFT.sol";
-import "../../src/TicketMarketplace.sol";
-import "../../src/mock/MockERC20.sol";
+import {Test} from "forge-std/Test.sol";
+import {TicketNFT} from "../../src/TicketNFT.sol";
+import {TicketMarketplace} from "../../src/TicketMarketplace.sol";
+import {MockERC20} from "../../src/mock/MockERC20.sol";
 
 abstract contract TestHelper is Test {
     // ─── Contracts ───────────────────────────────────────────────────────────
@@ -74,7 +74,7 @@ abstract contract TestHelper is Test {
     }
 
     /// @dev Shortcut: alice beli 1 tiket dari listing ID tertentu.
-    function _aliceBuysFrom(uint256 listingId, uint256 amount, uint256 pricePerUnit)
+    function _aliceBuysFrom(uint256 listingId, uint256 amount, uint256 /* pricePerUnit */)
         internal
     {
         string[] memory niks = new string[](amount);

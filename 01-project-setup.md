@@ -136,6 +136,39 @@ Berisi Foundry scripts untuk deployment dan interaksi on-chain. Foundry scripts 
 
 ---
 
+## Sinkronisasi ABI Otomatis (Jembatan Contracts -> Frontend)
+
+Karena proyek ini menggunakan arsitektur Monorepo, hasil kompilasi *smart contract* oleh Foundry (berada di `contracts/out/`) perlu dikirimkan ke *frontend* (`frontend/src/config/`) agar Wagmi dan Viem bisa mengenali fungsi-fungsi *blockchain*. Melakukan *copy-paste* ABI secara manual setiap kali kodingan Solidity diubah sangat melelahkan dan rentan akan kesalahan (*human error*).
+
+**Solusi (Trik Senior):** Buat sebuah Bash Script sederhana di root direktori proyek Anda untuk menyalin ABI secara otomatis.
+
+Buat file `sync-abi.sh` di *root* folder:
+
+```bash
+#!/bin/bash
+
+echo "Memulai kompilasi Smart Contract..."
+cd contracts && forge build
+cd ..
+
+echo "Menyinkronkan ABI ke Frontend..."
+mkdir -p frontend/src/config/abi
+
+# Menyalin file hasil kompilasi Foundry ke frontend
+cp contracts/out/TicketMarketplace.sol/TicketMarketplace.json frontend/src/config/abi/
+cp contracts/out/TicketNFT.sol/TicketNFT.json frontend/src/config/abi/
+
+echo "Sinkronisasi ABI selesai! ✨"
+```
+
+Beri izin eksekusi pada file tersebut:
+```bash
+chmod +x sync-abi.sh
+```
+Sekarang, cukup jalankan `./sync-abi.sh` di terminal setiap kali Anda mengubah kode Solidity.
+
+---
+
 ## Verifikasi Setup Berhasil
 
 ```bash

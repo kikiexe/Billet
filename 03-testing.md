@@ -99,8 +99,28 @@ abstract contract TestHelper is Test {
     function _aliceBuysFrom(uint256 listingId, uint256 amount, uint256 pricePerUnit)
         internal
     {
+        string[] memory niks = new string[](amount);
+        string[] memory names = new string[](amount);
+        for (uint256 i = 0; i < amount; i++) {
+            niks[i] = "1234567890123456";
+            names[i] = "Alice Holder";
+        }
         vm.prank(alice);
-        marketplace.buyTicket(listingId, amount);
+        marketplace.buyTicket(listingId, amount, niks, names);
+    }
+
+    /// @dev Generic shortcut: beli tiket dari listing ID tertentu oleh actor tertentu.
+    function _buy(address actor, uint256 listingId, uint256 amount)
+        internal
+    {
+        string[] memory niks = new string[](amount);
+        string[] memory names = new string[](amount);
+        for (uint256 i = 0; i < amount; i++) {
+            niks[i] = "1234567890123456";
+            names[i] = "Mock Holder";
+        }
+        vm.prank(actor);
+        marketplace.buyTicket(listingId, amount, niks, names);
     }
 }
 ```
@@ -239,7 +259,187 @@ contract TicketNFTTest is TestHelper {
         assertEq(start, 10000);
         assertEq(end, 20000);
     }
+
+    // ════════════════════════════════════════════════════════════════
+    //  ON-CHAIN IDENTITY & GATEKEEPER CHECK-IN
+    // ════════════════════════════════════════════════════════════════
+
+    function test_Admin_ConfigureGateKeeperAndCategoryNames() public {
+        address gatekeeper = makeAddr("gatekeeper");
+
+        vm.startPrank(organizer);
+        nft.setGateKeeper(gatekeeper, true);
+        nft.setTicketCategoryName(TOKEN_REGULER, "REGULER");
+        vm.stopPrank();
+
+        assertTrue(nft.isGateKeeper(gatekeeper), "Gatekeeper harus aktif");
+        assertEq(nft.ticketCategoryName(TOKEN_REGULER), "REGULER", "Nama kategori harus sesuai");
+
+        // Non-owner tidak boleh mengubah setting
+        vm.startPrank(alice);
+        vm.expectRevert();
+        nft.setGateKeeper(gatekeeper, false);
+        vm.expectRevert();
+        nft.setTicketCategoryName(TOKEN_REGULER, "VIP");
+        vm.stopPrank();
+    }
+
+    function test_IdentityRegistration_OnlyMarketplace() public {
+        // Hanya authorizedMarketplace yang bisa registrasi/hapus data
+        vm.startPrank(alice);
+        vm.expectRevert(TicketNFT.UnauthorizedTransfer.selector);
+        nft.registerHolder(alice, TOKEN_REGULER, "Alice", "1234567890123456");
+
+        vm.expectRevert(TicketNFT.UnauthorizedTransfer.selector);
+        nft.removeHolder(alice, TOKEN_REGULER, 0);
+        vm.stopPrank();
+    }
+
+    function test_GateCheckIn_Success() public {
+        address gatekeeper = makeAddr("gatekeeper");
+
+        // 1. Setup Gatekeeper dan Marketplace
+        vm.startPrank(organizer);
+        nft.setGateKeeper(gatekeeper, true);
+        nft.mintToMarketplace(TOKEN_REGULER, 1);
+        vm.stopPrank();
+
+        // 2. Simulasi registrasi oleh authorizedMarketplace
+        vm.prank(address(marketplace));
+        nft.registerHolder(alice, TOKEN_REGULER, "Alice", "1234567890123456");
+
+        // Mint tiket dari marketplace ke Alice untuk simulasi kepemilikan
+        vm.prank(address(marketplace));
+        nft.safeTransferFrom(address(marketplace), alice, TOKEN_REGULER, 1, "");
+
+        assertEq(nft.balanceOf(alice, TOKEN_REGULER), 1);
+        TicketNFT.TicketHolder[] memory holdersBefore = nft.getTicketHolders(alice, TOKEN_REGULER);
+        assertEq(holdersBefore.length, 1);
+        assertEq(holdersBefore[0].name, "Alice");
+        assertFalse(holdersBefore[0].used, "Tiket awal harus belum digunakan");
+
+        // Ekspektasi emit TicketCheckedIn
+        vm.expectEmit(true, true, true, true);
+        emit TicketNFT.TicketCheckedIn(alice, TOKEN_REGULER, 0);
+
+        // 3. Gatekeeper melakukan check-in tiket
+        vm.prank(gatekeeper);
+        nft.checkInFromGate(alice, TOKEN_REGULER, 0);
+
+        // Verifikasi kepemilikan token utuh pasca check-in (tidak dibakar)
+        assertEq(nft.balanceOf(alice, TOKEN_REGULER), 1, "Tiket Alice tidak boleh terbakar");
+        TicketNFT.TicketHolder[] memory holdersAfter = nft.getTicketHolders(alice, TOKEN_REGULER);
+        assertEq(holdersAfter.length, 1, "Data identitas harus tetap di blockchain");
+        assertTrue(holdersAfter[0].used, "Status tiket harus terpakai");
+    }
+
+    function test_GateCheckIn_RevertIfNotGateKeeper() public {
+        address gatekeeper = makeAddr("gatekeeper");
+
+        vm.startPrank(organizer);
+        nft.setGateKeeper(gatekeeper, true);
+        vm.stopPrank();
+
+        // Simulasi registrasi
+        vm.prank(address(marketplace));
+        nft.registerHolder(alice, TOKEN_REGULER, "Alice", "1234567890123456");
+
+        // Alice mencoba check-in tiketnya sendiri (bukan gatekeeper) -> HARUS REVERT
+        vm.prank(alice);
+        vm.expectRevert(TicketNFT.NotGateKeeper.selector);
+        nft.checkInFromGate(alice, TOKEN_REGULER, 0);
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  NEW TESTS: USED STATUS & CHECK-IN EDGE CASES
+    // ════════════════════════════════════════════════════════════════
+
+    function test_GateCheckIn_RevertIfAlreadyUsed() public {
+        address gatekeeper = makeAddr("gatekeeper");
+
+        vm.startPrank(organizer);
+        nft.setGateKeeper(gatekeeper, true);
+        nft.mintToMarketplace(TOKEN_REGULER, 1);
+        vm.stopPrank();
+
+        vm.prank(address(marketplace));
+        nft.registerHolder(alice, TOKEN_REGULER, "Alice", "1234567890123456");
+
+        vm.prank(address(marketplace));
+        nft.safeTransferFrom(address(marketplace), alice, TOKEN_REGULER, 1, "");
+
+        // Check-in pertama -> sukses
+        vm.prank(gatekeeper);
+        nft.checkInFromGate(alice, TOKEN_REGULER, 0);
+
+        // Check-in kedua kalinya pada index yang sama -> HARUS REVERT
+        vm.prank(gatekeeper);
+        vm.expectRevert("Ticket already used");
+        nft.checkInFromGate(alice, TOKEN_REGULER, 0);
+    }
+
+    function test_GateCheckIn_RevertIfTicketListed() public {
+        address gatekeeper = makeAddr("gatekeeper");
+
+        vm.startPrank(organizer);
+        nft.setGateKeeper(gatekeeper, true);
+        nft.mintToMarketplace(TOKEN_REGULER, 1);
+        vm.stopPrank();
+
+        vm.prank(address(marketplace));
+        nft.registerHolder(alice, TOKEN_REGULER, "Alice", "1234567890123456");
+
+        vm.prank(address(marketplace));
+        nft.safeTransferFrom(address(marketplace), alice, TOKEN_REGULER, 1, "");
+
+        // Alice mendaftarkan tiketnya untuk dijual kembali (resale) di marketplace
+        // Ini akan mentransfer tiket ke escrow marketplace, mengurangi saldo Alice menjadi 0
+        vm.startPrank(alice);
+        nft.setApprovalForAll(address(marketplace), true);
+        marketplace.listResale(TOKEN_REGULER, 1, PRICE_REGULER);
+        vm.stopPrank();
+
+        assertEq(nft.balanceOf(alice, TOKEN_REGULER), 0);
+
+        // Gatekeeper mencoba check-in tiket Alice yang sedang terdaftar di marketplace -> HARUS REVERT karena saldo 0
+        vm.prank(gatekeeper);
+        vm.expectRevert("Insufficient ticket balance in wallet");
+        nft.checkInFromGate(alice, TOKEN_REGULER, 0);
+    }
+
+    function test_Resale_RevertIfInsufficientUnusedTickets() public {
+        address gatekeeper = makeAddr("gatekeeper");
+
+        vm.startPrank(organizer);
+        nft.setGateKeeper(gatekeeper, true);
+        nft.mintToMarketplace(TOKEN_REGULER, 1);
+        vm.stopPrank();
+
+        vm.prank(address(marketplace));
+        nft.registerHolder(alice, TOKEN_REGULER, "Alice", "1234567890123456");
+
+        vm.prank(address(marketplace));
+        nft.safeTransferFrom(address(marketplace), alice, TOKEN_REGULER, 1, "");
+
+        // Check-in tiket sehingga berstatus terpakai (used = true)
+        vm.prank(gatekeeper);
+        nft.checkInFromGate(alice, TOKEN_REGULER, 0);
+
+        // Alice mencoba mendaftarkan tiket terpakai tersebut ke marketplace sekunder -> HARUS REVERT
+        vm.startPrank(alice);
+        nft.setApprovalForAll(address(marketplace), true);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                ITicketMarketplace.InsufficientUnusedTickets.selector,
+                0, // available unused
+                1  // requested
+            )
+        );
+        marketplace.listResale(TOKEN_REGULER, 1, PRICE_REGULER);
+        vm.stopPrank();
+    }
 }
+```,StartLine:298,TargetContent:
 ```
 
 ---
@@ -312,8 +512,7 @@ contract TicketMarketplaceTest is TestHelper {
         uint256 organizerBalanceBefore = idrx.balanceOf(organizer);
 
         // Alice beli 2 tiket
-        vm.prank(alice);
-        marketplace.buyTicket(0, 2);
+        _buy(alice, 0, 2);
 
         // Alice mendapat tiket
         assertEq(nft.balanceOf(alice, TOKEN_REGULER), 2);
@@ -332,8 +531,7 @@ contract TicketMarketplaceTest is TestHelper {
         uint256 aliceBalanceBefore = idrx.balanceOf(alice);
 
         // Alice beli tiket
-        vm.prank(alice);
-        marketplace.buyTicket(0, 1);
+        _buy(alice, 0, 1);
 
         // Hanya terpotong seharga tiket REGULER (tidak ada overpay/native fee)
         assertEq(
@@ -352,6 +550,10 @@ contract TicketMarketplaceTest is TestHelper {
         vm.prank(alice);
         idrx.approve(address(marketplace), 0);
 
+        string[] memory niks = new string[](1);
+        string[] memory names = new string[](1);
+        niks[0] = "111"; names[0] = "A";
+
         vm.prank(alice);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -360,7 +562,7 @@ contract TicketMarketplaceTest is TestHelper {
                 PRICE_REGULER  // required
             )
         );
-        marketplace.buyTicket(0, 1);
+        marketplace.buyTicket(0, 1, niks, names);
 
         // Reset allowance ke max agar tidak merusak test lain
         vm.prank(alice);
@@ -368,11 +570,15 @@ contract TicketMarketplaceTest is TestHelper {
     }
 
     function test_BuyPrimary_RevertIfListingNotActive() public {
+        string[] memory niks = new string[](1);
+        string[] memory names = new string[](1);
+        niks[0] = "111"; names[0] = "A";
+
         vm.prank(alice);
         vm.expectRevert(
             abi.encodeWithSelector(ITicketMarketplace.ListingNotActive.selector, 999)
         );
-        marketplace.buyTicket(999, 1);
+        marketplace.buyTicket(999, 1, niks, names);
     }
 
     function test_BuyPrimary_ListingBecomesInactiveWhenSoldOut() public {
@@ -381,8 +587,7 @@ contract TicketMarketplaceTest is TestHelper {
         marketplace.listPrimary(TOKEN_REGULER, 1, PRICE_REGULER);
         vm.stopPrank();
 
-        vm.prank(alice);
-        marketplace.buyTicket(0, 1);
+        _buy(alice, 0, 1);
 
         assertFalse(marketplace.getListing(0).active, "Listing harus inactive setelah sold out");
     }
@@ -397,6 +602,10 @@ contract TicketMarketplaceTest is TestHelper {
         marketplace.listPrimary(TOKEN_VVIP, 5, PRICE_REGULER);
         vm.stopPrank();
 
+        string[] memory niks = new string[](1);
+        string[] memory names = new string[](1);
+        niks[0] = "111"; names[0] = "A";
+
         // Listing ID untuk VVIP adalah 1 (Listing ID 0 adalah REGULER di setUp)
         vm.prank(alice);
         vm.expectRevert(
@@ -406,7 +615,7 @@ contract TicketMarketplaceTest is TestHelper {
                 block.timestamp
             )
         );
-        marketplace.buyTicket(1, 1);
+        marketplace.buyTicket(1, 1, niks, names);
     }
 
     function test_BuyPrimary_RevertIfSaleEnded() public {
@@ -419,6 +628,10 @@ contract TicketMarketplaceTest is TestHelper {
         marketplace.listPrimary(TOKEN_VVIP, 5, PRICE_REGULER);
         vm.stopPrank();
 
+        string[] memory niks = new string[](1);
+        string[] memory names = new string[](1);
+        niks[0] = "111"; names[0] = "A";
+
         vm.prank(alice);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -427,7 +640,7 @@ contract TicketMarketplaceTest is TestHelper {
                 block.timestamp
             )
         );
-        marketplace.buyTicket(1, 1);
+        marketplace.buyTicket(1, 1, niks, names);
     }
 
     function test_BuyPrimary_SuccessWithinSaleWindow() public {
@@ -442,8 +655,7 @@ contract TicketMarketplaceTest is TestHelper {
         // Geser waktu blok ke dalam sale window (start + 10 mins)
         vm.warp(start + 10 minutes);
 
-        vm.prank(alice);
-        marketplace.buyTicket(1, 1);
+        _buy(alice, 1, 1);
 
         assertEq(nft.balanceOf(alice, TOKEN_VVIP), 1);
     }
@@ -457,6 +669,10 @@ contract TicketMarketplaceTest is TestHelper {
         marketplace.listPrimary(TOKEN_VVIP, 5, PRICE_REGULER);
         vm.stopPrank();
 
+        string[] memory niks = new string[](1);
+        string[] memory names = new string[](1);
+        niks[0] = "111"; names[0] = "A";
+
         // 1. Tepat 1 detik SEBELUM penjualan dimulai (start - 1) -> HARUS REVERT
         vm.warp(start - 1);
         vm.prank(alice);
@@ -467,18 +683,16 @@ contract TicketMarketplaceTest is TestHelper {
                 start - 1
             )
         );
-        marketplace.buyTicket(1, 1);
+        marketplace.buyTicket(1, 1, niks, names);
 
         // 2. Tepat saat detik pertama penjualan dimulai (start) -> HARUS SUKSES
         vm.warp(start);
-        vm.prank(alice);
-        marketplace.buyTicket(1, 1);
+        _buy(alice, 1, 1);
         assertEq(nft.balanceOf(alice, TOKEN_VVIP), 1);
 
         // 3. Tepat saat detik terakhir penjualan aktif (end) -> HARUS SUKSES
         vm.warp(end);
-        vm.prank(bob);
-        marketplace.buyTicket(1, 1);
+        _buy(bob, 1, 1);
         assertEq(nft.balanceOf(bob, TOKEN_VVIP), 1);
 
         // 4. Tepat 1 detik SETELAH penjualan berakhir (end + 1) -> HARUS REVERT
@@ -491,7 +705,7 @@ contract TicketMarketplaceTest is TestHelper {
                 end + 1
             )
         );
-        marketplace.buyTicket(1, 1);
+        marketplace.buyTicket(1, 1, niks, names);
     }
 
     // ════════════════════════════════════════════════════════════════
@@ -504,8 +718,7 @@ contract TicketMarketplaceTest is TestHelper {
         marketplace.listPrimary(TOKEN_REGULER, 5, PRICE_REGULER);
         vm.stopPrank();
 
-        vm.prank(alice);
-        marketplace.buyTicket(0, 1);
+        _buy(alice, 0, 1);
 
         primaryListingId = 0;
     }
@@ -529,8 +742,7 @@ contract TicketMarketplaceTest is TestHelper {
         uint256 organizerBalanceBefore  = idrx.balanceOf(organizer);
 
         // Bob beli dari resale listing (listing ID = 1)
-        vm.prank(bob);
-        marketplace.buyTicket(1, 1);
+        _buy(bob, 1, 1);
 
         // Royalti langsung ditransfer ke receiver (organizer)
         assertEq(
@@ -554,8 +766,7 @@ contract TicketMarketplaceTest is TestHelper {
         vm.stopPrank();
 
         // Alice beli tiket VVIP (listing ID = 1 karena listing REGULER ID = 0)
-        vm.prank(alice);
-        marketplace.buyTicket(1, 1);
+        _buy(alice, 1, 1);
 
         // Alice list resale untuk TOKEN_VVIP dengan untung (110% dari harga asal)
         vm.startPrank(alice);
@@ -568,8 +779,7 @@ contract TicketMarketplaceTest is TestHelper {
         uint256 organizerBalanceBefore  = idrx.balanceOf(organizer);
 
         // Bob beli tiket VVIP Alice (listing ID = 2)
-        vm.prank(bob);
-        marketplace.buyTicket(2, 1);
+        _buy(bob, 2, 1);
 
         // Royalti harus tetap NOL karena promotor menyetel royaltyBps = 0
         assertEq(
@@ -594,8 +804,7 @@ contract TicketMarketplaceTest is TestHelper {
 
         uint256 organizerBalanceBefore = idrx.balanceOf(organizer);
 
-        vm.prank(bob);
-        marketplace.buyTicket(1, 1);
+        _buy(bob, 1, 1);
 
         // Royalti tidak bertambah sama sekali
         assertEq(
@@ -635,8 +844,7 @@ contract TicketMarketplaceTest is TestHelper {
         marketplace.listPrimary(TOKEN_VVIP, 5, PRICE_REGULER);
         vm.stopPrank();
 
-        vm.prank(alice);
-        marketplace.buyTicket(1, 1);
+        _buy(alice, 1, 1);
 
         vm.startPrank(alice);
         nft.setApprovalForAll(address(marketplace), true);
@@ -670,8 +878,7 @@ contract TicketMarketplaceTest is TestHelper {
 
         vm.warp(start + 10 minutes);
 
-        vm.prank(alice);
-        marketplace.buyTicket(1, 1);
+        _buy(alice, 1, 1);
 
         // 2. Geser waktu keluar dari sale window (sale berakhir)
         vm.warp(end + 1 hours);
@@ -685,8 +892,7 @@ contract TicketMarketplaceTest is TestHelper {
         vm.stopPrank();
 
         // Listing ID untuk resale adalah 2
-        vm.prank(carol);
-        marketplace.buyTicket(2, 1);
+        _buy(carol, 2, 1);
 
         assertEq(nft.balanceOf(carol, TOKEN_VVIP), 1);
     }
@@ -742,8 +948,7 @@ contract TicketMarketplaceTest is TestHelper {
         (, uint256 royaltyExpected) = nft.royaltyInfo(TOKEN_REGULER, PriceLib.maxResalePrice(PRICE_REGULER, 11000));
         uint256 organizerBalanceBefore = idrx.balanceOf(organizer);
 
-        vm.prank(bob);
-        marketplace.buyTicket(1, 1);
+        _buy(bob, 1, 1);
 
         assertEq(
             idrx.balanceOf(organizer),
@@ -789,7 +994,100 @@ contract TicketMarketplaceTest is TestHelper {
         (, uint256 royalty) = nft.royaltyInfo(TOKEN_REGULER, resalePrice);
         assertLe(royalty, resalePrice, "Royalti tidak boleh melebihi total pembayaran");
     }
+
+    // ════════════════════════════════════════════════════════════════
+    //  ON-CHAIN IDENTITY SYNCHRONIZATION & BUY INTEGRATION
+    // ════════════════════════════════════════════════════════════════
+
+    function test_BuyPrimary_WithOnChainIdentityRegistration() public {
+        vm.startPrank(organizer);
+        nft.mintToMarketplace(TOKEN_REGULER, 2);
+        marketplace.listPrimary(TOKEN_REGULER, 2, PRICE_REGULER);
+        vm.stopPrank();
+
+        string[] memory niks = new string[](2);
+        string[] memory names = new string[](2);
+        niks[0] = "3171012345670001";
+        names[0] = "Joko";
+        niks[1] = "3171012345670002";
+        names[1] = "Siti";
+
+        vm.prank(alice);
+        marketplace.buyTicket(0, 2, niks, names);
+
+        // Verifikasi data terdaftar di TicketNFT
+        TicketNFT.TicketHolder[] memory holders = nft.getTicketHolders(alice, TOKEN_REGULER);
+        assertEq(holders.length, 2, "Harus ada 2 holder terdaftar");
+        assertEq(holders[0].name, "Joko");
+        assertEq(holders[0].nik, "3171012345670001");
+        assertEq(holders[1].name, "Siti");
+        assertEq(holders[1].nik, "3171012345670002");
+    }
+
+    function test_Buy_RevertIfArrayLengthMismatch() public {
+        vm.startPrank(organizer);
+        nft.mintToMarketplace(TOKEN_REGULER, 1);
+        marketplace.listPrimary(TOKEN_REGULER, 1, PRICE_REGULER);
+        vm.stopPrank();
+
+        string[] memory niks = new string[](2); // mismatch: beli 1 tapi array isi 2
+        string[] memory names = new string[](1);
+        niks[0] = "111"; niks[1] = "222";
+        names[0] = "A";
+
+        vm.prank(alice);
+        vm.expectRevert(ITicketMarketplace.ArrayLengthMismatch.selector);
+        marketplace.buyTicket(0, 1, niks, names);
+    }
+
+    function test_Resale_IdentityResync_OnSecondaryPurchase() public {
+        // 1. Setup Alice beli tiket primer dengan identitasnya
+        vm.startPrank(organizer);
+        nft.mintToMarketplace(TOKEN_REGULER, 1);
+        marketplace.listPrimary(TOKEN_REGULER, 1, PRICE_REGULER);
+        vm.stopPrank();
+
+        string[] memory aliceNiks = new string[](1);
+        string[] memory aliceNames = new string[](1);
+        aliceNiks[0] = "3171012345670001";
+        aliceNames[0] = "Alice Holder";
+
+        vm.prank(alice);
+        marketplace.buyTicket(0, 1, aliceNiks, aliceNames);
+
+        // Cek identitas Alice terdaftar
+        TicketNFT.TicketHolder[] memory holdersAlice = nft.getTicketHolders(alice, TOKEN_REGULER);
+        assertEq(holdersAlice.length, 1);
+        assertEq(holdersAlice[0].name, "Alice Holder");
+
+        // 2. Alice jual ke Bob via Resale
+        vm.startPrank(alice);
+        nft.setApprovalForAll(address(marketplace), true);
+        marketplace.listResale(TOKEN_REGULER, 1, PRICE_REGULER);
+        vm.stopPrank();
+
+        // Listing ID untuk resale REGULER adalah 1
+        string[] memory bobNiks = new string[](1);
+        string[] memory bobNames = new string[](1);
+        bobNiks[0] = "3171012345679999";
+        bobNames[0] = "Bob Buyer";
+
+        vm.prank(bob);
+        marketplace.buyTicket(1, 1, bobNiks, bobNames);
+
+        // 3. Verifikasi resinkronisasi identitas otomatis:
+        //    - Identitas Alice dihapus
+        //    - Identitas Bob ditambahkan
+        TicketNFT.TicketHolder[] memory holdersAliceAfter = nft.getTicketHolders(alice, TOKEN_REGULER);
+        assertEq(holdersAliceAfter.length, 0, "Identitas Alice harus dihapus saat resale");
+
+        TicketNFT.TicketHolder[] memory holdersBob = nft.getTicketHolders(bob, TOKEN_REGULER);
+        assertEq(holdersBob.length, 1, "Identitas Bob harus terdaftar");
+        assertEq(holdersBob[0].name, "Bob Buyer");
+        assertEq(holdersBob[0].nik, "3171012345679999");
+    }
 }
+
 ```
 
 ---
@@ -818,8 +1116,7 @@ contract FullFlowTest is TestHelper {
         vm.stopPrank();
 
         // ── Step 2: Alice beli 1 tiket primary ──────────────────────────────
-        vm.prank(alice);
-        marketplace.buyTicket(0, 1);
+        _buy(alice, 0, 1);
 
         assertEq(nft.balanceOf(alice, TOKEN_REGULER), 1, "Alice harus punya 1 tiket");
 
@@ -842,8 +1139,7 @@ contract FullFlowTest is TestHelper {
         uint256 aliceBalanceBefore = idrx.balanceOf(alice);
         uint256 organizerBalanceBefore = idrx.balanceOf(organizer);
 
-        vm.prank(bob);
-        marketplace.buyTicket(1, 1);
+        _buy(bob, 1, 1);
 
         // Bob punya tiket
         assertEq(nft.balanceOf(bob, TOKEN_REGULER), 1, "Bob harus punya tiket");
@@ -865,8 +1161,7 @@ contract FullFlowTest is TestHelper {
         vm.stopPrank();
 
         // Calo (alice) beli tiket
-        vm.prank(alice);
-        marketplace.buyTicket(0, 1);
+        _buy(alice, 0, 1);
 
         // Calo coba jual 5x harga asal
         vm.startPrank(alice);
@@ -891,8 +1186,7 @@ contract FullFlowTest is TestHelper {
         marketplace.listPrimary(TOKEN_REGULER, 1, PRICE_REGULER);
         vm.stopPrank();
 
-        vm.prank(alice);
-        marketplace.buyTicket(0, 1);
+        _buy(alice, 0, 1);
 
         // Alice coba transfer ke carol langsung (bypass marketplace)
         vm.prank(alice);

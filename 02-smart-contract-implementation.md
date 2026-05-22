@@ -101,12 +101,15 @@ interface ITicketMarketplace {
 
     error PriceCeilingExceeded(uint256 asked, uint256 maxAllowed);
     error InsufficientPayment(uint256 sent, uint256 required);
+    error InsufficientAllowance(uint256 current, uint256 required);
     error ListingNotActive(uint256 listingId);
     error NotSeller(uint256 listingId, address caller);
     error ZeroAmount();
     error UnauthorizedTransfer();
     error SaleNotStarted(uint256 start, uint256 current);
     error SaleEnded(uint256 end, uint256 current);
+    error ArrayLengthMismatch();
+    error InsufficientUnusedTickets(uint256 available, uint256 requested);
 
     // ─── Functions ───────────────────────────────────────────────────────────
 
@@ -122,7 +125,12 @@ interface ITicketMarketplace {
         uint256 pricePerUnit
     ) external;
 
-    function buyTicket(uint256 listingId, uint256 amount) external;
+    function buyTicket(
+        uint256 listingId,
+        uint256 amount,
+        string[] calldata niks,
+        string[] calldata names
+    ) external;
 
     function cancelListing(uint256 listingId) external;
 
@@ -151,10 +159,28 @@ import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
 contract TicketNFT is ERC1155, ERC2981, Ownable {
 
+    // ─── Structs ─────────────────────────────────────────────────────────────
+
+    struct TicketHolder {
+        string name;
+        string nik;
+        bool registered;
+        bool used;
+    }
+
     // ─── State Variables ─────────────────────────────────────────────────────
 
     /// @notice Address marketplace yang diizinkan melakukan transfer.
     address public authorizedMarketplace;
+
+    /// @notice Alamat gatekeeper yang diizinkan melakukan check-in tiket.
+    mapping(address => bool) public isGateKeeper;
+
+    /// @dev tokenId => Nama Kategori Tiket (VVIP, VIP, Reguler)
+    mapping(uint256 => string) public ticketCategoryName;
+
+    /// @dev owner => tokenId => TicketHolder[]
+    mapping(address => mapping(uint256 => TicketHolder[])) private _ticketHolders;
 
     /// @dev tokenId => harga primary sale dalam wei (untuk referensi ceiling).
     mapping(uint256 => uint256) public primaryPrice;
@@ -179,11 +205,16 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
     uint256 public constant VIP     = 2;
     uint256 public constant VVIP    = 3;
 
+    // ─── Events ──────────────────────────────────────────────────────────────
+
+    event TicketCheckedIn(address indexed from, uint256 indexed tokenId, uint256 index);
+
     // ─── Errors ──────────────────────────────────────────────────────────────
 
     error UnauthorizedTransfer();
     error ExceedsMaxSupply(uint256 tokenId, uint256 requested, uint256 remaining);
     error MarketplaceNotSet();
+    error NotGateKeeper();
 
     // ─── Constructor ─────────────────────────────────────────────────────────
 
@@ -201,6 +232,16 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         onlyOwner
     {
         authorizedMarketplace = marketplace;
+    }
+
+    /// @notice Set status alamat gatekeeper yang diizinkan membakar tiket di gerbang.
+    function setGateKeeper(address gateKeeper, bool status) external onlyOwner {
+        isGateKeeper[gateKeeper] = status;
+    }
+
+    /// @notice Set nama kategori tiket.
+    function setTicketCategoryName(uint256 tokenId, string calldata name) external onlyOwner {
+        ticketCategoryName[tokenId] = name;
     }
 
     /// @notice Konfigurasi kategori tiket baru.
@@ -252,6 +293,112 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
     /// @notice Dapatkan rentang waktu penjualan tiket.
     function getSaleWindow(uint256 tokenId) external view returns (uint256, uint256) {
         return (saleStart[tokenId], saleEnd[tokenId]);
+    }
+
+    // ─── Identity & Check-in Functions ───────────────────────────────────────
+
+    /// @notice Registrasi data pembeli tiket. Hanya bisa dipanggil oleh Marketplace resmi.
+    function registerHolder(
+        address owner,
+        uint256 tokenId,
+        string calldata name,
+        string calldata nik
+    ) external {
+        if (msg.sender != authorizedMarketplace) revert UnauthorizedTransfer();
+        _ticketHolders[owner][tokenId].push(TicketHolder({
+            name: name,
+            nik: nik,
+            registered: true,
+            used: false
+        }));
+    }
+
+    /// @notice Hapus registrasi data pembeli (saat dijual kembali). Hanya bisa dipanggil oleh Marketplace resmi.
+    function removeHolder(
+        address owner,
+        uint256 tokenId,
+        uint256 index
+    ) external {
+        if (msg.sender != authorizedMarketplace) revert UnauthorizedTransfer();
+        uint256 length = _ticketHolders[owner][tokenId].length;
+        require(index < length, "Index out of bounds");
+        
+        // Pindahkan elemen terakhir ke index yang dihapus, lalu pop
+        _ticketHolders[owner][tokenId][index] = _ticketHolders[owner][tokenId][length - 1];
+        _ticketHolders[owner][tokenId].pop();
+    }
+
+    /// @notice Dapatkan jumlah tiket yang sudah digunakan (di-check-in).
+    function getUsedTicketCount(address owner, uint256 tokenId) public view returns (uint256) {
+        uint256 count = 0;
+        uint256 length = _ticketHolders[owner][tokenId].length;
+        for (uint256 i = 0; i < length; i++) {
+            if (_ticketHolders[owner][tokenId][i].used) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /// @notice Dapatkan jumlah tiket yang belum digunakan.
+    function getUnusedTicketCount(address owner, uint256 tokenId) public view returns (uint256) {
+        uint256 count = 0;
+        uint256 length = _ticketHolders[owner][tokenId].length;
+        for (uint256 i = 0; i < length; i++) {
+            if (!_ticketHolders[owner][tokenId][i].used) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /// @notice Hapus data holder yang belum digunakan (saat resale terjual). Hanya bisa dipanggil oleh Marketplace resmi.
+    function removeUnusedHolder(address owner, uint256 tokenId) external {
+        if (msg.sender != authorizedMarketplace) revert UnauthorizedTransfer();
+        uint256 length = _ticketHolders[owner][tokenId].length;
+        bool found = false;
+        for (uint256 i = 0; i < length; i++) {
+            if (!_ticketHolders[owner][tokenId][i].used) {
+                // Pindahkan elemen terakhir ke index ini, lalu pop
+                _ticketHolders[owner][tokenId][i] = _ticketHolders[owner][tokenId][length - 1];
+                _ticketHolders[owner][tokenId].pop();
+                found = true;
+                break;
+            }
+        }
+        require(found, "No unused ticket holder found");
+    }
+
+    /// @notice Melakukan check-in tiket penonton di gerbang masuk oleh gatekeeper resmi.
+    ///         Membatalkan pembakaran NFT, melestarikan tiket sebagai kenang-kenangan dengan menandai properti used = true.
+    function checkInFromGate(
+        address from,
+        uint256 tokenId,
+        uint256 index
+    ) external {
+        if (!isGateKeeper[msg.sender]) revert NotGateKeeper();
+        
+        uint256 length = _ticketHolders[from][tokenId].length;
+        require(index < length, "Index out of bounds");
+        require(!_ticketHolders[from][tokenId][index].used, "Ticket already used");
+
+        // Invarian: saldo token user tidak boleh kurang dari jumlah unused ticket yang tersisa
+        // Mencegah check-in tiket yang sedang di-escrow/listing di marketplace
+        uint256 usedCount = getUsedTicketCount(from, tokenId);
+        require(balanceOf(from, tokenId) > usedCount, "Insufficient ticket balance in wallet");
+        
+        _ticketHolders[from][tokenId][index].used = true;
+        
+        emit TicketCheckedIn(from, tokenId, index);
+    }
+
+    /// @notice Dapatkan data pembeli tiket terdaftar (read-only untuk panel panitia)
+    function getTicketHolders(address owner, uint256 tokenId)
+        external
+        view
+        returns (TicketHolder[] memory)
+    {
+        return _ticketHolders[owner][tokenId];
     }
 
     // ─── Transfer Gating ─────────────────────────────────────────────────────
@@ -402,6 +549,12 @@ contract TicketMarketplace is
             revert PriceCeilingExceeded(pricePerUnit, maxPrice);
         }
 
+        // 3. Validasi bahwa penjual memiliki jumlah unused ticket yang memadai
+        uint256 unusedCount = ticketNFT.getUnusedTicketCount(msg.sender, tokenId);
+        if (amount > unusedCount) {
+            revert InsufficientUnusedTickets(unusedCount, amount);
+        }
+
         // Transfer tiket dari seller ke kontrak (escrow)
         ticketNFT.safeTransferFrom(msg.sender, address(this), tokenId, amount, "");
 
@@ -426,15 +579,24 @@ contract TicketMarketplace is
     ///         Dana sisa dikirim ke seller. Tiket dikirim ke buyer.
     /// @param listingId ID listing yang ingin dibeli.
     /// @param amount    Jumlah tiket yang ingin dibeli.
-    function buyTicket(uint256 listingId, uint256 amount)
+    /// @param niks      Array NIK pemegang tiket baru.
+    /// @param names     Array nama pemegang tiket baru.
+    function buyTicket(
+        uint256 listingId,
+        uint256 amount,
+        string[] calldata niks,
+        string[] calldata names
+    )
         external
         override
         nonReentrant
     {
+        if (amount == 0)         revert ZeroAmount();
+        if (niks.length != amount || names.length != amount) revert ArrayLengthMismatch();
+
         Listing storage listing = _listings[listingId];
 
         if (!listing.active)     revert ListingNotActive(listingId);
-        if (amount == 0)         revert ZeroAmount();
 
         // Validasi waktu penjualan tiket perdana (Primary Sale Only)
         if (!listing.isResale) {
@@ -457,12 +619,24 @@ contract TicketMarketplace is
         
         uint256 allowance = paymentToken.allowance(msg.sender, address(this));
         if (allowance < totalPrice) {
-            revert InsufficientPayment(allowance, totalPrice);
+            revert InsufficientAllowance(allowance, totalPrice);
         }
 
         // Update state sebelum transfer (Checks-Effects-Interactions pattern)
         listing.amount -= amount;
         if (listing.amount == 0) listing.active = false;
+
+        // Registrasi data identitas on-chain di NFT
+        for (uint256 i = 0; i < amount; i++) {
+            ticketNFT.registerHolder(msg.sender, listing.tokenId, names[i], niks[i]);
+        }
+
+        // Jika ini adalah resale, hapus data identitas dari seller
+        if (listing.isResale) {
+            for (uint256 i = 0; i < amount; i++) {
+                ticketNFT.removeUnusedHolder(listing.seller, listing.tokenId);
+            }
+        }
 
         // Hitung distribusi dana
         uint256 royaltyAmount = 0;
@@ -515,16 +689,14 @@ contract TicketMarketplace is
 
         listing.active = false;
 
-        // Kembalikan tiket ke seller hanya jika ini resale (tiket ada di escrow)
-        if (listing.isResale) {
-            ticketNFT.safeTransferFrom(
-                address(this),
-                msg.sender,
-                listing.tokenId,
-                listing.amount,
-                ""
-            );
-        }
+        // Kembalikan tiket ke seller (berlaku untuk Resale User maupun Primary Organizer)
+        ticketNFT.safeTransferFrom(
+            address(this),
+            msg.sender,
+            listing.tokenId,
+            listing.amount,
+            ""
+        );
 
         emit ListingCancelled(listingId, msg.sender);
     }
@@ -579,8 +751,13 @@ contract DeployScript is Script {
         // 5. Setup kategori tiket (IDRX decimal = 18)
         //    configureTicketCategory(tokenId, maxSupply, price, ceilingBps, royaltyBps, start, end)
         nft.configureTicketCategory(1, 1000, 100_000 * 10**18, 11000, 500, 0, 0);  // REGULER (Rp100.000, ceiling 110%, royalty 5%, tanpa batas waktu)
+        nft.setTicketCategoryName(1, "REGULER");
+        
         nft.configureTicketCategory(2, 200,  500_000 * 10**18, 11000, 500, 0, 0);  // VIP (Rp500.000)
+        nft.setTicketCategoryName(2, "VIP");
+        
         nft.configureTicketCategory(3, 50,   1_000_000 * 10**18, 11000, 500, 0, 0); // VVIP (Rp1.000.000)
+        nft.setTicketCategoryName(3, "VVIP");
 
         vm.stopBroadcast();
 

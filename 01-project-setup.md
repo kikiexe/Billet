@@ -106,6 +106,11 @@ billet-monorepo/
 │       ├── unit/
 │       └── integration/
 │
+├── indexer/                         # Direktori Web3 Indexer (Ponder GraphQL)
+│   ├── ponder.config.ts             # Konfigurasi RPC dan target alamat kontrak
+│   ├── ponder.schema.ts             # Skema GraphQL untuk tabel tiket aktif
+│   └── src/                         # File mapping event ke database
+│
 └── frontend/                        # Direktori Web3 DApp (Fokus File 04)
     ├── src/
     │   ├── app/                     # Routing & Pages (Next.js App Router)

@@ -28,13 +28,14 @@ Pada pasar sekunder tradisional (baik fisik maupun digital Web2), promotor kehil
 
 ## 3. Solusi yang Diusulkan (Closed-Loop Ecosystem)
 
-Skripsi ini mengusulkan sebuah protokol penjualan tiket berbasis **100% Pure Web3** yang berjalan di atas jaringan **Base (Layer 2)** untuk menjamin efisiensi biaya gas. Protokol ini menciptakan ekosistem tertutup (*Closed-Loop Ecosystem*) dengan lima pilar solusi utama:
+Skripsi ini mengusulkan sebuah protokol penjualan tiket berbasis **100% Pure Web3** yang berjalan di atas jaringan **Base (Layer 2)** untuk menjamin efisiensi biaya gas. Protokol ini menciptakan ekosistem tertutup (*Closed-Loop Ecosystem*) dengan enam pilar solusi utama:
 
 1.  **Sistem Pembayaran Stabil (IDRX Token):** Menggunakan token ERC-20 IDRX (Rupiah Digital) sebagai alat pembayaran resmi di platform untuk menghindari volatilitas harga crypto yang ekstrem.
 2.  **Mekanisme Rekening Bersama Tanpa Perantara (Trustless Escrow):** Logika jual-beli tiket bekas langsung ditangani oleh *smart contract*. Pembeli baru menyetor dana ke kontrak, tiket dipindahkan secara otomatis, dan dana diteruskan ke penjual lama secara real-time dan aman tanpa perantara pihak ketiga.
 3.  **Penegakan Batas Atas Harga Kustom (Customizable Price Ceiling Enforcement):** Penyelenggara acara (promotor) dapat menentukan batas harga jual kembali sekunder secara kustom per kategori tiket (misal 110% untuk kategori VIP, 100% *face-value* untuk tiket reguler/amal) alih-alih menggunakan persentase statis yang di-*hardcode* di sistem. Batas ini disimpan langsung pada *smart contract* NFT untuk menjamin transparansi, dan segala upaya transaksi di atas batas ini akan langsung digagalkan oleh blockchain secara otomatis.
 4.  **Royalti Bersyarat & Fleksibel (Conditional & Customizable Royalty - ERC-2981):** Sistem menerapkan persentase royalti dinamis yang dikonfigurasi secara mandiri oleh penyelenggara saat pembuatan tiket (misalnya 5%, atau 0% jika ingin menonaktifkan royalti sepenuhnya). Jika tiket dijual kembali dengan keuntungan (misalnya dibeli 1.000.000 IDRX, dijual kembali 1.100.000 IDRX), promotor mendapatkan royalti sesuai tarif yang telah disetel. Namun, jika tiket dijual rugi atau sama dengan harga asli, royalti otomatis dipotong menjadi 0% untuk menjaga likuiditas darurat bagi penggemar.
 5.  **Batasan Jendela Waktu Penjualan Perdana (Sales Time Window):** Protokol menyediakan fitur pengaturan rentang waktu mulai (`saleStart`) dan selesai (`saleEnd`) penjualan tiket perdana secara *on-chain* untuk setiap kategori tiket. Ini membatasi transaksi pembelian pasar perdana (*primary sale*) di marketplace hanya dalam jendela waktu yang telah ditentukan, memberikan otomatisasi penuh bagi penyelenggara untuk mengelola jadwal penjualan (seperti *presale* atau *early bird*) tanpa perlu membuka/menutup penjualan secara manual, sekaligus melindungi sistem dari eksploitasi pembelian di luar waktu resmi.
+6.  **Sistem Verifikasi Gerbang Tanpa Friksi & Registrasi Identitas On-Chain (Ticket-on-Device with Gatekeeper Used Marking):** Menyimpan asosiasi identitas fisik (Nama & NIK) pemegang tiket secara langsung dan terdesentralisasi penuh secara *on-chain* di dalam kontrak token ERC-1155. Pada gerbang fisik, pengunjung cukup memperlihatkan QR Code alamat wallet publik mereka. Tablet panitia melakukan kueri RPC *read-only* langsung ke blockchain secara instan dan gratis untuk memunculkan Nama, NIK, dan Kategori Tiket untuk dicocokkan dengan KTP fisik pengunjung. Setelah tervalidasi cocok, panitia (bertindak sebagai *Gatekeeper* resmi) memicu transaksi on-chain `checkInFromGate` untuk menandai status tiket tersebut sebagai terpakai (*used*). NFT tiket tetap dilestarikan di dalam dompet penonton sebagai souvenir berharga (sejenis POAP), namun secara sistem terkunci sehingga tidak bisa digunakan ganda atau dipindahkan, dengan gas fee transaksi ditanggung sepenuhnya oleh panitia.
 
 ---
 
@@ -49,6 +50,7 @@ sequenceDiagram
     participant P as Pengguna (Fans/Calo)
     participant IDRX as Token ERC-20 (IDRX)
     participant Tiket as Protokol Tiket ERC-1155 (Smart Contract)
+    participant Gate as Tablet Panitia (GateKeeper)
     
     Note over P, IDRX: 1. Proses Deposit (Fiat to Crypto)
     P->>IDRX: Transfer Uang Rupiah Asli ke Rekening Admin
@@ -57,10 +59,10 @@ sequenceDiagram
     
     Note over P, Tiket: 2. Pembelian Tiket Perdana (Primary Market)
     Note over Tiket: Validasi: saleStart <= Waktu Blok <= saleEnd
-    P->>Tiket: Kirim Permintaan Pembelian Tiket
+    P->>Tiket: Kirim Pembelian + Data Identitas (Nama & NIK)
     Tiket->>IDRX: Transfer IDRX dari Pengguna ke Dompet Promotor
     IDRX-->>Tiket: Pembayaran Tervalidasi & Sukses
-    Tiket-->>P: Cetak & Kirim NFT Tiket ERC-1155 ke Dompet Pengguna
+    Tiket-->>P: Kirim NFT Tiket + Daftarkan Identitas secara On-Chain
     
     Note over P, Tiket: 3. Upaya Transfer Ilegal / Calo Luar Sistem (Gagal)
     P->>Tiket: Transfer Tiket langsung (P2P/Pihak Ketiga) ke Dompet Lain
@@ -68,8 +70,20 @@ sequenceDiagram
     
     Note over P, Tiket: 4. Penjualan Resmi di Pasar Sekunder (Secondary Market)
     Note over Tiket: Validasi: Harga <= Ceiling Kustom per Kategori
-    P->>Tiket: Daftarkan Tiket di Marketplace Internal (Harga: 1.100.000 IDRX)
-    Tiket-->>P: Sukses: Sistem Menyetujui (Harga <= Batas Ceiling)
+    P->>Tiket: Daftarkan Tiket di Marketplace Internal (Harga <= Batas Ceiling)
+    Tiket-->>P: Sukses: Listing Aktif & Tiket di-Escrow
+    Note over P, Tiket: Pembeli Baru membeli Tiket Resale
+    P->>Tiket: Beli Tiket Resale + Input Nama & NIK Baru
+    Tiket->>Tiket: Hapus Identitas Lama & Daftarkan Identitas Baru
+    
+    Note over P, Gate: 5. Proses Masuk di Gerbang Fisik (Check-In)
+    P->>Gate: Tunjukkan QR Code Alamat Wallet Publik (0 Gas)
+    Gate->>Tiket: Kueri getTicketHolders (Read-only RPC, Gratis)
+    Tiket-->>Gate: Kembalikan Data NIK, Nama, Kategori Tiket
+    Note over Gate: Panitia mencocokkan Nama/NIK dengan KTP Fisik
+    Gate->>Tiket: Panggil checkInFromGate (Wallet Panitia bayar Gas)
+    Tiket-->>P: Status NFT Tiket disetel terpakai (used = true)
+    Gate-->>P: Pintu Terbuka, Pengunjung Silakan Masuk!
 ```
 
 ### 4.2. Deskripsi Komponen Teknis
@@ -114,15 +128,20 @@ Saat transaksi di pasar sekunder berhasil dieksekusi oleh pembeli baru:
     *   Jika $\text{block.timestamp} > \text{saleEnd}$, transaksi digagalkan secara otomatis dengan revert error `SaleEnded`.
     *   *Pengecualian:* Jual-beli tiket bekas di pasar sekunder (*resale listings*) dilepaskan sepenuhnya dari jendela waktu penjualan perdana ini untuk memastikan likuiditas pemegang tiket sekunder tetap terjaga kapan saja.
 
+### 5.5. Registrasi Identitas On-Chain & Penandaan Terpakai Gerbang (On-Chain Identity Mapping & Gatekeeper Used Marking)
+*   **Logika Registrasi Identitas:** Setiap kali terjadi transaksi pembelian tiket (baik primary sale maupun resale), pembeli wajib memasukkan Nama Lengkap dan NIK. Data ini disimpan dalam `mapping(address => mapping(uint256 => TicketHolder[]))` secara langsung di blockchain Base L2 (Single Source of Truth) tanpa melibatkan database Web2 terpusat.
+*   **Logika Sinkronisasi Pasar Sekunder:** Jika pemegang tiket menjual kembali tiketnya melalui *marketplace* resmi, smart contract secara otomatis memanggil fungsi `removeUnusedHolder` untuk menghapus data pendaftaran tiket yang belum digunakan dari penjual lama, dan memanggil `registerHolder` untuk mendaftarkan data pembeli baru secara atomik dalam satu transaksi. Hal ini memastikan integritas data identitas pemegang tiket selalu sinkron secara otomatis dengan kepemilikan NFT secara *real-time*.
+*   **Logika Check-in & Used Marking:** Di gerbang masuk, panitia yang ditunjuk secara on-chain (`isGateKeeper[msg.sender] == true`) memindai alamat wallet pengunjung, lalu memanggil kueri `getTicketHolders` untuk mencocokkan Nama dan NIK terdaftar dengan KTP pengunjung. Jika cocok, panitia mengeksekusi fungsi `checkInFromGate` yang menandai status tiket tersebut sebagai terpakai (`used = true`). Hal ini melestarikan NFT di dompet pengunjung sebagai kenang-kenangan sekaligus meminimalkan friksi check-in. Invarian saldo token on-chain (`balanceOf > getUsedTicketCount`) menjamin bahwa pengguna tidak dapat melakukan check-in terhadap tiket yang sedang terdaftar di marketplace.
+
 ---
 
 ## 6. Keamanan & Mitigasi Serangan (Defense Scenarios)
 
 Sebagai sistem Web3 yang bersifat terbuka dan dapat diakses oleh siapa saja secara publik, terdapat beberapa skenario serangan calo yang diantisipasi:
 
-### 6.1. Skenario Penjualan Akun (Kunci Dompet Fisik)
-*   **Metode Calo:** Calo memborong tiket secara sah ke dompet digitalnya sendiri, lalu menjual seluruh dompet tersebut (menyerahkan *Private Key* / *Seed Phrase* dompet) kepada pembeli di dunia nyata secara tunai (off-chain).
-*   **Mitigasi:** Saat penukaran tiket fisik di gerbang konser, sistem menggunakan verifikasi identitas (KTP/Paspor) yang dicocokkan dengan data registrasi nama pembeli asli yang terdaftar secara aman. Karena dompet digital tidak dapat diubah namanya secara *on-chain* jika registrasi awal telah dikunci, pembeli tiket ilegal tidak akan bisa masuk ke area konser. Hal ini mematikan nilai ekonomi dari dompet yang diperjualbelikan.
+### 6.1. Skenario Penjualan Akun (Kunci Dompet Fisik & Verifikasi KTP Gerbang)
+*   **Metode Calo:** Calo memborong tiket secara sah ke dompet digitalnya sendiri, lalu menjual seluruh dompet tersebut (menyerahkan *Private Key* / *Seed Phrase* dompet) kepada pembeli di dunia nyata secara tunai (off-chain) untuk mengelabui restriksi transfer tiket.
+*   **Mitigasi:** Saat penukaran tiket di gerbang, panitia memindai QR Code alamat wallet publik dan sistem mengambil data Nama dan NIK terdaftar yang tersimpan secara *on-chain* di blockchain Base L2. Panitia kemudian mencocokkannya secara ketat dengan **KTP/Paspor fisik** pengunjung di lokasi. Karena data NIK dan Nama diikat secara on-chain saat transaksi pembelian pertama (dan tidak bisa diubah kecuali melalui transaksi jual-beli resmi di marketplace), pembeli tiket ilegal (yang KTP-nya tidak cocok dengan data on-chain) akan langsung ditolak masuk. Hal ini menghilangkan nilai ekonomi dari dompet yang diperjualbelikan. Setelah validasi cocok, status tiket disetel sebagai terpakai secara on-chain (`checkInFromGate`), mengunci tiket agar tidak bisa digunakan ganda atau diperjualbelikan kembali.
 
 ### 6.2. Skenario Front-Running (Bot Arbitrase)
 *   **Metode Calo:** Bot calo memantau transaksi masuk pada jaringan blockchain (*mempool*). Saat ada tiket murah yang didaftarkan di pasar sekunder, bot mengirim transaksi beli dengan biaya gas yang sangat tinggi agar transaksinya diproses lebih dahulu oleh validator (*front-running*).
@@ -151,3 +170,5 @@ Untuk membuktikan keandalan dan efisiensi sistem sebelum dipertahankan di depan 
 | **"Mengapa memilih standar ERC-1155 daripada ERC-721 yang umum digunakan untuk NFT?"** | "ERC-721 mengharuskan pembuatan kontrak pintar baru atau transaksi terpisah yang memakan biaya gas tinggi untuk setiap kategori tiket. **ERC-1155** memungkinkan pengelolaan multi-token (VIP, VVIP, Reguler) dalam satu kontrak tunggal secara modular, yang secara signifikan mengurangi biaya gas transaksi di jaringan." |
 | **"Bagaimana jika promotor ingin mengadakan program tiket amal atau VIP yang harganya sama sekali tidak boleh dinaikkan?"** | "Sistem kami mendukung **Customizable Price Ceiling** per kategori tiket. Untuk tiket amal atau kampanye tertentu, promotor dapat menyetel `priceCeilingBps` sebesar `10000` (100%). Dengan ini, pembeli pertama sama sekali tidak dapat mengambil keuntungan sepeser pun saat menjual kembali tiketnya, menghilangkan insentif calo secara total." |
 | **"Apakah ada mekanisme otomatis untuk mengatur fase penjualan tiket (seperti presale dan early bird)?"** | "Ya, kami mengimplementasikan **Sales Time Window** secara on-chain per kategori tiket (`saleStart` dan `saleEnd`). Sistem secara otomatis menolak transaksi pembelian sebelum waktu mulai atau setelah waktu berakhir tanpa perlu intervensi admin off-chain, memastikan keadilan distribusi tiket." |
+| **"Bagaimana mencegah orang asing menyalin alamat wallet milik pembeli tiket lalu menunjukkannya di gerbang (wallet address spoofing)?"** | "Sistem kami menerapkan **On-Chain Identity Gating & KTP Matching**. Alamat wallet yang diserahkan di gerbang hanya digunakan untuk memanggil data Nama Lengkap & NIK yang tersimpan secara on-chain di NFT. Panitia gerbang wajib mencocokkan data Nama/NIK blockchain tersebut dengan KTP fisik pengunjung. Sekalipun Budi menyalin alamat wallet Joko, Budi akan langsung ditolak karena KTP Budi tidak akan pernah cocok dengan nama Joko yang terdaftar secara on-chain." |
+| **"Apakah aman menyimpan data privasi seperti NIK dan Nama lengkap pengunjung secara terbuka di blockchain?"** | "Pada purwarupa (*proof-of-concept*) skripsi ini, data disimpan secara cleartext demi demonstrasi kelayakan sistem. Namun, dalam arsitektur produksi (*production-grade*), kami merancang sistem agar data NIK dan Nama pengunjung dienkripsi secara asimetris (misal menggunakan ECIES/AES) di frontend menggunakan *Public Key* milik Promotor sebelum dikirim ke blockchain. Dengan demikian, data terenkripsi aman di blockchain, dan hanya pihak Promotor (yang memiliki *Private Key* pada tablet gerbang masuk) yang dapat mendekripsinya untuk proses pencocokan KTP saat check-in." |

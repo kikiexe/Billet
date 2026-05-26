@@ -24,7 +24,7 @@ export async function getHoldersFromBlockchain(
       abi: NFT_ABI,
       functionName: 'getTicketHolders',
       args: [walletAddress as `0x${string}`, BigInt(tokenId)],
-    }) as any[]
+    }) as TicketHolder[]
 
     return data.map((item) => ({
       name: item.name,
@@ -32,6 +32,7 @@ export async function getHoldersFromBlockchain(
       registered: item.registered,
       used: item.used,
     }))
+
   } catch (error) {
     console.error("Gagal kueri data blockchain:", error)
     throw error

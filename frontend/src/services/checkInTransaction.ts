@@ -1,37 +1,27 @@
-import { createWalletClient, http } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { baseSepolia } from 'viem/chains'
-import { NFT_ABI, NFT_ADDRESS } from '@/config/contracts'
-
-const gatekeeperPrivateKey = (process.env.NEXT_PUBLIC_GATEKEEPER_PRIVATE_KEY || '0x0000000000000000000000000000000000000000000000000000000000000000') as `0x${string}`
-const gatekeeperAccount = privateKeyToAccount(gatekeeperPrivateKey)
-
-const walletClient = createWalletClient({
-  account: gatekeeperAccount,
-  chain: baseSepolia,
-  transport: http(),
-})
-
 export async function executeOnChainCheckIn(
   userWallet: string,
   tokenId: number,
   index: number
 ): Promise<`0x${string}`> {
   try {
-    const txHash = await walletClient.writeContract({
-      address: NFT_ADDRESS,
-      abi: NFT_ABI,
-      functionName: 'checkInFromGate',
-      args: [
-        userWallet as `0x${string}`,
-        BigInt(tokenId),
-        BigInt(index)
-      ],
+    const response = await fetch('/api/check-in', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userWallet, tokenId, index }),
     })
     
-    return txHash;
+    if (!response.ok) {
+      const data = await response.json()
+      throw new Error(data.error || 'Check-in failed')
+    }
+    
+    const data = await response.json()
+    return data.hash;
   } catch (error) {
-    console.error("Transaksi pembakaran gagal:", error)
+    console.error("Check-in request failed:", error)
     throw error
   }
 }
+

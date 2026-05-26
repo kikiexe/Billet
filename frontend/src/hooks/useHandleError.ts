@@ -1,17 +1,35 @@
-import { decodeErrorResult } from 'viem'
+import { decodeErrorResult, type Hex } from 'viem'
 import { MARKETPLACE_ABI } from '@/config/contracts'
 import { toast } from "sonner"
 
+interface ContractError {
+  data?: unknown;
+  cause?: {
+    data?: unknown;
+    cause?: {
+      data?: unknown;
+    };
+  };
+  message?: string;
+}
+
 export function useHandleContractError() {
-  const handleError = (error: any) => {
+  const handleError = (error: unknown) => {
     try {
-      const errorData = error.data || error.cause?.data || error.cause?.cause?.data;
+      const err = error as ContractError;
+      let errorData = err.data || err.cause?.data || err.cause?.cause?.data;
       
-      if (!errorData) throw new Error("No error data");
+      if (errorData && typeof errorData === 'object' && 'data' in errorData) {
+        errorData = (errorData as { data: unknown }).data;
+      }
+
+      if (!errorData || typeof errorData !== 'string' || !errorData.startsWith('0x')) {
+        throw new Error("No valid hex error data found");
+      }
 
       const decodedError = decodeErrorResult({
         abi: MARKETPLACE_ABI,
-        data: errorData,
+        data: errorData as Hex,
       })
 
       if (decodedError.errorName === 'PriceCeilingExceeded') {
@@ -25,8 +43,9 @@ export function useHandleContractError() {
       } else {
         toast.error("Transaksi Gagal", { description: "Cek kembali ketentuan transaksi Anda." })
       }
-    } catch (e) {
-      if (error?.message?.includes('User rejected')) {
+    } catch {
+      const err = error as ContractError;
+      if (err?.message?.includes('User rejected')) {
         toast.info("Dibatalkan", { description: "Anda membatalkan transaksi di wallet." })
       } else {
         toast.error("Error", { description: "Terjadi kesalahan yang tidak diketahui." })
@@ -36,3 +55,5 @@ export function useHandleContractError() {
 
   return { handleError }
 }
+
+

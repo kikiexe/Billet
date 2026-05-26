@@ -239,14 +239,17 @@ contract TicketMarketplace is
 
         listing.active = false;
 
-        // Kembalikan tiket ke seller (berlaku untuk Resale User maupun Primary Organizer)
-        TICKET_NFT.safeTransferFrom(
-            address(this),
-            msg.sender,
-            listing.tokenId,
-            listing.amount,
-            ""
-        );
+        // Kembalikan tiket ke seller HANYA jika ini adalah resale
+        // (Organisator tidak menerima tiket kembali untuk Primary karena langsung di-mint ke escrow)
+        if (listing.isResale) {
+            TICKET_NFT.safeTransferFrom(
+                address(this),
+                msg.sender,
+                listing.tokenId,
+                listing.amount,
+                ""
+            );
+        }
 
         emit ListingCancelled(listingId, msg.sender);
     }

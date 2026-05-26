@@ -153,13 +153,15 @@ contract TicketNFTTest is TestHelper {
     }
 
     function test_IdentityRegistration_OnlyMarketplace() public {
-        // Hanya authorizedMarketplace yang bisa registrasi/hapus data
+        // Hanya authorizedMarketplace yang bisa registrasi atau menghapus data holder
         vm.startPrank(alice);
+        
         vm.expectRevert(TicketNFT.UnauthorizedTransfer.selector);
         nft.registerHolder(alice, TOKEN_REGULER, "Alice", "1234567890123456");
 
         vm.expectRevert(TicketNFT.UnauthorizedTransfer.selector);
-        nft.removeHolder(alice, TOKEN_REGULER, 0);
+        nft.removeUnusedHolder(alice, TOKEN_REGULER);
+        
         vm.stopPrank();
     }
 

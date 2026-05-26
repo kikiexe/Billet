@@ -11,7 +11,7 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
 
     struct TicketHolder {
         string name;
-        string nik;
+        string nik; // NOTE: In production, NIK must be stored in ECIES encrypted format (Proposal Section 8) to secure user privacy
         bool registered;
         bool used;
     }
@@ -146,6 +146,7 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
     // ─── Identity & Check-in Functions ───────────────────────────────────────
 
     /// @notice Registrasi data pembeli tiket. Hanya bisa dipanggil oleh Marketplace resmi.
+    /// @dev NOTE: In production, the 'nik' parameter will receive ECIES-encrypted ciphertext to satisfy privacy requirements.
     function registerHolder(
         address owner,
         uint256 tokenId,
@@ -161,19 +162,6 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         }));
     }
 
-    /// @notice Hapus registrasi data pembeli (saat dijual kembali). Hanya bisa dipanggil oleh Marketplace resmi.
-    function removeHolder(
-        address owner,
-        uint256 tokenId,
-        uint256 index
-    ) external {
-        if (msg.sender != authorizedMarketplace) revert UnauthorizedTransfer();
-        uint256 length = _ticketHolders[owner][tokenId].length;
-        require(index < length, "Index out of bounds");
-        
-        // Pindahkan elemen terakhir ke index yang dihapus, lalu pop
-        delete _ticketHolders[owner][tokenId][index];
-    }
 
     /// @notice Dapatkan jumlah tiket yang sudah digunakan (di-check-in).
     function getUsedTicketCount(address owner, uint256 tokenId) public view returns (uint256) {

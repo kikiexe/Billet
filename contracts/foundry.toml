@@ -16,3 +16,7 @@ runs = 256
 [profile.default.invariant]
 runs  = 64
 depth = 15
+
+[rpc_endpoints]
+base_sepolia = "https://base-sepolia.g.alchemy.com/v2/IRm0znUyu95uZVbyEupxv"
+

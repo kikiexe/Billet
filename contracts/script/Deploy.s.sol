@@ -13,13 +13,16 @@ contract DeployScript is Script {
 
         vm.startBroadcast(deployerKey);
 
-        // 1. Deploy Mock IDRX Stablecoin (untuk simulasi)
+        // 1. Deploy Mock IDRX Stablecoin (untuk simulasi / testing)
+        // NOTE: Untuk produksi di Base Mainnet, gunakan alamat IDRX resmi (0x87aC32B870... atau yang setara)
+        // dan lewati tahap deploy mock ini.
         MockERC20 idrx = new MockERC20("Rupiah Digital", "IDRX");
 
         // 2. Deploy TicketNFT
         TicketNFT nft = new TicketNFT("https://api.smartticket.io/metadata/{id}");
 
         // 3. Deploy Marketplace dengan reference ke NFT dan IDRX
+        // NOTE: Untuk produksi, pass alamat IDRX resmi sebagai parameter ke-2 constructor TicketMarketplace.
         TicketMarketplace marketplace = new TicketMarketplace(address(nft), address(idrx));
 
         // 4. Autorisasi marketplace di NFT contract

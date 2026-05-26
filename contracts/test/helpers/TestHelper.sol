@@ -26,6 +26,7 @@ abstract contract TestHelper is Test {
     // ─── Prices (IDRX decimal = 18) ──────────────────────────────────────────
     uint256 public constant PRICE_REGULER = 100_000 * 10**18; // Rp100.000
     uint256 public constant PRICE_VIP     = 500_000 * 10**18; // Rp500.000
+    uint256 private _listingCount;
 
     function setUp() public virtual {
         // Deploy sebagai organizer
@@ -70,7 +71,7 @@ abstract contract TestHelper is Test {
         vm.stopPrank();
 
         // listing ID dimulai dari 0 dan increment, ambil yang terakhir
-        listingId = 0; // untuk test sederhana, disesuaikan per kasus
+        listingId = _listingCount++;
     }
 
     /// @dev Shortcut: alice beli 1 tiket dari listing ID tertentu.

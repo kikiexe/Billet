@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 echo "Memulai kompilasi Smart Contract..."
 cd contracts && forge build

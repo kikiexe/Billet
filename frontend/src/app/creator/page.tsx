@@ -108,8 +108,11 @@ export default function CreatorPage() {
         });
 
         // Price per unit in wei (18 decimals for IDRX)
-        const priceInWei = parseUnits(eventPrice.toString(), 2); // 2 decimals for IDRX
+        const priceInWei = parseUnits(eventPrice.toString(), 18); // Calibrated to 18 decimals standard
 
+        // TODO: Integrasikan fungsi configureTicketCategory pada NFT contract (TicketNFT.sol) ke dalam form UI ini
+        // agar administrator/owner dapat memperbarui parameter priceCeilingBps (ceiling markup limit) secara langsung
+        // ke smart contract di blockchain sebelum memanggil listPrimary pada marketplace.
         const tx = await writeContractAsync({
           address: MARKETPLACE_ADDRESS,
           abi: MARKETPLACE_ABI,

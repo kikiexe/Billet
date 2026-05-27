@@ -83,7 +83,10 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
 
     try {
       const names = holderData.map((h) => h.name.trim());
-      // Hash NIK client-side using Keccak-256 before transmitting, protecting PII privacy on-chain
+      // Hash NIK client-side using Keccak-256 before transmitting, protecting PII privacy on-chain.
+      // NOTE (Trade-off): The marketplace smart contract ABI expects string[] for niks, not bytes32[].
+      // We store the hash hex string representation ('0x...') on-chain. This successfully mitigates PII exposure
+      // without requiring a smart contract redeployment, although a native bytes32[] is more gas-optimal for storage.
       const niks = holderData.map((h) => keccak256(toBytes(h.nik.trim())));
 
       // Calculate total in ether format for the hook

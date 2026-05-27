@@ -9,19 +9,18 @@ import {
   Ticket,
   Percent,
   ShieldAlert,
-  ArrowRight,
   ShieldCheck,
   CheckCircle2,
   TrendingUp,
   Activity,
   PlusCircle,
   Coins,
-  Share2,
   Calendar,
   Layers,
   ChevronDown,
   Info,
-  Zap
+  Zap,
+  ArrowRight
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -36,6 +35,41 @@ const eventCategories = [
   { name: "Seminar & Kelas", defaultPrice: 100000, royaltyRate: 0.02, resaleRate: 0.05 },
   { name: "Pertandingan Olahraga", defaultPrice: 150000, royaltyRate: 0.03, resaleRate: 0.10 },
   { name: "Pertunjukan Seni", defaultPrice: 80000, royaltyRate: 0.04, resaleRate: 0.08 }
+];
+
+// ─── Feature list ────────────────────────────────────────────────────────
+
+const features = [
+  {
+    icon: ShieldCheck,
+    title: "NFT Ticketing (ERC-1155)",
+    desc: "Tiket di-mint sebagai token ERC-1155 di Base L2. Nol pemalsuan."
+  },
+  {
+    icon: Percent,
+    title: "Price Ceiling Otomatis",
+    desc: "Harga resale dibatasi smart contract. Calo tak bisa markup berlebihan."
+  },
+  {
+    icon: Coins,
+    title: "Resale Royalty (ERC-2981)",
+    desc: "Terima royalti otomatis setiap tiket berpindah tangan di pasar sekunder."
+  },
+  {
+    icon: Zap,
+    title: "Check-in Gasless",
+    desc: "Verifikasi tiket di pintu masuk secara instan via tanda tangan cryptographic."
+  },
+  {
+    icon: Activity,
+    title: "Laporan Real-Time",
+    desc: "Data penjualan tiket dan mutasi resale langsung dari blockchain."
+  },
+  {
+    icon: Layers,
+    title: "Multi-Kategori",
+    desc: "Format tiket Reguler, VIP, hingga VVIP dengan metadata eksklusif."
+  }
 ];
 
 export default function CreatorPage() {
@@ -185,129 +219,119 @@ export default function CreatorPage() {
     <div className="min-h-screen flex flex-col bg-cream relative">
       <Navbar />
 
-      <main className="flex-1 pb-24">
-        {/* ─── Hero Marketing Section ───────────────────────────────────── */}
-        <section className="relative overflow-hidden pt-20 pb-28 md:pt-28 md:pb-36" id="hero-creator">
-          {/* Neon warm orbs background */}
+      <main className="flex-1">
+        {/* ═══════════════════════════════════════════════════════
+            SECTION 1: Hero — Clean & Focused
+        ═══════════════════════════════════════════════════════ */}
+        <section className="relative overflow-hidden pt-16 pb-20 md:pt-20 md:pb-28" id="hero-creator">
+          {/* Subtle background orb */}
           <div className="absolute inset-0 -z-10">
             <div
-              className="absolute -top-32 -right-32 w-137.5 h-137.5 rounded-full animate-orb-1 opacity-30"
-              style={{
-                background: "radial-gradient(circle, #FF8A50 0%, #FFE0C2 50%, transparent 80%)",
-              }}
-            />
-            <div
-              className="absolute -bottom-20 -left-20 w-112.5 h-112.5 rounded-full animate-orb-2 opacity-20"
-              style={{
-                background: "radial-gradient(circle, #FFCCA3 0%, transparent 70%)",
-              }}
+              className="absolute -top-32 -right-32 w-96 h-96 rounded-full animate-orb-1 opacity-20"
+              style={{ background: "radial-gradient(circle, #FF8A50 0%, #FFE0C2 50%, transparent 80%)" }}
             />
           </div>
 
-          <div className="max-w-7xl mx-auto px-5 sm:px-8">
-            <div className="grid lg:grid-cols-12 gap-12 items-center">
-              {/* Text Area */}
-              <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-sm font-semibold text-warm-700 animate-fade-in-up">
-                  <Sparkles className="w-4 h-4" />
-                  Billet untuk Kreator — Solusi Event On-Chain
+          <div className="section-container">
+            <div className="grid lg:grid-cols-12 gap-10 items-center">
+              {/* Text */}
+              <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
+                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-warm-50 text-warm-700 text-xs font-semibold border border-warm-100">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Billet untuk Kreator
                 </span>
                 
-                <h1 className="font-heading font-black text-4xl sm:text-5xl md:text-6xl tracking-tight leading-none text-bark">
-                  Hi, <span className="text-gradient-warm">Event Creator!</span> <br />
-                  Mau bikin konser musik? <br />
-                  Billet siap jadi #SolusiEvent kamu.
+                <h1 className="font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight leading-[1.1] text-bark">
+                  Luncurkan Tiket{" "}
+                  <span className="text-gradient-warm">On-Chain</span>
+                  <br className="hidden sm:block" />
+                  dalam Hitungan Menit.
                 </h1>
                 
-                <p className="text-stone text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                  Luncurkan tiket digital aman dalam bentuk NFT ERC-1155 di jaringan Base L2. 
-                  Terlindungi sepenuhnya dari pemalsuan dan calo liar dengan batas resale otomatis.
+                <p className="text-stone text-sm sm:text-base max-w-lg mx-auto lg:mx-0 leading-relaxed">
+                  Buat tiket digital NFT ERC-1155 di Base L2. Terlindungi dari pemalsuan dan calo, 
+                  dengan batas resale otomatis dan royalti langsung ke wallet Anda.
                 </p>
 
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
                   <a
                     href="#calculator-section"
-                    className="px-7 py-3.5 rounded-2xl bg-bark text-white font-heading font-semibold text-sm hover:shadow-lg transition-all"
+                    className="px-5 py-3 rounded-xl bg-bark text-white font-heading font-semibold text-sm hover:bg-bark-light transition-colors"
                   >
                     Hitung Pendapatan
                   </a>
                   <a
                     href="#launcher-section"
-                    className="px-7 py-3.5 rounded-2xl bg-linear-to-r from-warm-500 to-warm-600 text-white font-heading font-semibold text-sm hover:shadow-warm-lg hover:scale-[1.02] transition-all"
+                    className="px-5 py-3 rounded-xl bg-linear-to-r from-warm-500 to-warm-600 text-white font-heading font-semibold text-sm shadow-warm hover:shadow-warm-lg hover:scale-[1.01] transition-all"
                   >
-                    Luncurkan Event Baru
+                    Luncurkan Event
                   </a>
                 </div>
 
                 {/* Trust Stats */}
-                <div className="pt-6 grid grid-cols-3 gap-4 border-t border-bark/5 text-center lg:text-left">
-                  <div>
-                    <h3 className="font-heading font-extrabold text-2xl sm:text-3xl text-bark">30.000+</h3>
-                    <p className="text-stone text-xs">Event Creator Terdaftar</p>
-                  </div>
-                  <div>
-                    <h3 className="font-heading font-extrabold text-2xl sm:text-3xl text-bark">Rp 0</h3>
-                    <p className="text-stone text-xs">Biaya Pembuatan Tiket</p>
-                  </div>
-                  <div>
-                    <h3 className="font-heading font-extrabold text-2xl sm:text-3xl text-bark">5 M+</h3>
-                    <p className="text-stone text-xs">Volume Transaksi On-Chain</p>
-                  </div>
+                <div className="pt-6 grid grid-cols-3 gap-4 border-t border-bark/6 text-center lg:text-left">
+                  {[
+                    { value: "30.000+", label: "Creator Terdaftar" },
+                    { value: "Rp 0", label: "Biaya Pembuatan" },
+                    { value: "5 M+", label: "Volume Transaksi" }
+                  ].map((stat, i) => (
+                    <div key={i}>
+                      <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-bark">{stat.value}</h3>
+                      <p className="text-stone text-[11px] mt-0.5">{stat.label}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Graphic Mockup Dashboard */}
+              {/* Dashboard Mockup (compact) */}
               <div className="lg:col-span-5 relative">
-                <div className="absolute inset-0 bg-linear-to-tr from-warm-500/10 to-orange-400/5 rounded-3xl blur-2xl -z-10" />
-                <div className="rounded-3xl glass p-6 border border-white/40 shadow-2xl space-y-6">
-                  <div className="flex items-center justify-between pb-4 border-b border-bark/5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3.5 h-3.5 rounded-full bg-red-400" />
-                      <div className="w-3.5 h-3.5 rounded-full bg-yellow-400" />
-                      <div className="w-3.5 h-3.5 rounded-full bg-green-400" />
+                <div className="rounded-2xl bg-white border border-bark/6 p-5 shadow-card space-y-4">
+                  {/* Window chrome */}
+                  <div className="flex items-center justify-between pb-3 border-b border-bark/6">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-red-400" />
+                      <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                      <div className="w-3 h-3 rounded-full bg-green-400" />
                     </div>
-                    <span className="text-[10px] font-mono text-stone">billet-creator-dashboard.eth</span>
+                    <span className="text-[9px] font-mono text-stone/50">billet-dashboard.eth</span>
                   </div>
 
-                  {/* Mock Stats Cards */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-cream/40 p-4 rounded-2xl border border-bark/5">
-                      <p className="text-[10px] text-stone font-semibold uppercase tracking-wider">Tiket Terjual</p>
-                      <h4 className="font-heading font-extrabold text-xl text-bark mt-1">1.482 / 1.500</h4>
-                      <div className="w-full bg-sand h-1.5 rounded-full mt-3 overflow-hidden">
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-sand/30 p-3.5 rounded-xl border border-bark/4">
+                      <p className="text-[9px] text-stone/50 font-semibold uppercase tracking-wider">Tiket Terjual</p>
+                      <h4 className="font-heading font-bold text-lg text-bark mt-1">1.482 / 1.500</h4>
+                      <div className="w-full bg-sand/60 h-1 rounded-full mt-2 overflow-hidden">
                         <div className="bg-warm-500 h-full rounded-full w-[92%]" />
                       </div>
                     </div>
-                    <div className="bg-cream/40 p-4 rounded-2xl border border-bark/5">
-                      <p className="text-[10px] text-stone font-semibold uppercase tracking-wider">Royalti Resale</p>
-                      <h4 className="font-heading font-extrabold text-xl text-green-600 mt-1">+ Rp 7.410.000</h4>
-                      <p className="text-[9px] text-stone/60 mt-2 flex items-center gap-1 font-mono">
-                        <TrendingUp className="w-3 h-3 text-green-500" /> 148 kali resale aktif
+                    <div className="bg-sand/30 p-3.5 rounded-xl border border-bark/4">
+                      <p className="text-[9px] text-stone/50 font-semibold uppercase tracking-wider">Royalti Resale</p>
+                      <h4 className="font-heading font-bold text-lg text-green-600 mt-1">+ Rp 7.4jt</h4>
+                      <p className="text-[9px] text-stone/40 mt-2 flex items-center gap-1 font-mono">
+                        <TrendingUp className="w-3 h-3 text-green-500" /> 148 resale
                       </p>
                     </div>
                   </div>
 
-                  {/* Mock Activity List */}
-                  <div className="space-y-3">
-                    <p className="text-xs font-semibold text-bark">Aktivitas Tiket Terbaru (Real-Time)</p>
-                    <div className="space-y-2">
-                      {[
-                        { type: "Primary Buy", addr: "0x3D36...789", desc: "Membeli 2 Tiket VIP", val: "Rp 700.000", ok: true },
-                        { type: "Resale Royalty", addr: "0x8A80...ABC", desc: "Menerima Royalti Resale 5%", val: "+ Rp 55.000", ok: false },
-                        { type: "Primary Buy", addr: "0x1A16...D3A", desc: "Membeli 1 Tiket Reguler", val: "Rp 150.000", ok: true }
-                      ].map((item, i) => (
-                        <div key={i} className="flex items-center justify-between p-2.5 rounded-xl bg-white/50 border border-bark/5 text-xs">
-                          <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${item.ok ? "bg-green-500 animate-pulse-warm" : "bg-warm-500"}`} />
-                            <div>
-                              <p className="font-bold text-bark">{item.type}</p>
-                              <p className="text-[10px] text-stone">{item.desc} ({item.addr})</p>
-                            </div>
+                  {/* Activity */}
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-semibold text-bark">Aktivitas Terbaru</p>
+                    {[
+                      { type: "Primary Buy", desc: "Membeli 2 Tiket VIP", val: "Rp 700.000", ok: true },
+                      { type: "Resale Royalty", desc: "Royalti 5%", val: "+ Rp 55.000", ok: false },
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center justify-between p-2.5 rounded-lg bg-white/50 border border-bark/4 text-[11px]">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-1.5 h-1.5 rounded-full ${item.ok ? "bg-green-500" : "bg-warm-500"}`} />
+                          <div>
+                            <p className="font-semibold text-bark">{item.type}</p>
+                            <p className="text-[9px] text-stone/50">{item.desc}</p>
                           </div>
-                          <span className={`font-bold font-mono ${item.ok ? "text-bark" : "text-green-600"}`}>{item.val}</span>
                         </div>
-                      ))}
-                    </div>
+                        <span className={`font-bold font-mono ${item.ok ? "text-bark" : "text-green-600"}`}>{item.val}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -315,27 +339,33 @@ export default function CreatorPage() {
           </div>
         </section>
 
-        {/* ─── Revenue Calculator Section ───────────────────────────────── */}
-        <section className="py-20 bg-white/40 border-y border-bark/5" id="calculator-section">
-          <div className="max-w-7xl mx-auto px-5 sm:px-8">
-            <div className="text-center max-w-2xl mx-auto mb-14">
-              <h2 className="font-heading font-extrabold text-3xl text-bark flex items-center justify-center gap-2">
-                Hitung Perkiraan Pendapatan Event Kamu
-                <Calculator className="w-7 h-7 text-warm-500" />
+        <hr className="section-divider" />
+
+        {/* ═══════════════════════════════════════════════════════
+            SECTION 2: Revenue Calculator
+        ═══════════════════════════════════════════════════════ */}
+        <section className="section-spacing bg-white/40 border-y border-bark/4" id="calculator-section">
+          <div className="section-container">
+            <div className="text-center max-w-xl mx-auto mb-10">
+              <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-bark flex items-center justify-center gap-2">
+                Hitung Pendapatan
+                <Calculator className="w-6 h-6 text-warm-500" />
               </h2>
-              <p className="text-stone text-sm sm:text-base mt-2">
-                Bandingkan bagaimana sistem Billet memberi Anda untung lebih banyak melalui passive income royalti resale on-chain!
+              <p className="text-stone text-sm mt-2">
+                Lihat estimasi pendapatan dari penjualan primer + royalti resale on-chain.
               </p>
             </div>
 
-            <div className="grid lg:grid-cols-12 gap-8">
+            <div className="grid lg:grid-cols-12 gap-6">
               {/* Input Panel */}
-              <div className="lg:col-span-5 rounded-3xl glass p-6 border border-white/50 space-y-6">
-                <h3 className="font-heading font-bold text-lg text-bark border-b border-bark/5 pb-3">Konfigurasi Penjualan</h3>
+              <div className="lg:col-span-5 rounded-2xl bg-white/70 backdrop-blur-xl border border-white/60 p-6 space-y-5 shadow-card">
+                <h3 className="font-heading font-bold text-base text-bark border-b border-bark/6 pb-3">
+                  Konfigurasi
+                </h3>
                 
                 {/* Event Category Select */}
-                <div className="space-y-2">
-                  <label className="text-xs font-semibold text-bark block">Kategori / Jenis Event</label>
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Jenis Event</label>
                   <div className="relative">
                     <select
                       value={selectedCat.name}
@@ -346,21 +376,21 @@ export default function CreatorPage() {
                           setTicketPrice(cat.defaultPrice);
                         }
                       }}
-                      className="w-full bg-cream/50 px-4 py-3 rounded-2xl border border-bark/10 text-bark font-semibold text-sm appearance-none focus:outline-hidden focus:border-warm-500 transition-all cursor-pointer"
+                      className="input-field appearance-none cursor-pointer pr-10"
                     >
                       {eventCategories.map((c) => (
                         <option key={c.name} value={c.name}>{c.name}</option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-stone pointer-events-none" />
+                    <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone/40 pointer-events-none" />
                   </div>
                 </div>
 
-                {/* Ticket Price Input */}
-                <div className="space-y-2">
+                {/* Ticket Price */}
+                <div className="space-y-1.5">
                   <div className="flex justify-between items-center">
-                    <label className="text-xs font-semibold text-bark">Harga Per Tiket (Rupiah)</label>
-                    <span className="text-[10px] text-stone font-mono">Rp {ticketPrice.toLocaleString("id-ID")}</span>
+                    <label className="text-[11px] font-semibold text-bark uppercase tracking-wider">Harga Per Tiket</label>
+                    <span className="text-[11px] text-stone font-mono">Rp {ticketPrice.toLocaleString("id-ID")}</span>
                   </div>
                   <input
                     type="range"
@@ -371,18 +401,17 @@ export default function CreatorPage() {
                     onChange={(e) => setTicketPrice(Number(e.target.value))}
                     className="w-full accent-warm-500 cursor-pointer"
                   />
-                  <div className="flex justify-between text-[10px] text-stone font-semibold">
+                  <div className="flex justify-between text-[9px] text-stone/40 font-mono">
                     <span>Rp 30rb</span>
-                    <span>Rp 1jt</span>
                     <span>Rp 2jt</span>
                   </div>
                 </div>
 
-                {/* Ticket Volume Input */}
-                <div className="space-y-2">
+                {/* Ticket Volume */}
+                <div className="space-y-1.5">
                   <div className="flex justify-between items-center">
-                    <label className="text-xs font-semibold text-bark">Jumlah Tiket Yang Dijual</label>
-                    <span className="text-[10px] text-stone font-mono">{ticketVolume.toLocaleString("id-ID")} Lembar</span>
+                    <label className="text-[11px] font-semibold text-bark uppercase tracking-wider">Jumlah Tiket</label>
+                    <span className="text-[11px] text-stone font-mono">{ticketVolume.toLocaleString("id-ID")} lembar</span>
                   </div>
                   <input
                     type="range"
@@ -393,86 +422,73 @@ export default function CreatorPage() {
                     onChange={(e) => setTicketVolume(Number(e.target.value))}
                     className="w-full accent-warm-500 cursor-pointer"
                   />
-                  <div className="flex justify-between text-[10px] text-stone font-semibold">
+                  <div className="flex justify-between text-[9px] text-stone/40 font-mono">
                     <span>50</span>
-                    <span>10rb</span>
-                    <span>25rb</span>
+                    <span>25.000</span>
                   </div>
                 </div>
               </div>
 
-              {/* Output Results Panel */}
-              <div className="lg:col-span-7 rounded-3xl bg-bark text-white p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden shadow-2xl">
-                {/* Decorative glow */}
-                <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-warm-500/10 blur-[80px]" />
+              {/* Output Panel */}
+              <div className="lg:col-span-7 rounded-2xl bg-bark text-white p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden shadow-card">
+                <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-warm-500/8 blur-[80px]" />
 
-                <div className="space-y-6 relative z-10">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-bold border border-green-500/20 uppercase tracking-wider">
-                    <Coins className="w-3.5 h-3.5" />
-                    Billet Fee-Saver Enabled
+                <div className="space-y-5 relative z-10">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-green-500/15 text-green-400 text-[10px] font-bold border border-green-500/15 uppercase tracking-wider">
+                    <Coins className="w-3 h-3" />
+                    0% Platform Fee — Promo!
                   </span>
 
-                  <h3 className="font-heading font-black text-2xl sm:text-3xl">Estimasi Pendapatan Event</h3>
+                  <h3 className="font-heading font-extrabold text-xl sm:text-2xl">Estimasi Pendapatan</h3>
 
-                  {/* Calculations Details */}
-                  <div className="grid sm:grid-cols-3 gap-5 pt-4">
-                    {/* Primary Sale */}
-                    <div className="bg-white/5 p-4.5 rounded-2xl border border-white/5">
-                      <p className="text-[10px] text-white/50 uppercase font-semibold">1. Penjualan Tiket Utama</p>
-                      <h4 className="font-heading font-black text-xl text-white mt-1">
+                  {/* Breakdown */}
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                      <p className="text-[9px] text-white/40 uppercase font-semibold tracking-wider">Penjualan Utama</p>
+                      <h4 className="font-heading font-bold text-lg text-white mt-1">
                         Rp {grossSales.toLocaleString("id-ID")}
                       </h4>
-                      <p className="text-[9px] text-white/40 mt-2 font-mono">Primary Sale 100%</p>
                     </div>
-
-                    {/* Resale Royalty */}
-                    <div className="bg-white/5 p-4.5 rounded-2xl border border-white/5">
-                      <p className="text-[10px] text-white/50 uppercase font-semibold">2. Royalti Resale (Secondary)</p>
-                      <h4 className="font-heading font-black text-xl text-green-400 mt-1">
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                      <p className="text-[9px] text-white/40 uppercase font-semibold tracking-wider">Royalti Resale</p>
+                      <h4 className="font-heading font-bold text-lg text-green-400 mt-1">
                         + Rp {resaleRoyalties.toLocaleString("id-ID")}
                       </h4>
-                      <p className="text-[9px] text-green-400/60 mt-2 font-mono">
-                        Asumsi {Math.round(selectedCat.resaleRate * 100)}% resale aktif, royalti {Math.round(selectedCat.royaltyRate * 100)}%
-                      </p>
                     </div>
-
-                    {/* Platform Fee */}
-                    <div className="bg-white/5 p-4.5 rounded-2xl border border-white/5">
-                      <p className="text-[10px] text-white/50 uppercase font-semibold">3. Platform Fee</p>
-                      <h4 className="font-heading font-black text-xl text-warm-400 mt-1">
-                        - Rp {platformFee.toLocaleString("id-ID")}
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
+                      <p className="text-[9px] text-white/40 uppercase font-semibold tracking-wider">Platform Fee</p>
+                      <h4 className="font-heading font-bold text-lg text-warm-400 mt-1">
+                        Rp 0
                       </h4>
-                      <p className="text-[9px] text-warm-400/80 mt-2 font-bold uppercase tracking-wider">
-                        PROMO 0% PLATFORM FEE!
-                      </p>
+                      <p className="text-[8px] text-warm-400/70 mt-1 font-bold uppercase tracking-wider">PROMO!</p>
                     </div>
                   </div>
 
-                  {/* Visual Bar Breakdown Chart */}
-                  <div className="space-y-2 pt-4">
-                    <p className="text-xs text-white/70 font-semibold">Proporsi Struktur Pendapatan Bersih:</p>
-                    <div className="w-full bg-white/10 h-4 rounded-full overflow-hidden flex">
+                  {/* Bar */}
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] text-white/50 font-semibold">Proporsi Pendapatan:</p>
+                    <div className="w-full bg-white/10 h-3 rounded-full overflow-hidden flex">
                       <div className="bg-warm-500 h-full transition-all duration-300" style={{ width: `${primaryPercentage}%` }} />
                       <div className="bg-green-500 h-full transition-all duration-300" style={{ width: `${royaltyPercentage}%` }} />
                     </div>
-                    <div className="flex gap-4 text-[10px] text-white/50 font-semibold font-mono">
-                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-warm-500 rounded" /> Penjualan Utama ({primaryPercentage}%)</span>
-                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-green-500 rounded" /> Royalti Resale ({royaltyPercentage}%)</span>
+                    <div className="flex gap-4 text-[9px] text-white/40 font-mono">
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 bg-warm-500 rounded" /> Primer ({primaryPercentage}%)</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 bg-green-500 rounded" /> Royalti ({royaltyPercentage}%)</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Final Net Profits */}
-                <div className="pt-6 mt-6 border-t border-white/10 relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                {/* Net total */}
+                <div className="pt-5 mt-5 border-t border-white/10 relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
-                    <p className="text-xs text-white/50 font-bold uppercase tracking-wider">Estimasi Total Pendapatan Bersih (Net)</p>
-                    <h2 className="font-heading font-black text-3xl sm:text-4xl md:text-5xl text-gradient-warm leading-tight mt-1">
+                    <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Total Pendapatan Bersih</p>
+                    <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-gradient-warm leading-tight mt-0.5">
                       Rp {netEarnings.toLocaleString("id-ID")}
                     </h2>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs text-white/60 bg-white/5 px-4 py-2 rounded-xl border border-white/5">
-                    <Info className="w-4 h-4 text-warm-400 shrink-0" />
-                    <span>Hingga 112% profit lebih tinggi dibanding sistem konvensional!</span>
+                  <div className="flex items-center gap-1.5 text-[10px] text-white/40 bg-white/4 px-3 py-2 rounded-lg border border-white/5">
+                    <Info className="w-3.5 h-3.5 text-warm-400 shrink-0" />
+                    <span>Hingga 112% lebih tinggi dari konvensional</span>
                   </div>
                 </div>
               </div>
@@ -480,280 +496,245 @@ export default function CreatorPage() {
           </div>
         </section>
 
-        {/* ─── Features Grid Section ────────────────────────────────────── */}
-        <section className="py-20 max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="font-heading font-extrabold text-3xl text-bark">
-              Tingkatkan Event Dengan Fitur Unggulan
+        <hr className="section-divider" />
+
+        {/* ═══════════════════════════════════════════════════════
+            SECTION 3: Features (Compact 2x3 Grid)
+        ═══════════════════════════════════════════════════════ */}
+        <section className="section-spacing section-container">
+          <div className="text-center max-w-xl mx-auto mb-10">
+            <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-bark">
+              Fitur Unggulan
             </h2>
-            <p className="text-stone text-sm sm:text-base mt-2">
-              Billet menghadirkan teknologi Web3 tercanggih untuk melipatgandakan kepuasan fans dan organizer.
+            <p className="text-stone text-sm mt-2">
+              Teknologi Web3 tercanggih untuk event creator.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-            {[
-              {
-                icon: ShieldCheck,
-                title: "Smart NFT Ticketing (ERC-1155)",
-                desc: "Seluruh tiket di-mint sebagai token ERC-1155 di Base L2. Nol pemalsuan tiket, perlindungan kepemilikan 100% on-chain."
-              },
-              {
-                icon: Percent,
-                title: "Price Ceiling Otomatis",
-                desc: "Kontrak pintar membatasi harga resale. Calo tidak bisa menjual di atas markup wajar (e.g. max 1.1x dari harga orisinal)."
-              },
-              {
-                icon: Coins,
-                title: "Resale Royalty (ERC-2981)",
-                desc: "Menerima royalti otomatis setiap kali tiket berpindah tangan di pasar sekunder. Keuntungan pasif instan langsung ke wallet."
-              },
-              {
-                icon: Activity,
-                title: "Laporan Penjualan Real-Time",
-                desc: "Akses data penjualan tiket, grafik registrasi pemegang tiket, dan mutasi resale langsung dari blockchain secara transparan."
-              },
-              {
-                icon: Zap,
-                title: "Check-in Pintu Masuk Gasless",
-                desc: "Verifikasi kepemilikan tiket di pintu masuk secara instan via tanda tangan cryptographic (tanpa gas fee) hanya dalam 1 detik."
-              },
-              {
-                icon: Layers,
-                title: "Multi-Kategori Kustom",
-                desc: "Format pasokan tiket Anda secara dinamis dari kelas Reguler, VIP, hingga VVIP dengan metadata gambar dan ornamen eksklusif."
-              }
-            ].map((feat, i) => (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {features.map((feat) => (
               <div
                 key={feat.title}
-                className="group relative rounded-3xl glass p-6 hover:shadow-warm-lg hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between"
+                className="group rounded-2xl bg-white/60 border border-bark/6 p-5 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-300 flex gap-4 items-start"
               >
+                <div className="w-10 h-10 rounded-xl bg-linear-to-br from-warm-400 to-warm-600 text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
+                  <feat.icon className="w-5 h-5" />
+                </div>
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-warm-400 to-warm-600 text-white flex items-center justify-center mb-5 shadow-warm transition-transform group-hover:scale-105">
-                    <feat.icon className="w-6 h-6" />
-                  </div>
-                  <h3 className="font-heading font-bold text-lg text-bark mb-2">{feat.title}</h3>
-                  <p className="text-stone text-xs sm:text-sm leading-relaxed">{feat.desc}</p>
+                  <h3 className="font-heading font-bold text-sm text-bark mb-1">{feat.title}</h3>
+                  <p className="text-stone text-xs leading-relaxed">{feat.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* ─── Sandbox Event Creator Launcher Panel ──────────────────────── */}
-        <section className="max-w-4xl mx-auto px-5 sm:px-8 pt-10" id="launcher-section">
-          <div className="rounded-3xl glass-strong border border-white/50 p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-            {/* Background design */}
-            <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-warm-500/10 blur-[80px]" />
+        <hr className="section-divider" />
 
-            <div className="relative z-10">
-              <div className="text-center max-w-xl mx-auto mb-8">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warm-500/10 text-warm-700 text-xs font-bold border border-warm-200 uppercase tracking-wider mb-3">
-                  <PlusCircle className="w-3.5 h-3.5" />
-                  Creator Portal Sandbox
-                </span>
-                <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-bark">Luncurkan Tiket Acara Baru</h2>
-                <p className="text-stone text-xs sm:text-sm mt-1">
-                  Hubungkan wallet Anda untuk membuat event on-chain di Base Sepolia, atau simulasikan langsung dalam Mode Sandbox.
-                </p>
-              </div>
+        {/* ═══════════════════════════════════════════════════════
+            SECTION 4: Event Launcher Form
+        ═══════════════════════════════════════════════════════ */}
+        <section className="section-spacing" id="launcher-section">
+          <div className="section-container max-w-3xl">
+            <div className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white/60 p-6 sm:p-8 shadow-card relative overflow-hidden">
+              <div className="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-warm-500/5 blur-[60px]" />
 
-              {!isConnected ? (
-                /* Wallet Lock Panel */
-                <div className="flex flex-col items-center justify-center py-12 text-center bg-cream/30 border border-bark/5 rounded-2xl p-6">
-                  <div className="w-14 h-14 rounded-2xl bg-sand/60 flex items-center justify-center mb-4">
-                    <Ticket className="w-6 h-6 text-stone/40" />
-                  </div>
-                  <h4 className="font-heading font-semibold text-base text-bark mb-1">
-                    Hubungkan Wallet Anda
-                  </h4>
-                  <p className="text-stone text-xs max-w-xs mb-5">
-                    Hubungkan wallet kripto Anda untuk membuka formulir launcher tiket event on-chain.
+              <div className="relative z-10">
+                {/* Header */}
+                <div className="text-center max-w-md mx-auto mb-8">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-warm-50 text-warm-700 text-[11px] font-bold border border-warm-100 uppercase tracking-wider mb-3">
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    Creator Portal
+                  </span>
+                  <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-bark">
+                    Luncurkan Tiket Acara Baru
+                  </h2>
+                  <p className="text-stone text-xs mt-1.5">
+                    Hubungkan wallet untuk on-chain, atau coba langsung dalam Mode Sandbox.
                   </p>
-                  <ConnectKitButton />
                 </div>
-              ) : (
-                /* Active Form Launcher Panel */
-                <form onSubmit={handleLaunchEvent} className="space-y-6">
-                  {/* Mode Banner Indicator */}
-                  <div className={`p-4 rounded-2xl border text-xs sm:text-sm flex gap-3 ${
-                    isOwner
-                      ? "bg-green-50 border-green-200 text-green-800"
-                      : "bg-amber-50 border-amber-200 text-amber-800"
-                  }`}>
-                    {isOwner ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-                    ) : (
-                      <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                    )}
-                    <div>
-                      <p className="font-bold">
-                        {isOwner ? "Mode Aktif: On-Chain (Base Sepolia)" : "Mode Aktif: Sandbox / Simulasi"}
-                      </p>
-                      <p className="text-xs opacity-90 mt-0.5">
-                        {isOwner
-                          ? "Anda terdeteksi sebagai owner smart contract! Tiket baru yang Anda buat akan langsung ter-mint di blockchain Base Sepolia."
-                          : "Anda terdeteksi sebagai creator demo. Halaman akan menjalankan simulasi penerbitan tiket dan meregistrasikannya secara instan di database browser lokal Anda (localStorage)."}
-                      </p>
+
+                {!isConnected ? (
+                  /* Wallet Lock */
+                  <div className="flex flex-col items-center justify-center py-12 text-center bg-sand/20 border border-bark/4 rounded-xl p-6">
+                    <div className="w-12 h-12 rounded-xl bg-sand/50 flex items-center justify-center mb-4">
+                      <Ticket className="w-5 h-5 text-stone/30" />
                     </div>
+                    <h4 className="font-heading font-semibold text-base text-bark mb-1">
+                      Hubungkan Wallet
+                    </h4>
+                    <p className="text-stone text-xs max-w-xs mb-5">
+                      Hubungkan wallet Anda untuk membuka formulir.
+                    </p>
+                    <ConnectKitButton />
                   </div>
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {/* Event Name */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-bark block">Nama Acara / Event</label>
-                      <input
-                        type="text"
-                        placeholder="Contoh: Coldplay Music of the Spheres"
-                        value={eventName}
-                        onChange={(e) => setEventName(e.target.value)}
-                        required
-                        className="w-full bg-cream/50 px-4 py-3 rounded-2xl border border-bark/10 text-bark text-sm font-semibold focus:outline-hidden focus:border-warm-500 transition-all"
-                      />
-                    </div>
-
-                    {/* Kategori Tiket */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-bark block">Kategori NFT Kelas</label>
-                      <select
-                        value={eventCategory}
-                        onChange={(e) => setEventCategory(e.target.value)}
-                        className="w-full bg-cream/50 px-4 py-3 rounded-2xl border border-bark/10 text-bark font-semibold text-sm focus:outline-hidden focus:border-warm-500 transition-all cursor-pointer"
-                      >
-                        <option value="1">Reguler (Token #1)</option>
-                        <option value="2">VIP (Token #2)</option>
-                        <option value="3">VVIP (Token #3)</option>
-                      </select>
-                    </div>
-
-                    {/* Ticket Price */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-bark block">Harga Tiket Primer (IDRX)</label>
-                      <input
-                        type="number"
-                        min="1000"
-                        value={eventPrice}
-                        onChange={(e) => setEventPrice(Number(e.target.value))}
-                        required
-                        className="w-full bg-cream/50 px-4 py-3 rounded-2xl border border-bark/10 text-bark text-sm font-mono font-semibold focus:outline-hidden focus:border-warm-500 transition-all"
-                      />
-                    </div>
-
-                    {/* Ticket Pasokan */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-bark block">Pasokan Tiket (Jumlah Lembar)</label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={eventVolume}
-                        onChange={(e) => setEventVolume(Number(e.target.value))}
-                        required
-                        className="w-full bg-cream/50 px-4 py-3 rounded-2xl border border-bark/10 text-bark text-sm font-mono font-semibold focus:outline-hidden focus:border-warm-500 transition-all"
-                      />
-                    </div>
-
-                    {/* City Select */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-bark block">Kota Lokasi Acara</label>
-                      <select
-                        value={eventCity}
-                        onChange={(e) => setEventCity(e.target.value)}
-                        className="w-full bg-cream/50 px-4 py-3 rounded-2xl border border-bark/10 text-bark font-semibold text-sm focus:outline-hidden focus:border-warm-500 transition-all cursor-pointer"
-                      >
-                        <option value="Jakarta">Jakarta</option>
-                        <option value="Bandung">Bandung</option>
-                        <option value="Yogyakarta">Yogyakarta</option>
-                        <option value="Surabaya">Surabaya</option>
-                      </select>
-                    </div>
-
-                    {/* Venue */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-bark block">Venue / Tempat Acara</label>
-                      <input
-                        type="text"
-                        placeholder="Contoh: Stadion Utama GBK"
-                        value={eventVenue}
-                        onChange={(e) => setEventVenue(e.target.value)}
-                        required
-                        className="w-full bg-cream/50 px-4 py-3 rounded-2xl border border-bark/10 text-bark text-sm font-semibold focus:outline-hidden focus:border-warm-500 transition-all"
-                      />
-                    </div>
-
-                    {/* Date */}
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-bark block">Tanggal Acara</label>
-                      <input
-                        type="text"
-                        placeholder="Contoh: 12 Juli 2026"
-                        value={eventDate}
-                        onChange={(e) => setEventDate(e.target.value)}
-                        required
-                        className="w-full bg-cream/50 px-4 py-3 rounded-2xl border border-bark/10 text-bark text-sm font-semibold focus:outline-hidden focus:border-warm-500 transition-all"
-                      />
-                    </div>
-
-                    {/* Price Ceiling */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <label className="text-xs font-semibold text-bark block">Batas Price Ceiling Markup</label>
-                        <span className="text-[10px] text-warm-600 font-extrabold uppercase">
-                          {isOwner ? "10% (Default On-Chain)" : `Markup Max ${priceCeilingMarkup}%`}
-                        </span>
-                      </div>
-                      <select
-                        disabled={isOwner}
-                        value={isOwner ? 10 : priceCeilingMarkup}
-                        onChange={(e) => {
-                          if (!isOwner) setPriceCeilingMarkup(Number(e.target.value));
-                        }}
-                        className={`w-full bg-cream/50 px-4 py-3 rounded-2xl border border-bark/10 text-bark font-semibold text-sm focus:outline-hidden focus:border-warm-500 transition-all ${
-                          isOwner ? "opacity-60 cursor-not-allowed bg-stone-100" : "cursor-pointer"
-                        }`}
-                      >
-                        <option value="0">0% (Beli & Resale Hanya Bisa Sama Harga)</option>
-                        <option value="5">5% Maksimum Markup (1.05x)</option>
-                        <option value="10">10% Maksimum Markup (1.1x)</option>
-                        <option value="20">20% Maksimum Markup (1.2x)</option>
-                      </select>
+                ) : (
+                  /* Form */
+                  <form onSubmit={handleLaunchEvent} className="space-y-5">
+                    {/* Mode Banner */}
+                    <div className={`p-3.5 rounded-xl border text-xs flex gap-3 ${
+                      isOwner
+                        ? "bg-green-50/70 border-green-100 text-green-800"
+                        : "bg-amber-50/70 border-amber-100 text-amber-800"
+                    }`}>
                       {isOwner ? (
-                        <div className="flex gap-2 items-start bg-amber-50/80 border border-amber-200/55 text-amber-900 p-3 rounded-xl text-[10px] leading-relaxed">
-                          <ShieldAlert className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                          <div>
-                            <span className="font-black">Mode On-Chain Terdeteksi:</span> Batas markup dikunci sebesar <span className="font-bold">10% (1.10x)</span> secara default di smart contract NFT.
-                            <span className="block mt-1 font-mono text-[9px] text-amber-800">
-                              // TODO: Integrasikan configureTicketCategory() di form ini agar Admin dapat mengubah ceiling sebelum listing.
-                            </span>
-                          </div>
-                        </div>
+                        <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
                       ) : (
-                        <p className="text-[10px] text-stone/60 leading-normal">
-                          * Catatan: Dalam Sandbox Mode, batas markup ini diuji langsung pada transaksi pasar sekunder lokal.
-                        </p>
+                        <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                       )}
+                      <div>
+                        <p className="font-bold text-[11px]">
+                          {isOwner ? "Mode: On-Chain (Base Sepolia)" : "Mode: Sandbox / Simulasi"}
+                        </p>
+                        <p className="text-[10px] opacity-80 mt-0.5 leading-relaxed">
+                          {isOwner
+                            ? "Tiket akan ter-mint di blockchain Base Sepolia."
+                            : "Event disimpan di browser lokal (localStorage) sebagai demo."}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    disabled={isLaunching}
-                    className="w-full py-4 rounded-2xl bg-linear-to-r from-warm-500 to-warm-600 text-white font-heading font-black text-base shadow-warm-lg hover:shadow-2xl hover:scale-[1.01] transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
-                  >
-                    {isLaunching ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Meluncurkan Tiket Acara...
-                      </>
-                    ) : (
-                      <>
-                        <PlusCircle className="w-5 h-5" />
-                        {isOwner ? "Luncurkan Tiket Sekarang (On-Chain)" : "Simulasikan Tiket Acara Baru (Sandbox)"}
-                      </>
-                    )}
-                  </button>
-                </form>
-              )}
+                    {/* Form fields */}
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Nama Event</label>
+                        <input
+                          type="text"
+                          placeholder="Contoh: Coldplay Jakarta"
+                          value={eventName}
+                          onChange={(e) => setEventName(e.target.value)}
+                          required
+                          className="input-field"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Kategori NFT</label>
+                        <select
+                          value={eventCategory}
+                          onChange={(e) => setEventCategory(e.target.value)}
+                          className="input-field appearance-none cursor-pointer"
+                        >
+                          <option value="1">Reguler (Token #1)</option>
+                          <option value="2">VIP (Token #2)</option>
+                          <option value="3">VVIP (Token #3)</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Harga (IDRX)</label>
+                        <input
+                          type="number"
+                          min="1000"
+                          value={eventPrice}
+                          onChange={(e) => setEventPrice(Number(e.target.value))}
+                          required
+                          className="input-field font-mono"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Jumlah Tiket</label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={eventVolume}
+                          onChange={(e) => setEventVolume(Number(e.target.value))}
+                          required
+                          className="input-field font-mono"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Kota</label>
+                        <select
+                          value={eventCity}
+                          onChange={(e) => setEventCity(e.target.value)}
+                          className="input-field appearance-none cursor-pointer"
+                        >
+                          <option value="Jakarta">Jakarta</option>
+                          <option value="Bandung">Bandung</option>
+                          <option value="Yogyakarta">Yogyakarta</option>
+                          <option value="Surabaya">Surabaya</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Venue</label>
+                        <input
+                          type="text"
+                          placeholder="Contoh: Stadion GBK"
+                          value={eventVenue}
+                          onChange={(e) => setEventVenue(e.target.value)}
+                          required
+                          className="input-field"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Tanggal</label>
+                        <input
+                          type="text"
+                          placeholder="Contoh: 12 Juli 2026"
+                          value={eventDate}
+                          onChange={(e) => setEventDate(e.target.value)}
+                          required
+                          className="input-field"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between items-center">
+                          <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Price Ceiling</label>
+                          <span className="text-[10px] text-warm-600 font-bold">
+                            {isOwner ? "10% (Default)" : `Max ${priceCeilingMarkup}%`}
+                          </span>
+                        </div>
+                        <select
+                          disabled={isOwner}
+                          value={isOwner ? 10 : priceCeilingMarkup}
+                          onChange={(e) => {
+                            if (!isOwner) setPriceCeilingMarkup(Number(e.target.value));
+                          }}
+                          className={`input-field appearance-none ${
+                            isOwner ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                          }`}
+                        >
+                          <option value="0">0% (Sama Harga)</option>
+                          <option value="5">5% (1.05x)</option>
+                          <option value="10">10% (1.1x)</option>
+                          <option value="20">20% (1.2x)</option>
+                        </select>
+                        {isOwner && (
+                          <p className="text-[9px] text-amber-600 leading-relaxed flex items-start gap-1">
+                            <ShieldAlert className="w-3 h-3 shrink-0 mt-0.5" />
+                            Mode On-Chain: Ceiling dikunci 10% di smart contract.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Submit */}
+                    <button
+                      type="submit"
+                      disabled={isLaunching}
+                      className="w-full py-3.5 rounded-xl bg-linear-to-r from-warm-500 to-warm-600 text-white font-heading font-bold text-sm shadow-warm hover:shadow-warm-lg hover:scale-[1.01] transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
+                    >
+                      {isLaunching ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Meluncurkan...
+                        </>
+                      ) : (
+                        <>
+                          <PlusCircle className="w-4 h-4" />
+                          {isOwner ? "Luncurkan On-Chain" : "Simulasikan (Sandbox)"}
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
+              </div>
             </div>
           </div>
         </section>

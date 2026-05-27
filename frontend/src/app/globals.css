@@ -50,94 +50,95 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 
   /* Billet custom colors */
-  --color-warm-50: #FFF8F0;
-  --color-warm-100: #FFF0E0;
-  --color-warm-200: #FFE0C2;
-  --color-warm-300: #FFCCA3;
-  --color-warm-400: #FFB07A;
-  --color-warm-500: #FF8A50;
-  --color-warm-600: #FF6B35;
-  --color-warm-700: #E85A2A;
-  --color-warm-800: #C44A22;
-  --color-warm-900: #9A3A1B;
-  --color-cream: #FAF7F2;
-  --color-sand: #F0EBE3;
-  --color-bark: #1A1612;
-  --color-bark-light: #3D3630;
-  --color-stone: #8A8078;
+  --color-warm-50: #FAF0F0;
+  --color-warm-100: #F4CECE;
+  --color-warm-200: #EAA8A8;
+  --color-warm-300: #D67070;
+  --color-warm-400: #B53D3D;
+  --color-warm-500: #9C1C1C;
+  --color-warm-600: #7F0303; /* Maroon */
+  --color-warm-700: #660000;
+  --color-warm-800: #4D0000;
+  --color-warm-900: #330000;
+  --color-cream: #EFE8DF; /* Alabaster */
+  --color-sand: #D8BA98; /* Tan */
+  --color-bark: #0F414A; /* Midnight blue */
+  --color-bark-light: #1A5966; /* Mid teal */
+  --color-stone: #607C82; /* Slate teal */
+  --color-lightblue: #96C0CE; /* Light blue */
 }
 
 /* ─── Light Theme (Warm Cream) ─────────────────────────────────── */
 
 :root {
-  --background: #FAF7F2;
-  --foreground: #1A1612;
-  --card: rgba(255, 255, 255, 0.55);
-  --card-foreground: #1A1612;
+  --background: #EFE8DF; /* Alabaster */
+  --foreground: #0F414A; /* Midnight Blue */
+  --card: rgba(255, 255, 255, 0.65);
+  --card-foreground: #0F414A;
   --popover: #FFFFFF;
-  --popover-foreground: #1A1612;
-  --primary: #FF6B35;
+  --popover-foreground: #0F414A;
+  --primary: #7F0303; /* Maroon */
   --primary-foreground: #FFFFFF;
-  --secondary: #F0EBE3;
-  --secondary-foreground: #3D3630;
-  --muted: #F0EBE3;
-  --muted-foreground: #8A8078;
-  --accent: #FFF0E0;
-  --accent-foreground: #C44A22;
+  --secondary: #D8BA98; /* Tan */
+  --secondary-foreground: #0F414A;
+  --muted: #D8BA98;
+  --muted-foreground: #607C82;
+  --accent: #FAF0F0;
+  --accent-foreground: #7F0303;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: rgba(26, 22, 18, 0.08);
-  --input: rgba(26, 22, 18, 0.08);
-  --ring: #FF8A50;
-  --chart-1: #FF6B35;
-  --chart-2: #FFB07A;
-  --chart-3: #FFCCA3;
-  --chart-4: #FFE0C2;
-  --chart-5: #FFF0E0;
+  --border: rgba(15, 65, 74, 0.08);
+  --input: rgba(15, 65, 74, 0.08);
+  --ring: #7F0303;
+  --chart-1: #7F0303;
+  --chart-2: #B53D3D;
+  --chart-3: #D67070;
+  --chart-4: #EAA8A8;
+  --chart-5: #FAF0F0;
   --radius: 0.75rem;
-  --sidebar: #FAF7F2;
-  --sidebar-foreground: #1A1612;
-  --sidebar-primary: #FF6B35;
+  --sidebar: #EFE8DF;
+  --sidebar-foreground: #0F414A;
+  --sidebar-primary: #7F0303;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #FFF0E0;
-  --sidebar-accent-foreground: #C44A22;
-  --sidebar-border: rgba(26, 22, 18, 0.08);
-  --sidebar-ring: #FF8A50;
+  --sidebar-accent: #FAF0F0;
+  --sidebar-accent-foreground: #7F0303;
+  --sidebar-border: rgba(15, 65, 74, 0.08);
+  --sidebar-ring: #7F0303;
 }
 
 /* ─── Dark Theme ───────────────────────────────────────────────── */
 
 .dark {
-  --background: #0F0D0B;
-  --foreground: #F5F0E8;
-  --card: rgba(255, 255, 255, 0.06);
-  --card-foreground: #F5F0E8;
-  --popover: #1A1612;
-  --popover-foreground: #F5F0E8;
-  --primary: #FF8A50;
-  --primary-foreground: #0F0D0B;
-  --secondary: #1E1B17;
-  --secondary-foreground: #D4CBC0;
-  --muted: #1E1B17;
-  --muted-foreground: #8A8078;
-  --accent: rgba(255, 138, 80, 0.15);
-  --accent-foreground: #FFB07A;
+  --background: #061A1E; /* Deeper Midnight Blue */
+  --foreground: #EFE8DF; /* Alabaster */
+  --card: rgba(15, 65, 74, 0.15);
+  --card-foreground: #EFE8DF;
+  --popover: #0F414A;
+  --popover-foreground: #EFE8DF;
+  --primary: #D8BA98; /* Tan as primary in dark mode for contrast */
+  --primary-foreground: #061A1E;
+  --secondary: #0F414A;
+  --secondary-foreground: #EFE8DF;
+  --muted: #0F414A;
+  --muted-foreground: #96C0CE; /* Light Blue */
+  --accent: rgba(150, 192, 206, 0.15);
+  --accent-foreground: #96C0CE;
   --destructive: oklch(0.704 0.191 22.216);
   --border: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.1);
-  --ring: #FF8A50;
-  --chart-1: #FF8A50;
-  --chart-2: #FFB07A;
-  --chart-3: #FFCCA3;
-  --chart-4: rgba(255, 138, 80, 0.3);
-  --chart-5: rgba(255, 138, 80, 0.15);
-  --sidebar: #0F0D0B;
-  --sidebar-foreground: #F5F0E8;
-  --sidebar-primary: #FF8A50;
-  --sidebar-primary-foreground: #0F0D0B;
-  --sidebar-accent: rgba(255, 138, 80, 0.15);
-  --sidebar-accent-foreground: #FFB07A;
+  --ring: #D8BA98;
+  --chart-1: #D8BA98;
+  --chart-2: #96C0CE;
+  --chart-3: #EFE8DF;
+  --chart-4: rgba(150, 192, 206, 0.3);
+  --chart-5: rgba(150, 192, 206, 0.15);
+  --sidebar: #061A1E;
+  --sidebar-foreground: #EFE8DF;
+  --sidebar-primary: #D8BA98;
+  --sidebar-primary-foreground: #061A1E;
+  --sidebar-accent: rgba(150, 192, 206, 0.15);
+  --sidebar-accent-foreground: #96C0CE;
   --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #FF8A50;
+  --sidebar-ring: #D8BA98;
 }
 
 /* ─── Base Styles ──────────────────────────────────────────────── */
@@ -153,63 +154,141 @@
     @apply font-sans;
     scroll-behavior: smooth;
   }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(138, 128, 120, 0.25);
+    border-radius: 100px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(138, 128, 120, 0.4);
+  }
 }
 
-/* ─── Glassmorphism Utilities ──────────────────────────────────── */
+/* ─── Solid Utilities (No Glassmorphism) ────────────────────────── */
 
 @layer utilities {
   .glass {
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(20px) saturate(1.2);
-    -webkit-backdrop-filter: blur(20px) saturate(1.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: #FFFFFF;
+    border: 1px solid rgba(15, 65, 74, 0.08);
   }
 
   .glass-strong {
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(32px) saturate(1.4);
-    -webkit-backdrop-filter: blur(32px) saturate(1.4);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: #FFFFFF;
+    border: 1px solid rgba(15, 65, 74, 0.12);
   }
 
   .glass-subtle {
-    background: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(12px) saturate(1.1);
-    -webkit-backdrop-filter: blur(12px) saturate(1.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(15, 65, 74, 0.06);
   }
 
   .glass-dark {
-    background: rgba(15, 13, 11, 0.6);
-    backdrop-filter: blur(20px) saturate(1.2);
-    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    background: #0F414A;
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
+  /* ─── Text Colors (No Gradients) ─────────────────────────────── */
+
   .text-gradient-warm {
-    background: linear-gradient(135deg, #FF8A50 0%, #FF6B35 40%, #E85A2A 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #7F0303; /* Solid Maroon */
   }
 
   .text-gradient-hero {
-    background: linear-gradient(135deg, #1A1612 0%, #FF6B35 50%, #FF8A50 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #0F414A; /* Solid Midnight Blue */
   }
+
+  /* ─── Shadows ──────────────────────────────────────────────── */
 
   .shadow-warm {
     box-shadow:
-      0 4px 24px -4px rgba(255, 107, 53, 0.12),
-      0 2px 8px -2px rgba(26, 22, 18, 0.06);
+      0 4px 24px -4px rgba(127, 3, 3, 0.12),
+      0 2px 8px -2px rgba(15, 65, 74, 0.06);
   }
 
   .shadow-warm-lg {
     box-shadow:
-      0 8px 40px -8px rgba(255, 107, 53, 0.18),
-      0 4px 16px -4px rgba(26, 22, 18, 0.08);
+      0 8px 40px -8px rgba(127, 3, 3, 0.18),
+      0 4px 16px -4px rgba(15, 65, 74, 0.08);
+  }
+
+  .shadow-card {
+    box-shadow:
+      0 1px 3px rgba(15, 65, 74, 0.04),
+      0 4px 12px rgba(15, 65, 74, 0.03);
+  }
+
+  .shadow-card-hover {
+    box-shadow:
+      0 8px 30px -6px rgba(127, 3, 3, 0.14),
+      0 4px 14px -4px rgba(15, 65, 74, 0.07);
+  }
+
+  /* ─── Section Spacing ──────────────────────────────────────── */
+
+  .section-spacing {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  @media (min-width: 768px) {
+    .section-spacing {
+      padding-top: 5rem;
+      padding-bottom: 5rem;
+    }
+  }
+
+  .section-container {
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .section-container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+
+  /* ─── Ticket Perforated Edge ───────────────────────────────── */
+
+  .ticket-edge-left {
+    mask-image: radial-gradient(circle 6px at left, transparent 95%, black 100%);
+    -webkit-mask-image: radial-gradient(circle 6px at left, transparent 95%, black 100%);
+    mask-size: 12px 24px;
+    -webkit-mask-size: 12px 24px;
+    mask-repeat: repeat-y;
+    -webkit-mask-repeat: repeat-y;
+    mask-position: left center;
+    -webkit-mask-position: left center;
+  }
+
+  /* ─── Divider ──────────────────────────────────────────────── */
+
+  .section-divider {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(26, 22, 18, 0.06), transparent);
+    margin: 0;
+  }
+
+  /* ─── Hide Scrollbar ───────────────────────────────────────── */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
   }
 }
 
@@ -272,6 +351,17 @@
   75% { transform: translate(20px, -60px) scale(1.04); }
 }
 
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ─── Animation Utility Classes ────────────────────────────────── */
 
 @layer utilities {
@@ -279,6 +369,7 @@
   .animate-float-slow { animation: float-slow 8s ease-in-out infinite; }
   .animate-fade-in-up { animation: fade-in-up 0.7s ease-out forwards; }
   .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+  .animate-slide-up { animation: slide-up 0.4s ease-out forwards; }
   .animate-shimmer {
     background-size: 200% 100%;
     animation: shimmer 3s linear infinite;
@@ -296,4 +387,29 @@
   .stagger-3 { animation-delay: 0.3s; }
   .stagger-4 { animation-delay: 0.4s; }
   .stagger-5 { animation-delay: 0.5s; }
+}
+
+/* ─── Form Input Styling ───────────────────────────────────────── */
+
+@layer utilities {
+  .input-field {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.875rem;
+    border: 1px solid rgba(15, 65, 74, 0.08);
+    background: rgba(239, 232, 223, 0.5);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #0F414A;
+    transition: all 0.2s ease;
+  }
+  .input-field::placeholder {
+    color: rgba(96, 124, 130, 0.5);
+  }
+  .input-field:focus {
+    outline: none;
+    border-color: #7F0303;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(127, 3, 3, 0.1);
+  }
 }

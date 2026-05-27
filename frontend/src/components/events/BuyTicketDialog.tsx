@@ -16,9 +16,9 @@ interface BuyTicketDialogProps {
 }
 
 const steps = [
-  { id: "form", label: "Detail Tiket" },
-  { id: "approving", label: "Approve IDRX" },
-  { id: "buying", label: "Pembelian" },
+  { id: "form", label: "Detail" },
+  { id: "approving", label: "Approve" },
+  { id: "buying", label: "Beli" },
   { id: "success", label: "Selesai" },
 ];
 
@@ -122,9 +122,9 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
       />
 
       {/* Dialog */}
-      <div className="relative w-full max-w-lg rounded-3xl glass-strong shadow-warm-lg animate-fade-in-up overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 pb-4 border-b border-border/30">
+      <div className="relative w-full max-w-lg rounded-2xl bg-white/90 backdrop-blur-xl shadow-warm-lg animate-fade-in-up overflow-hidden border border-white/60">
+        {/* ─── Header ─────────────────────────────────────── */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-4">
           <div>
             <h2 className="font-heading font-bold text-xl text-bark">
               Beli Tiket
@@ -136,7 +136,7 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
           {txState === "idle" && (
             <button
               onClick={onClose}
-              className="p-2 rounded-xl hover:bg-warm-50/60 text-stone transition-colors"
+              className="p-2 rounded-xl hover:bg-sand/60 text-stone transition-colors"
               id="dialog-close"
             >
               <X className="w-5 h-5" />
@@ -144,19 +144,19 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
           )}
         </div>
 
-        {/* Progress Steps */}
-        <div className="px-6 pt-5">
+        {/* ─── Progress Steps ─────────────────────────────── */}
+        <div className="px-6 pb-4">
           <div className="flex items-center gap-1">
             {steps.map((step, i) => (
               <div key={step.id} className="flex items-center flex-1">
                 <div
                   className={`
-                    w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all
+                    w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all
                     ${i < currentStepIndex
                       ? "bg-green-500 text-white"
                       : i === currentStepIndex
                         ? "bg-warm-500 text-white shadow-warm"
-                        : "bg-sand text-stone/50"
+                        : "bg-sand/80 text-stone/40"
                     }
                   `}
                 >
@@ -168,20 +168,20 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                 </div>
                 {i < steps.length - 1 && (
                   <div
-                    className={`flex-1 h-0.5 mx-1.5 rounded transition-colors ${
-                      i < currentStepIndex ? "bg-green-400" : "bg-sand"
+                    className={`flex-1 h-0.5 mx-2 rounded transition-colors ${
+                      i < currentStepIndex ? "bg-green-400" : "bg-sand/80"
                     }`}
                   />
                 )}
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-1.5 mb-4">
+          <div className="flex justify-between mt-2">
             {steps.map((step, i) => (
               <span
                 key={step.id}
                 className={`text-[10px] font-medium flex-1 text-center ${
-                  i <= currentStepIndex ? "text-bark" : "text-stone/40"
+                  i <= currentStepIndex ? "text-bark" : "text-stone/30"
                 }`}
               >
                 {step.label}
@@ -190,25 +190,26 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
           </div>
         </div>
 
-        {/* Body */}
-        <div className="px-6 pb-6 max-h-[60vh] overflow-y-auto">
+        <hr className="section-divider" />
+
+        {/* ─── Body ───────────────────────────────────────── */}
+        <div className="px-6 py-5 max-h-[60vh] overflow-y-auto">
           {txState === "success" ? (
             /* Success State */
-            <div className="text-center py-10">
-              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-5">
+            <div className="text-center py-8">
+              <div className="w-16 h-16 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center mx-auto mb-5">
                 <CheckCircle2 className="w-8 h-8 text-green-600" />
               </div>
               <h3 className="font-heading font-bold text-2xl text-bark mb-2">
                 Pembelian Berhasil!
               </h3>
-              <p className="text-stone text-sm mb-6">
+              <p className="text-stone text-sm mb-6 max-w-xs mx-auto">
                 {amount} tiket {categoryName} berhasil dibeli.
-                <br />
-                Cek di halaman &ldquo;Tiket Saya&rdquo; untuk detailnya.
+                Cek di halaman "Tiket Saya" untuk detailnya.
               </p>
               <button
                 onClick={onClose}
-                className="px-6 py-2.5 rounded-2xl bg-linear-to-r from-warm-500 to-warm-600 text-white font-heading font-semibold text-sm shadow-warm hover:shadow-warm-lg transition-all"
+                className="px-6 py-2.5 rounded-xl bg-linear-to-r from-warm-500 to-warm-600 text-white font-heading font-semibold text-sm shadow-warm hover:shadow-warm-lg transition-all"
                 id="dialog-done"
               >
                 Selesai
@@ -223,7 +224,7 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                   ? "Menunggu Approval IDRX..."
                   : "Memproses Pembelian..."}
               </h3>
-              <p className="text-stone text-sm">
+              <p className="text-stone text-sm max-w-xs mx-auto">
                 {txState === "approving"
                   ? "Konfirmasi transaksi approve di wallet Anda."
                   : "Konfirmasi transaksi pembelian di wallet Anda."}
@@ -240,17 +241,17 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                   </p>
                 </div>
               ) : (
-                <>
+                <div className="space-y-5">
                   {/* Amount selector */}
-                  <div className="mb-5">
-                    <label className="text-sm font-medium text-bark mb-2 block">
+                  <div>
+                    <label className="text-sm font-semibold text-bark mb-2.5 block">
                       Jumlah Tiket
                     </label>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => handleAmountChange(amount - 1)}
                         disabled={amount <= 1}
-                        className="w-10 h-10 rounded-xl glass flex items-center justify-center text-bark font-bold text-lg hover:bg-white/70 disabled:opacity-30 transition-all"
+                        className="w-10 h-10 rounded-xl bg-sand/50 border border-bark/6 flex items-center justify-center text-bark font-bold text-lg hover:bg-sand/80 disabled:opacity-30 transition-all"
                       >
                         −
                       </button>
@@ -260,27 +261,27 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                       <button
                         onClick={() => handleAmountChange(amount + 1)}
                         disabled={amount >= maxAmount}
-                        className="w-10 h-10 rounded-xl glass flex items-center justify-center text-bark font-bold text-lg hover:bg-white/70 disabled:opacity-30 transition-all"
+                        className="w-10 h-10 rounded-xl bg-sand/50 border border-bark/6 flex items-center justify-center text-bark font-bold text-lg hover:bg-sand/80 disabled:opacity-30 transition-all"
                       >
                         +
                       </button>
-                      <span className="text-xs text-stone ml-2">
+                      <span className="text-xs text-stone/50 ml-1">
                         maks. {maxAmount}
                       </span>
                     </div>
                   </div>
 
                   {/* Holder data inputs */}
-                  <div className="mb-5 space-y-4">
-                    <label className="text-sm font-medium text-bark block">
+                  <div className="space-y-3">
+                    <label className="text-sm font-semibold text-bark block">
                       Data Pemegang Tiket
                     </label>
                     {holderData.map((holder, i) => (
                       <div
                         key={i}
-                        className="rounded-2xl bg-sand/40 p-4 space-y-3"
+                        className="rounded-xl bg-sand/25 border border-bark/4 p-4 space-y-2.5"
                       >
-                        <p className="text-xs font-semibold text-stone uppercase tracking-wider">
+                        <p className="text-[10px] font-semibold text-stone/50 uppercase tracking-wider">
                           Pemegang #{i + 1}
                         </p>
                         <input
@@ -290,7 +291,7 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                           onChange={(e) =>
                             handleHolderChange(i, "name", e.target.value)
                           }
-                          className="w-full px-4 py-2.5 rounded-xl glass border-0 text-sm text-bark placeholder:text-stone/40 focus:ring-2 focus:ring-warm-400 outline-none transition-all"
+                          className="input-field"
                           id={`holder-name-${i}`}
                         />
                         <input
@@ -300,7 +301,7 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                           onChange={(e) =>
                             handleHolderChange(i, "nik", e.target.value)
                           }
-                          className="w-full px-4 py-2.5 rounded-xl glass border-0 text-sm text-bark placeholder:text-stone/40 focus:ring-2 focus:ring-warm-400 outline-none transition-all"
+                          className="input-field font-mono"
                           id={`holder-nik-${i}`}
                         />
                       </div>
@@ -309,27 +310,27 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
 
                   {/* Error */}
                   {errorMsg && (
-                    <div className="mb-4 flex items-center gap-2 text-sm text-red-600 bg-red-50/60 rounded-xl p-3">
+                    <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50/60 border border-red-100 rounded-xl p-3">
                       <AlertCircle className="w-4 h-4 shrink-0" />
                       {errorMsg}
                     </div>
                   )}
 
-                  {/* Summary & Submit */}
-                  <div className="rounded-2xl bg-linear-to-br from-warm-50 to-warm-100/60 p-5 mb-4">
-                    <div className="flex justify-between items-center mb-2">
+                  {/* Summary */}
+                  <div className="rounded-xl bg-warm-50/50 border border-warm-100/50 p-4 space-y-2">
+                    <div className="flex justify-between items-center">
                       <span className="text-sm text-stone">Harga per tiket</span>
                       <span className="text-sm text-bark font-medium">
                         {formatIDRX(listing.pricePerUnit)}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center mb-2">
+                    <div className="flex justify-between items-center">
                       <span className="text-sm text-stone">Jumlah</span>
                       <span className="text-sm text-bark font-medium">
                         × {amount}
                       </span>
                     </div>
-                    <div className="border-t border-warm-200/40 my-3" />
+                    <div className="border-t border-warm-200/40 my-1" />
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-semibold text-bark">Total</span>
                       <span className="font-heading font-bold text-xl text-warm-700">
@@ -338,15 +339,16 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                     </div>
                   </div>
 
+                  {/* Submit */}
                   <button
                     onClick={handleSubmit}
-                    className="w-full py-3.5 rounded-2xl bg-linear-to-r from-warm-500 to-warm-600 text-white font-heading font-semibold text-base shadow-warm hover:shadow-warm-lg hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                    className="w-full py-3.5 rounded-xl bg-linear-to-r from-warm-500 to-warm-600 text-white font-heading font-semibold text-base shadow-warm hover:shadow-warm-lg hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
                     id="buy-submit"
                   >
                     Beli Sekarang
                     <ChevronRight className="w-4 h-4" />
                   </button>
-                </>
+                </div>
               )}
             </>
           )}

@@ -139,7 +139,7 @@ export default function CreatorPage() {
         amount: Number(eventVolume),
         pricePerUnit: parseUnits(eventPrice.toString(), 18).toString(), // Calibrated to 18 decimals and serialized as string
         originalPrice: parseUnits(eventPrice.toString(), 18).toString(),
-        priceCeilingBps: Number(10000 + priceCeilingMarkup * 100), // Enforce selected price ceiling limit (e.g., 10% = 11000 bps)
+        priceCeilingBps: Number(10000 + (isOwner ? 10 : priceCeilingMarkup) * 100), // Enforce selected price ceiling limit (e.g., 10% = 11000 bps)
         active: true,
         isResale: false,
         title: eventName,
@@ -704,7 +704,9 @@ export default function CreatorPage() {
                       <select
                         disabled={isOwner}
                         value={isOwner ? 10 : priceCeilingMarkup}
-                        onChange={(e) => setPriceCeilingMarkup(Number(e.target.value))}
+                        onChange={(e) => {
+                          if (!isOwner) setPriceCeilingMarkup(Number(e.target.value));
+                        }}
                         className={`w-full bg-cream/50 px-4 py-3 rounded-2xl border border-bark/10 text-bark font-semibold text-sm focus:outline-hidden focus:border-warm-500 transition-all ${
                           isOwner ? "opacity-60 cursor-not-allowed bg-stone-100" : "cursor-pointer"
                         }`}

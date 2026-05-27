@@ -127,10 +127,11 @@ export default function CreatorPage() {
       const simulatedListing = {
         listingId: Math.floor(Math.random() * 900) + 200, // random simulated ID
         seller: address || "0x0000000000000000000000000000000000000000",
-        tokenId: BigInt(eventCategory),
-        amount: BigInt(eventVolume),
-        pricePerUnit: parseUnits(eventPrice.toString(), 2),
-        originalPrice: parseUnits(eventPrice.toString(), 2),
+        tokenId: Number(eventCategory),
+        amount: Number(eventVolume),
+        pricePerUnit: parseUnits(eventPrice.toString(), 18).toString(), // Calibrated to 18 decimals and serialized as string
+        originalPrice: parseUnits(eventPrice.toString(), 18).toString(),
+        priceCeilingBps: Number(10000 + priceCeilingMarkup * 100), // Enforce selected price ceiling limit (e.g., 10% = 11000 bps)
         active: true,
         isResale: false,
         title: eventName,
@@ -700,6 +701,9 @@ export default function CreatorPage() {
                         <option value="10">10% Maksimum Markup (1.1x)</option>
                         <option value="20">20% Maksimum Markup (1.2x)</option>
                       </select>
+                      <p className="text-[10px] text-stone/60 leading-normal">
+                        * Catatan: Dalam Sandbox Mode, batas ini langsung diuji pada pasar sekunder. Pada On-Chain Mode, parameter ini dikunci per kategori tiket di kontrak NFT.
+                      </p>
                     </div>
                   </div>
 

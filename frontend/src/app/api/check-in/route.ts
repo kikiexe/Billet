@@ -6,6 +6,13 @@ import { NFT_ABI, NFT_ADDRESS } from '@/config/contracts'
 
 export async function POST(request: Request) {
   try {
+    // 1. Verify gatekeeper secret header token to protect production route
+    const gatekeeperSecret = request.headers.get('X-Gatekeeper-Secret')
+    const expectedSecret = process.env.GATEKEEPER_API_SECRET
+    if (!expectedSecret || gatekeeperSecret !== expectedSecret) {
+      return NextResponse.json({ error: 'Unauthorized: Invalid or missing Gatekeeper Secret Token' }, { status: 401 })
+    }
+
     const { userWallet, tokenId, index } = await request.json()
     
     const gatekeeperPrivateKey = process.env.GATEKEEPER_PRIVATE_KEY as `0x${string}`

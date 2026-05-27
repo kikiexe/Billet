@@ -86,8 +86,8 @@ const mockEvents: RichEvent[] = [
     seller: "0x3D3630A175B5F345672A1BCE3C45FFB123456789",
     tokenId: 2n, // VIP
     amount: 15n,
-    pricePerUnit: 35000000000000000000000n, // Rp 350.000
-    originalPrice: 35000000000000000000000n,
+    pricePerUnit: 350000000000000000000000n, // Rp 350.000 (calibrated to 18 decimals)
+    originalPrice: 350000000000000000000000n,
     active: true,
     isResale: false,
     title: "Tulus: Retrospektif Tour 2026",
@@ -103,8 +103,8 @@ const mockEvents: RichEvent[] = [
     seller: "0x8A8078F67A123EBC3D2A1C34FF8A123456789ABC",
     tokenId: 1n, // Reguler
     amount: 45n,
-    pricePerUnit: 15000000000000000000000n, // Rp 150.000
-    originalPrice: 15000000000000000000000n,
+    pricePerUnit: 150000000000000000000000n, // Rp 150.000
+    originalPrice: 150000000000000000000000n,
     active: true,
     isResale: false,
     title: "Web3 & AI Summit 2026",
@@ -120,8 +120,8 @@ const mockEvents: RichEvent[] = [
     seller: "0x1A1612C28DF0B234D3A1B28C8A54EFB123456789",
     tokenId: 1n, // Reguler
     amount: 20n,
-    pricePerUnit: 20000000000000000000000n, // Rp 200.000
-    originalPrice: 20000000000000000000000n,
+    pricePerUnit: 200000000000000000000000n, // Rp 200.000
+    originalPrice: 200000000000000000000000n,
     active: true,
     isResale: false,
     title: "Jakarta Half Marathon",
@@ -137,8 +137,8 @@ const mockEvents: RichEvent[] = [
     seller: "0xE85A2A1A75B5F345672A1BCE3C45FFB123456789",
     tokenId: 1n, // Reguler
     amount: 30n,
-    pricePerUnit: 18000000000000000000000n, // Rp 180.000
-    originalPrice: 18000000000000000000000n,
+    pricePerUnit: 180000000000000000000000n, // Rp 180.000
+    originalPrice: 180000000000000000000000n,
     active: true,
     isResale: true,
     title: "Gudang Merdeka: Rock Concert",
@@ -154,8 +154,8 @@ const mockEvents: RichEvent[] = [
     seller: "0x9A3A1BC28DF0B234D3A1B28C8A54EFB123456789",
     tokenId: 3n, // VVIP
     amount: 8n,
-    pricePerUnit: 45000000000000000000000n, // Rp 450.000
-    originalPrice: 40000000000000000000000n, // Original Rp 400.000
+    pricePerUnit: 450000000000000000000000n, // Rp 450.000
+    originalPrice: 400000000000000000000000n, // Original Rp 400.000
     active: true,
     isResale: true,
     title: "Svara Festival: Harmoni Alam",
@@ -171,8 +171,8 @@ const mockEvents: RichEvent[] = [
     seller: "0xC44A22F67A123EBC3D2A1C34FF8A123456789ABC",
     tokenId: 1n, // Reguler
     amount: 25n,
-    pricePerUnit: 8000000000000000000000n, // Rp 80.000
-    originalPrice: 8000000000000000000000n,
+    pricePerUnit: 80000000000000000000000n, // Rp 80.000
+    originalPrice: 80000000000000000000000n,
     active: true,
     isResale: false,
     title: "Jogja Art & Culture Show",
@@ -188,8 +188,8 @@ const mockEvents: RichEvent[] = [
     seller: "0x2563EBA175B5F345672A1BCE3C45FFB123456789",
     tokenId: 1n, // Reguler
     amount: 50n,
-    pricePerUnit: 5000000000000000000000n, // Rp 50.000
-    originalPrice: 5000000000000000000000n,
+    pricePerUnit: 50000000000000000000000n, // Rp 50.000
+    originalPrice: 50000000000000000000000n,
     active: true,
     isResale: false,
     title: "Next-Gen Dev: React & Solidity",
@@ -251,6 +251,7 @@ export default function Home() {
   const [selectedCity, setSelectedCity] = useState<string>("");
   const [selectedListing, setSelectedListing] = useState<ListingWithId | null>(null);
   const [customEvents, setCustomEvents] = useState<RichEvent[]>([]);
+  const [selectedTypeFilter, setSelectedTypeFilter] = useState<'all' | 'onchain' | 'sandbox'>('all');
 
   // ─── Carousel Auto-Play ─────────────────────────────────────────────────
 
@@ -328,9 +329,14 @@ export default function Home() {
       
       const matchCity = !selectedCity || event.city === selectedCity;
 
-      return matchSearch && matchCategory && matchCity;
+      const matchType =
+        selectedTypeFilter === 'all' ||
+        (selectedTypeFilter === 'onchain' && !event.isMock) ||
+        (selectedTypeFilter === 'sandbox' && event.isMock);
+
+      return matchSearch && matchCategory && matchCity && matchType;
     });
-  }, [allEvents, searchQuery, selectedCategory, selectedCity]);
+  }, [allEvents, searchQuery, selectedCategory, selectedCity, selectedTypeFilter]);
 
   // ─── Buy / Simulation Action ────────────────────────────────────────────
 
@@ -474,7 +480,7 @@ export default function Home() {
 
         {/* ─── Active Event List ("Event Seru Untukmu") ─────────────────── */}
         <section className="max-w-7xl mx-auto px-5 sm:px-8 pt-16">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 border-b border-bark/5 pb-6">
             <div>
               <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-bark flex items-center gap-2">
                 Event Seru Untukmu
@@ -485,19 +491,55 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Filter Reset Badge */}
-            {(selectedCity || selectedCategory !== "Semua" || searchQuery) && (
-              <button
-                onClick={() => {
-                  setSelectedCity("");
-                  setSelectedCategory("Semua");
-                  setSearchQuery("");
-                }}
-                className="px-3.5 py-1.5 rounded-xl bg-warm-100 text-warm-700 text-xs font-semibold hover:bg-warm-200 transition-colors border border-warm-200"
-              >
-                Reset Filter
-              </button>
-            )}
+            {/* Source Tab Filters & Reset Buttons */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex p-1 rounded-2xl bg-sand/65 border border-bark/5 items-center gap-1 shadow-inner">
+                <button
+                  onClick={() => setSelectedTypeFilter('all')}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-heading transition-all duration-200 ${
+                    selectedTypeFilter === 'all'
+                      ? "bg-bark text-white shadow-xs"
+                      : "text-stone hover:text-bark"
+                  }`}
+                >
+                  Semua
+                </button>
+                <button
+                  onClick={() => setSelectedTypeFilter('onchain')}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-heading transition-all duration-200 ${
+                    selectedTypeFilter === 'onchain'
+                      ? "bg-green-500 text-white shadow-md"
+                      : "text-stone hover:text-bark"
+                  }`}
+                >
+                  On-Chain Base
+                </button>
+                <button
+                  onClick={() => setSelectedTypeFilter('sandbox')}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-heading transition-all duration-200 ${
+                    selectedTypeFilter === 'sandbox'
+                      ? "bg-warm-500 text-white shadow-warm"
+                      : "text-stone hover:text-bark"
+                  }`}
+                >
+                  Sandbox Demo
+                </button>
+              </div>
+
+              {(selectedCity || selectedCategory !== "Semua" || searchQuery || selectedTypeFilter !== 'all') && (
+                <button
+                  onClick={() => {
+                    setSelectedCity("");
+                    setSelectedCategory("Semua");
+                    setSearchQuery("");
+                    setSelectedTypeFilter('all');
+                  }}
+                  className="px-3.5 py-2 rounded-xl bg-warm-100 text-warm-700 text-xs font-bold hover:bg-warm-200 transition-colors border border-warm-200 shrink-0"
+                >
+                  Reset Filter
+                </button>
+              )}
+            </div>
           </div>
 
           {isLoading ? (
@@ -523,11 +565,15 @@ export default function Home() {
                                       event.category === "Olahraga" ? "bg-green-100 text-green-700" :
                                       "bg-orange-100 text-orange-700";
 
+                const cardStyleClass = event.isMock
+                  ? "border border-dashed border-bark/15 bg-white/40 hover:border-warm-400"
+                  : "border border-solid border-warm-500/25 bg-linear-to-br from-white/70 to-warm-50/15 shadow-warm hover:shadow-warm-lg hover:border-warm-500";
+
                 return (
                   <div
                     key={event.listingId}
                     onClick={() => handleBuyClick(event)}
-                    className="group relative rounded-3xl glass overflow-hidden hover:shadow-warm-lg hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+                    className={`group relative rounded-3xl overflow-hidden hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between ${cardStyleClass}`}
                   >
                     {/* Header Image Gradient */}
                     <div className={`h-36 bg-linear-to-br ${event.bannerGradient} relative overflow-hidden shrink-0`}>

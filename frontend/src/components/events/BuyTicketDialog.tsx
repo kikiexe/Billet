@@ -7,7 +7,7 @@ import { useBuyTicket } from "@/hooks/useBuyTicket";
 import { useHandleContractError } from "@/hooks/useHandleError";
 import { formatIDRX, getCategoryName } from "@/lib/format";
 import type { ListingWithId } from "@/hooks/useListings";
-import { formatUnits } from "viem";
+import { formatUnits, keccak256, toBytes } from "viem";
 
 interface BuyTicketDialogProps {
   listing: ListingWithId | null;
@@ -83,7 +83,8 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
 
     try {
       const names = holderData.map((h) => h.name.trim());
-      const niks = holderData.map((h) => h.nik.trim());
+      // Hash NIK client-side using Keccak-256 before transmitting, protecting PII privacy on-chain
+      const niks = holderData.map((h) => keccak256(toBytes(h.nik.trim())));
 
       // Calculate total in ether format for the hook
       // pricePerUnit is already in wei, we need to convert to string

@@ -2,10 +2,10 @@ import { formatUnits } from "viem";
 
 /**
  * Format IDRX amount from wei (18 decimals) to human-readable Rp string.
- * Example: 50000000000000000000000n → "Rp 50.000"
+ * Example: 50000000000000000000000n → "Rp 50.000" (if using 18 decimals)
  */
 export function formatIDRX(weiAmount: bigint): string {
-  const raw = formatUnits(weiAmount, 2);
+  const raw = formatUnits(weiAmount, 18);
   const num = parseFloat(raw);
   return `Rp ${num.toLocaleString("id-ID", { maximumFractionDigits: 0 })}`;
 }
@@ -14,7 +14,7 @@ export function formatIDRX(weiAmount: bigint): string {
  * Format IDRX amount from wei to a shorter numeric string (no currency prefix).
  */
 export function formatIDRXShort(weiAmount: bigint): string {
-  const raw = formatUnits(weiAmount, 2);
+  const raw = formatUnits(weiAmount, 18);
   const num = parseFloat(raw);
   if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}jt`;
   if (num >= 1_000) return `${(num / 1_000).toFixed(0)}rb`;

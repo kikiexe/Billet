@@ -3,6 +3,10 @@ import { formatUnits } from "viem";
 /**
  * Format IDRX amount from wei (18 decimals) to human-readable Rp string.
  * Example: 50000000000000000000000n → "Rp 50.000" (if using 18 decimals)
+ * 
+ * @note Menggunakan konversi ke Float (parseFloat) untuk pemformatan lokal.
+ * Batas presisi aman adalah Number.MAX_SAFE_INTEGER (sekitar 9 kuadriliun IDR),
+ * yang sangat aman untuk nominal tiket normal di Indonesia.
  */
 export function formatIDRX(weiAmount: bigint): string {
   const raw = formatUnits(weiAmount, 18);
@@ -16,8 +20,25 @@ export function formatIDRX(weiAmount: bigint): string {
 export function formatIDRXShort(weiAmount: bigint): string {
   const raw = formatUnits(weiAmount, 18);
   const num = parseFloat(raw);
-  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}jt`;
-  if (num >= 1_000) return `${(num / 1_000).toFixed(0)}rb`;
+  
+  // Jika nilainya mendekati atau lebih dari 1 juta (setelah dibulatkan ke 1 desimal)
+  // Contoh: 999.950 akan dibulatkan menjadi 1.0jt -> 1jt
+  const millionVal = num / 1_000_000;
+  if (millionVal >= 0.9995) {
+    return `${millionVal.toLocaleString("id-ID", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 1,
+    })}jt`;
+  }
+  
+  // Gunakan "rb" untuk nilai >= 10.000
+  if (num >= 10_000) {
+    return `${(num / 1_000).toLocaleString("id-ID", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 1,
+    })}rb`;
+  }
+  
   return num.toLocaleString("id-ID");
 }
 

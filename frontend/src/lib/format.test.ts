@@ -27,14 +27,30 @@ describe("Blockchain Format Helpers", () => {
   });
 
   describe("formatIDRXShort", () => {
-    it("should format amounts over 1 million with 'jt' shorthand", () => {
+    it("should format amounts over 1 million with 'jt' shorthand and Indonesian comma decimal", () => {
       const amount = 2500000000000000000000000n; // 2.5 million
-      expect(formatIDRXShort(amount)).toBe("2.5jt");
+      expect(formatIDRXShort(amount)).toBe("2,5jt");
     });
 
-    it("should format amounts over 1 thousand with 'rb' shorthand", () => {
+    it("should format amounts over 10 thousand with 'rb' shorthand", () => {
       const amount = 35000000000000000000000n; // 35k
       expect(formatIDRXShort(amount)).toBe("35rb");
+
+      const fractionalAmount = 10500000000000000000000n; // 10.5k
+      expect(formatIDRXShort(fractionalAmount)).toBe("10,5rb");
+    });
+
+    it("should disable 'rb' shorthand for amounts under 10 thousand for accuracy", () => {
+      const amount = 1500000000000000000000n; // 1.500
+      expect(formatIDRXShort(amount)).toBe("1.500");
+    });
+
+    it("should transition smoothly to 1jt for values close to 1 million (like 999.950)", () => {
+      const boundaryValue = 999950000000000000000000n; // 999.950
+      expect(formatIDRXShort(boundaryValue)).toBe("1jt");
+
+      const boundaryValueRb = 999000000000000000000000n; // 999.000
+      expect(formatIDRXShort(boundaryValueRb)).toBe("999rb");
     });
 
     it("should format small amounts with standard localized numbering", () => {

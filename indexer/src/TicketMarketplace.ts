@@ -35,7 +35,7 @@ ponder.on("TicketMarketplace:TicketSold", async ({ event, context }) => {
 
   // 1. Catat riwayat penjualan
   await db.insert(sale).values({
-    id: `${event.args.listingId}-${event.transaction.hash}`,
+    id: `${event.args.listingId}-${event.transaction.hash}-${event.log.logIndex}`,
     listingId: event.args.listingId.toString(),
     buyer: event.args.buyer.toLowerCase(),
     amount: event.args.amount,

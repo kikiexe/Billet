@@ -68,7 +68,7 @@ export default function CreatorPage() {
     functionName: "owner"
   });
 
-  const isOwner = contractOwner && address && contractOwner.toString().toLowerCase() === address.toLowerCase();
+  const isOwner = !!(contractOwner && address && contractOwner.toString().toLowerCase() === address.toLowerCase());
 
   // ─── Real-time Calculator Math ──────────────────────────────────────────
 
@@ -110,9 +110,14 @@ export default function CreatorPage() {
         // Price per unit in wei (18 decimals for IDRX)
         const priceInWei = parseUnits(eventPrice.toString(), 18); // Calibrated to 18 decimals standard
 
-        // TODO: Integrasikan fungsi configureTicketCategory pada NFT contract (TicketNFT.sol) ke dalam form UI ini
-        // agar administrator/owner dapat memperbarui parameter priceCeilingBps (ceiling markup limit) secara langsung
-        // ke smart contract di blockchain sebelum memanggil listPrimary pada marketplace.
+        // TODO / TECH DEBT WARNING: priceCeilingMarkup dropdown is currently a dead UI option in on-chain mode
+        // because the listPrimary transaction does not accept ceiling parameters. The ceiling parameter is defined
+        // inside the TicketNFT contract (TicketNFT.sol) using configureTicketCategory().
+        // To fix this fully, the creator UI must execute a two-step transaction:
+        // 1. Write to TicketNFT.configureTicketCategory(eventCategory, eventVolume, priceInWei, 10000 + priceCeilingMarkup * 100, royaltyBps, start, end)
+        // 2. Write to TicketMarketplace.listPrimary(eventCategory, eventVolume, priceInWei)
+        // Currently, we fallback to the default 10% ceiling (11000 bps) pre-configured in the smart contract deployment.
+        
         const tx = await writeContractAsync({
           address: MARKETPLACE_ADDRESS,
           abi: MARKETPLACE_ABI,
@@ -692,21 +697,38 @@ export default function CreatorPage() {
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
                         <label className="text-xs font-semibold text-bark block">Batas Price Ceiling Markup</label>
-                        <span className="text-[10px] text-warm-600 font-extrabold uppercase">Markup Max {priceCeilingMarkup}%</span>
+                        <span className="text-[10px] text-warm-600 font-extrabold uppercase">
+                          {isOwner ? "10% (Default On-Chain)" : `Markup Max ${priceCeilingMarkup}%`}
+                        </span>
                       </div>
                       <select
-                        value={priceCeilingMarkup}
+                        disabled={isOwner}
+                        value={isOwner ? 10 : priceCeilingMarkup}
                         onChange={(e) => setPriceCeilingMarkup(Number(e.target.value))}
-                        className="w-full bg-cream/50 px-4 py-3 rounded-2xl border border-bark/10 text-bark font-semibold text-sm focus:outline-hidden focus:border-warm-500 transition-all cursor-pointer"
+                        className={`w-full bg-cream/50 px-4 py-3 rounded-2xl border border-bark/10 text-bark font-semibold text-sm focus:outline-hidden focus:border-warm-500 transition-all ${
+                          isOwner ? "opacity-60 cursor-not-allowed bg-stone-100" : "cursor-pointer"
+                        }`}
                       >
                         <option value="0">0% (Beli & Resale Hanya Bisa Sama Harga)</option>
                         <option value="5">5% Maksimum Markup (1.05x)</option>
                         <option value="10">10% Maksimum Markup (1.1x)</option>
                         <option value="20">20% Maksimum Markup (1.2x)</option>
                       </select>
-                      <p className="text-[10px] text-stone/60 leading-normal">
-                        * Catatan: Dalam Sandbox Mode, batas ini langsung diuji pada pasar sekunder. Pada On-Chain Mode, parameter ini dikunci per kategori tiket di kontrak NFT.
-                      </p>
+                      {isOwner ? (
+                        <div className="flex gap-2 items-start bg-amber-50/80 border border-amber-200/55 text-amber-900 p-3 rounded-xl text-[10px] leading-relaxed">
+                          <ShieldAlert className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-black">Mode On-Chain Terdeteksi:</span> Batas markup dikunci sebesar <span className="font-bold">10% (1.10x)</span> secara default di smart contract NFT.
+                            <span className="block mt-1 font-mono text-[9px] text-amber-800">
+                              // TODO: Integrasikan configureTicketCategory() di form ini agar Admin dapat mengubah ceiling sebelum listing.
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-stone/60 leading-normal">
+                          * Catatan: Dalam Sandbox Mode, batas markup ini diuji langsung pada transaksi pasar sekunder lokal.
+                        </p>
+                      )}
                     </div>
                   </div>
 

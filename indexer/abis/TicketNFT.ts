@@ -1,4 +1,4 @@
-[
+export const abi = [
   {
     "type": "constructor",
     "inputs": [
@@ -1153,4 +1153,4 @@
     "name": "UnauthorizedTransfer",
     "inputs": []
   }
-]
+] as const;

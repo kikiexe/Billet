@@ -3,3 +3,13 @@ out/
 cache/
 broadcast/
 contracts/lib/
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/.env*
+
+# Indexer
+indexer/node_modules/
+indexer/.ponder/
+indexer/.env.local

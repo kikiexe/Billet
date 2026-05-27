@@ -51,7 +51,7 @@ const carouselBanners = [
     date: "12 Juli 2026",
     venue: "Stadion Utama GBK, Jakarta",
     category: "Musik",
-    gradient: "from-[#FF6B35] via-[#E85A2A] to-[#1A1612]",
+    gradient: "bg-warm-600",
     badgeText: "Terpopuler"
   },
   {
@@ -62,7 +62,7 @@ const carouselBanners = [
     date: "15-18 Juni 2026",
     venue: "Gedung Sate IT Hub, Bandung",
     category: "Seminar",
-    gradient: "from-[#2563EB] via-[#FF8A50] to-[#0F0D0B]",
+    gradient: "bg-bark",
     badgeText: "Rekomendasi"
   },
   {
@@ -73,7 +73,7 @@ const carouselBanners = [
     date: "22-26 Juli 2026",
     venue: "Istora Senayan, Jakarta",
     category: "Olahraga",
-    gradient: "from-[#10B981] via-[#3B82F6] to-[#1A1612]",
+    gradient: "bg-warm-700",
     badgeText: "Tiket Terbatas"
   }
 ];
@@ -379,18 +379,14 @@ export default function Home() {
               >
                 {/* Visual Background Pattern */}
                 <div
-                  className={`absolute inset-0 bg-linear-to-r ${banner.gradient} opacity-90`}
+                  className={`absolute inset-0 ${banner.gradient}`}
                 />
-                <div className="absolute inset-0 bg-black/40" />
-
-                {/* Aesthetic shapes for Wow factor */}
-                <div className="absolute -top-12 right-1/4 w-87.5 h-87.5 rounded-full bg-warm-500/10 blur-[90px] animate-pulse-warm" />
-                <div className="absolute top-12 -right-12 w-62.5 h-62.5 rounded-full bg-orange-400/20 blur-[60px]" />
+                <div className="absolute inset-0 bg-black/20" />
 
                 {/* Banner Content */}
                 <div className="max-w-7xl mx-auto px-5 sm:px-8 pb-12 sm:pb-16 w-full relative z-20 flex flex-col md:flex-row md:items-end justify-between gap-6">
                   <div className="max-w-2xl">
-                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-sm text-xs font-semibold text-warm-200 mb-4 border border-white/10">
+                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/10 text-xs font-semibold text-warm-200 mb-4 border border-white/10">
                       <Sparkles className="w-3.5 h-3.5 text-warm-400" />
                       {banner.badgeText}
                     </span>
@@ -664,11 +660,7 @@ export default function Home() {
 
         {/* ─── Trending Banner Slider ───────────────────────────────────── */}
         <section className="max-w-7xl mx-auto px-5 sm:px-8 pt-20">
-          <div className="rounded-3xl bg-linear-to-br from-bark-light to-bark p-8 sm:p-12 text-white relative overflow-hidden">
-            {/* Design decorations */}
-            <div className="absolute top-0 right-0 w-100 h-100 rounded-full bg-warm-500/10 blur-[100px]" />
-            <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-radial-gradient opacity-10" />
-
+          <div className="rounded-3xl bg-bark p-8 sm:p-12 text-white relative overflow-hidden">
             <div className="relative max-w-2xl space-y-6">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warm-500/20 text-warm-300 text-xs font-bold border border-warm-500/20 uppercase tracking-wide">
                 <Volume2 className="w-3.5 h-3.5" />

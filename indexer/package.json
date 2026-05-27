@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "hono": "^4.12.23",
-    "ponder": "latest",
-    "viem": "latest"
+    "ponder": "^0.16.6",
+    "viem": "^2.51.2"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

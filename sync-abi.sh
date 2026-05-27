@@ -27,13 +27,13 @@ mkdir -p indexer/abis
 
 if [ -f "contracts/out/TicketMarketplace.sol/TicketMarketplace.json" ]; then
   cp contracts/out/TicketMarketplace.sol/TicketMarketplace.json indexer/abis/
-  echo "export const abi = \$(jq '.abi' indexer/abis/TicketMarketplace.json) as const;" > indexer/abis/TicketMarketplace.ts
+  printf 'export const abi = %s as const;\n' "$(jq '.abi' indexer/abis/TicketMarketplace.json)" > indexer/abis/TicketMarketplace.ts
   echo "TicketMarketplace ABI disinkronkan ke Indexer."
 fi
 
 if [ -f "contracts/out/TicketNFT.sol/TicketNFT.json" ]; then
   cp contracts/out/TicketNFT.sol/TicketNFT.json indexer/abis/
-  echo "export const abi = \$(jq '.abi' indexer/abis/TicketNFT.json) as const;" > indexer/abis/TicketNFT.ts
+  printf 'export const abi = %s as const;\n' "$(jq '.abi' indexer/abis/TicketNFT.json)" > indexer/abis/TicketNFT.ts
   echo "TicketNFT ABI disinkronkan ke Indexer."
 fi
 

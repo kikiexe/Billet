@@ -175,6 +175,71 @@
 /* ─── Solid Utilities (No Glassmorphism) ────────────────────────── */
 
 @layer utilities {
+  .neo-grid-bg {
+    background-color: #F3BE22;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.08) 1.5px, transparent 1.5px),
+                      linear-gradient(90deg, rgba(0, 0, 0, 0.08) 1.5px, transparent 1.5px);
+    background-size: 24px 24px;
+  }
+  .neo-border {
+    border: 3.5px solid #000000;
+  }
+  .neo-border-sm {
+    border: 2px solid #000000;
+  }
+  .neo-border-lg {
+    border: 5px solid #000000;
+  }
+  .neo-shadow {
+    box-shadow: 6px 6px 0px 0px #000000;
+  }
+  .neo-shadow-sm {
+    box-shadow: 3px 3px 0px 0px #000000;
+  }
+  .neo-shadow-lg {
+    box-shadow: 10px 10px 0px 0px #000000;
+  }
+  .neo-btn {
+    border: 3.5px solid #000000;
+    box-shadow: 4px 4px 0px 0px #000000;
+    transition: all 0.1s ease-in-out;
+  }
+  .neo-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0px 0px #000000;
+  }
+  .neo-btn:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0px 0px #000000;
+  }
+  .font-pixel-lg {
+    font-family: var(--font-vt323), monospace;
+  }
+  .font-pixel-sm {
+    font-family: var(--font-press-start), monospace;
+  }
+
+  .neo-border-button button {
+    border: 3.5px solid #000000 !important;
+    box-shadow: 3px 3px 0px 0px #000000 !important;
+    border-radius: 0px !important;
+    font-family: var(--font-press-start) !important;
+    font-size: 8px !important;
+    text-transform: uppercase !important;
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    transition: all 0.1s ease-in-out !important;
+    padding: 0.5rem 1rem !important;
+  }
+  .neo-border-button button:hover {
+    transform: translate(-1px, -1px) !important;
+    box-shadow: 4px 4px 0px 0px #000000 !important;
+  }
+  .neo-border-button button:active {
+    transform: translate(2px, 2px) !important;
+    box-shadow: 1px 1px 0px 0px #000000 !important;
+  }
+
   .glass {
     background: #FFFFFF;
     border: 1px solid rgba(15, 65, 74, 0.08);

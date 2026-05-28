@@ -1,6 +1,7 @@
 import { useReadContracts } from "wagmi";
 import { MARKETPLACE_ABI, MARKETPLACE_ADDRESS } from "@/config/contracts";
 import type { Abi } from "viem";
+import { baseSepolia } from "viem/chains";
 
 export interface Listing {
   seller: `0x${string}`;
@@ -27,6 +28,7 @@ export function useListings(maxId = 20) {
     abi: MARKETPLACE_ABI as Abi,
     functionName: "getListing" as const,
     args: [BigInt(i)] as const,
+    chainId: baseSepolia.id,
   }));
 
   const { data, isLoading, error, refetch } = useReadContracts({

@@ -205,7 +205,8 @@ export default function CreatorPage() {
       setEventName("");
       setEventVenue("");
       setEventDate("");
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as any;
       console.error(err);
       toast.error("Transaksi Gagal!", {
         description: err.message || "Gagal mengirimkan transaksi on-chain."
@@ -216,68 +217,62 @@ export default function CreatorPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-cream relative">
+    <div className="min-h-screen flex flex-col neo-grid-bg relative text-black">
       <Navbar />
 
       <main className="flex-1">
         {/* ═══════════════════════════════════════════════════════
             SECTION 1: Hero — Clean & Focused
         ═══════════════════════════════════════════════════════ */}
-        <section className="relative overflow-hidden pt-16 pb-20 md:pt-20 md:pb-28" id="hero-creator">
-          {/* Subtle background orb */}
-          <div className="absolute inset-0 -z-10">
-            <div
-              className="absolute -top-32 -right-32 w-96 h-96 rounded-full animate-orb-1 opacity-20"
-              style={{ background: "radial-gradient(circle, #FF8A50 0%, #FFE0C2 50%, transparent 80%)" }}
-            />
-          </div>
-
+        <section className="relative overflow-hidden pt-12 pb-16 md:pt-16 md:pb-24" id="hero-creator">
           <div className="section-container">
             <div className="grid lg:grid-cols-12 gap-10 items-center">
               {/* Text */}
-              <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-warm-50 text-warm-700 text-xs font-semibold border border-warm-100">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Billet untuk Kreator
-                </span>
-                
-                <h1 className="font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl tracking-tight leading-[1.1] text-bark">
-                  Luncurkan Tiket{" "}
-                  <span className="text-gradient-warm">On-Chain</span>
-                  <br className="hidden sm:block" />
-                  dalam Hitungan Menit.
-                </h1>
-                
-                <p className="text-stone text-sm sm:text-base max-w-lg mx-auto lg:mx-0 leading-relaxed">
-                  Buat tiket digital NFT ERC-1155 di Base L2. Terlindungi dari pemalsuan dan calo, 
-                  dengan batas resale otomatis dan royalti langsung ke wallet Anda.
-                </p>
-
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
-                  <a
-                    href="#calculator-section"
-                    className="px-5 py-3 rounded-xl bg-bark text-white font-heading font-semibold text-sm hover:bg-bark-light transition-colors"
-                  >
-                    Hitung Pendapatan
-                  </a>
-                  <a
-                    href="#launcher-section"
-                    className="px-5 py-3 rounded-xl bg-linear-to-r from-warm-500 to-warm-600 text-white font-heading font-semibold text-sm shadow-warm hover:shadow-warm-lg hover:scale-[1.01] transition-all"
-                  >
-                    Luncurkan Event
-                  </a>
+              <div className="lg:col-span-7 space-y-6">
+                <div className="bg-white neo-border neo-shadow p-6 relative overflow-hidden -rotate-1 hover:rotate-0 transition-transform duration-200">
+                  <div className="absolute top-2 right-3 flex items-center gap-1.5 font-pixel-sm text-[9px] border-2 border-black px-1.5 py-0.5 bg-neutral-200">
+                    <span>CREATOR.EXE</span>
+                    <span className="font-bold border-l-2 border-black pl-1.5">X</span>
+                  </div>
+                  <div className="pt-6">
+                    <span className="inline-flex items-center gap-2 px-3 py-1 bg-[#FF5722]/15 border-2 border-black text-[#FF5722] font-pixel-sm text-[8px] uppercase tracking-wide mb-4">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Billet untuk Kreator
+                    </span>
+                    <h1 className="font-pixel-lg text-4xl sm:text-5xl font-black text-black leading-tight uppercase">
+                      Luncurkan Tiket <span className="text-[#FF5722]">On-Chain</span> dalam Hitungan Menit.
+                    </h1>
+                    <p className="font-pixel-sm text-[10px] text-neutral-850 leading-relaxed mt-4">
+                      Buat tiket digital NFT ERC-1155 di Base L2. Terlindungi dari pemalsuan dan calo, 
+                      dengan batas resale otomatis dan royalti langsung ke wallet Anda.
+                    </p>
+                    <div className="flex flex-wrap items-center gap-3 pt-6">
+                      <a
+                        href="#calculator-section"
+                        className="px-4 py-2.5 bg-black border-[3px] border-black text-white font-pixel-sm text-[9px] uppercase shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-neutral-900 active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_rgba(0,0,0,1)] transition-all cursor-pointer"
+                      >
+                        Kalkulator Pendapatan
+                      </a>
+                      <a
+                        href="#launcher-section"
+                        className="px-4 py-2.5 bg-[#FF5722] border-[3px] border-black text-white font-pixel-sm text-[9px] uppercase shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-[#E64A19] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_rgba(0,0,0,1)] transition-all cursor-pointer"
+                      >
+                        Luncurkan Event
+                      </a>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Trust Stats */}
-                <div className="pt-6 grid grid-cols-3 gap-4 border-t border-bark/6 text-center lg:text-left">
+                {/* Trust Stats Bar in Retro Box */}
+                <div className="bg-white neo-border neo-shadow p-5 grid grid-cols-3 gap-4 text-center">
                   {[
                     { value: "30.000+", label: "Creator Terdaftar" },
                     { value: "Rp 0", label: "Biaya Pembuatan" },
                     { value: "5 M+", label: "Volume Transaksi" }
                   ].map((stat, i) => (
                     <div key={i}>
-                      <h3 className="font-heading font-extrabold text-xl sm:text-2xl text-bark">{stat.value}</h3>
-                      <p className="text-stone text-[11px] mt-0.5">{stat.label}</p>
+                      <h3 className="font-pixel-lg text-2xl font-bold text-black uppercase">{stat.value}</h3>
+                      <p className="font-pixel-sm text-[8px] text-neutral-500 mt-1 uppercase leading-none">{stat.label}</p>
                     </div>
                   ))}
                 </div>
@@ -285,53 +280,53 @@ export default function CreatorPage() {
 
               {/* Dashboard Mockup (compact) */}
               <div className="lg:col-span-5 relative">
-                <div className="rounded-2xl bg-white border border-bark/6 p-5 shadow-card space-y-4">
-                  {/* Window chrome */}
-                  <div className="flex items-center justify-between pb-3 border-b border-bark/6">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-3 h-3 rounded-full bg-red-400" />
-                      <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                      <div className="w-3 h-3 rounded-full bg-green-400" />
+                <div className="bg-white neo-border neo-shadow">
+                  {/* Title Bar */}
+                  <div className="bg-[#4CAF50]/20 border-b-[3.5px] border-black px-4 py-2.5 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3.5 h-3.5 rounded-full bg-[#FF5722] border-2 border-black" />
+                      <div className="w-3.5 h-3.5 rounded-full bg-[#4CAF50] border-2 border-black" />
                     </div>
-                    <span className="text-[9px] font-mono text-stone/50">billet-dashboard.eth</span>
+                    <span className="font-pixel-sm text-[9px] uppercase text-black font-bold">BILLET-DASHBOARD.ETH</span>
                   </div>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-sand/30 p-3.5 rounded-xl border border-bark/4">
-                      <p className="text-[9px] text-stone/50 font-semibold uppercase tracking-wider">Tiket Terjual</p>
-                      <h4 className="font-heading font-bold text-lg text-bark mt-1">1.482 / 1.500</h4>
-                      <div className="w-full bg-sand/60 h-1 rounded-full mt-2 overflow-hidden">
-                        <div className="bg-warm-500 h-full rounded-full w-[92%]" />
-                      </div>
-                    </div>
-                    <div className="bg-sand/30 p-3.5 rounded-xl border border-bark/4">
-                      <p className="text-[9px] text-stone/50 font-semibold uppercase tracking-wider">Royalti Resale</p>
-                      <h4 className="font-heading font-bold text-lg text-green-600 mt-1">+ Rp 7.4jt</h4>
-                      <p className="text-[9px] text-stone/40 mt-2 flex items-center gap-1 font-mono">
-                        <TrendingUp className="w-3 h-3 text-green-500" /> 148 resale
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Activity */}
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-semibold text-bark">Aktivitas Terbaru</p>
-                    {[
-                      { type: "Primary Buy", desc: "Membeli 2 Tiket VIP", val: "Rp 700.000", ok: true },
-                      { type: "Resale Royalty", desc: "Royalti 5%", val: "+ Rp 55.000", ok: false },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center justify-between p-2.5 rounded-lg bg-white/50 border border-bark/4 text-[11px]">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-1.5 h-1.5 rounded-full ${item.ok ? "bg-green-500" : "bg-warm-500"}`} />
-                          <div>
-                            <p className="font-semibold text-bark">{item.type}</p>
-                            <p className="text-[9px] text-stone/50">{item.desc}</p>
-                          </div>
+                  {/* Stats Body */}
+                  <div className="p-5 space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-neutral-50 p-4 border-[3px] border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                        <p className="font-pixel-sm text-[8px] text-neutral-500 uppercase">Tiket Terjual</p>
+                        <h4 className="font-pixel-lg text-2xl text-black font-bold mt-1">1.482 / 1.500</h4>
+                        <div className="w-full bg-neutral-200 border-2 border-black h-4 mt-2 relative overflow-hidden">
+                          <div className="bg-[#FF5722] h-full w-[92%] border-r-2 border-black" />
                         </div>
-                        <span className={`font-bold font-mono ${item.ok ? "text-bark" : "text-green-600"}`}>{item.val}</span>
                       </div>
-                    ))}
+                      <div className="bg-neutral-50 p-4 border-[3px] border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                        <p className="font-pixel-sm text-[8px] text-neutral-500 uppercase">Royalti Resale</p>
+                        <h4 className="font-pixel-lg text-2xl text-[#4CAF50] font-bold mt-1">+ Rp 7.4jt</h4>
+                        <p className="font-pixel-sm text-[7px] text-neutral-600 mt-2 flex items-center gap-1">
+                          <TrendingUp className="w-3.5 h-3.5 text-[#4CAF50] stroke-[2.5]" /> 148 RESALE
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Activity */}
+                    <div className="space-y-2">
+                      <p className="font-pixel-sm text-[9px] font-bold text-black uppercase">Aktivitas Terbaru</p>
+                      {[
+                        { type: "Primary Buy", desc: "Membeli 2 Tiket VIP", val: "Rp 700.000", ok: true },
+                        { type: "Resale Royalty", desc: "Royalti 5%", val: "+ Rp 55.000", ok: false },
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center justify-between p-3 border-2 border-black bg-white text-[10px] font-pixel-sm">
+                          <div className="flex items-center gap-2">
+                            <span className={`w-2.5 h-2.5 border border-black ${item.ok ? "bg-[#4CAF50]" : "bg-[#FF5722]"}`} />
+                            <div>
+                              <p className="font-bold text-black uppercase">{item.type}</p>
+                              <p className="text-[8px] text-neutral-500">{item.desc}</p>
+                            </div>
+                          </div>
+                          <span className={`font-bold ${item.ok ? "text-black" : "text-[#4CAF50]"}`}>{item.val}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -339,33 +334,31 @@ export default function CreatorPage() {
           </div>
         </section>
 
-        <hr className="section-divider" />
-
         {/* ═══════════════════════════════════════════════════════
             SECTION 2: Revenue Calculator
         ═══════════════════════════════════════════════════════ */}
-        <section className="section-spacing bg-white/40 border-y border-bark/4" id="calculator-section">
+        <section className="py-16 border-y-4 border-black bg-white/20 animate-fade-in" id="calculator-section">
           <div className="section-container">
             <div className="text-center max-w-xl mx-auto mb-10">
-              <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-bark flex items-center justify-center gap-2">
+              <h2 className="font-pixel-lg text-4xl text-black flex items-center justify-center gap-3 uppercase font-bold">
                 Hitung Pendapatan
-                <Calculator className="w-6 h-6 text-warm-500" />
+                <Calculator className="w-7 h-7 text-[#FF5722]" />
               </h2>
-              <p className="text-stone text-sm mt-2">
+              <p className="font-pixel-sm text-[10px] text-neutral-700 mt-2">
                 Lihat estimasi pendapatan dari penjualan primer + royalti resale on-chain.
               </p>
             </div>
 
-            <div className="grid lg:grid-cols-12 gap-6">
+            <div className="grid lg:grid-cols-12 gap-8">
               {/* Input Panel */}
-              <div className="lg:col-span-5 rounded-2xl bg-white/70 backdrop-blur-xl border border-white/60 p-6 space-y-5 shadow-card">
-                <h3 className="font-heading font-bold text-base text-bark border-b border-bark/6 pb-3">
+              <div className="lg:col-span-5 bg-white border-[3.5px] border-black p-6 space-y-6 shadow-shadow neo-shadow">
+                <h3 className="font-pixel-lg text-2xl font-bold text-black border-b-[3px] border-black pb-3 uppercase">
                   Konfigurasi
                 </h3>
                 
                 {/* Event Category Select */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Jenis Event</label>
+                <div className="space-y-2">
+                  <label className="font-pixel-sm text-[9px] font-semibold text-black block uppercase tracking-wider">Jenis Event</label>
                   <div className="relative">
                     <select
                       value={selectedCat.name}
@@ -376,21 +369,21 @@ export default function CreatorPage() {
                           setTicketPrice(cat.defaultPrice);
                         }
                       }}
-                      className="input-field appearance-none cursor-pointer pr-10"
+                      className="w-full pl-4 pr-10 py-3 border-[3px] border-black bg-white font-pixel-sm text-[9px] appearance-none cursor-pointer"
                     >
                       {eventCategories.map((c) => (
                         <option key={c.name} value={c.name}>{c.name}</option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone/40 pointer-events-none" />
+                    <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-black pointer-events-none stroke-[2.5]" />
                   </div>
                 </div>
 
-                {/* Ticket Price */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <label className="text-[11px] font-semibold text-bark uppercase tracking-wider">Harga Per Tiket</label>
-                    <span className="text-[11px] text-stone font-mono">Rp {ticketPrice.toLocaleString("id-ID")}</span>
+                {/* Ticket Price Slider */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center font-pixel-sm text-[9px]">
+                    <label className="font-bold text-black uppercase">Harga Per Tiket</label>
+                    <span className="text-[#FF5722]">Rp {ticketPrice.toLocaleString("id-ID")}</span>
                   </div>
                   <input
                     type="range"
@@ -399,19 +392,19 @@ export default function CreatorPage() {
                     step="10000"
                     value={ticketPrice}
                     onChange={(e) => setTicketPrice(Number(e.target.value))}
-                    className="w-full accent-warm-500 cursor-pointer"
+                    className="w-full accent-black cursor-pointer"
                   />
-                  <div className="flex justify-between text-[9px] text-stone/40 font-mono">
+                  <div className="flex justify-between font-pixel-sm text-[8px] text-neutral-500">
                     <span>Rp 30rb</span>
                     <span>Rp 2jt</span>
                   </div>
                 </div>
 
-                {/* Ticket Volume */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center">
-                    <label className="text-[11px] font-semibold text-bark uppercase tracking-wider">Jumlah Tiket</label>
-                    <span className="text-[11px] text-stone font-mono">{ticketVolume.toLocaleString("id-ID")} lembar</span>
+                {/* Ticket Volume Slider */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center font-pixel-sm text-[9px]">
+                    <label className="font-bold text-black uppercase">Jumlah Tiket</label>
+                    <span className="text-[#FF5722]">{ticketVolume.toLocaleString("id-ID")} LBR</span>
                   </div>
                   <input
                     type="range"
@@ -420,9 +413,9 @@ export default function CreatorPage() {
                     step="50"
                     value={ticketVolume}
                     onChange={(e) => setTicketVolume(Number(e.target.value))}
-                    className="w-full accent-warm-500 cursor-pointer"
+                    className="w-full accent-black cursor-pointer"
                   />
-                  <div className="flex justify-between text-[9px] text-stone/40 font-mono">
+                  <div className="flex justify-between font-pixel-sm text-[8px] text-neutral-500">
                     <span>50</span>
                     <span>25.000</span>
                   </div>
@@ -430,64 +423,62 @@ export default function CreatorPage() {
               </div>
 
               {/* Output Panel */}
-              <div className="lg:col-span-7 rounded-2xl bg-bark text-white p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden shadow-card">
-                <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-warm-500/8 blur-[80px]" />
-
-                <div className="space-y-5 relative z-10">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-green-500/15 text-green-400 text-[10px] font-bold border border-green-500/15 uppercase tracking-wider">
-                    <Coins className="w-3 h-3" />
+              <div className="lg:col-span-7 bg-white border-[3.5px] border-black p-6 sm:p-8 flex flex-col justify-between shadow-shadow neo-shadow">
+                <div className="space-y-6">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#4CAF50]/15 border-2 border-black text-[#4CAF50] font-pixel-sm text-[8px] uppercase tracking-wider font-bold">
+                    <Coins className="w-3.5 h-3.5 stroke-[2.5]" />
                     0% Platform Fee — Promo!
                   </span>
 
-                  <h3 className="font-heading font-extrabold text-xl sm:text-2xl">Estimasi Pendapatan</h3>
+                  <h3 className="font-pixel-lg text-3xl font-bold uppercase text-black">Estimasi Pendapatan</h3>
 
                   {/* Breakdown */}
-                  <div className="grid sm:grid-cols-3 gap-3">
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                      <p className="text-[9px] text-white/40 uppercase font-semibold tracking-wider">Penjualan Utama</p>
-                      <h4 className="font-heading font-bold text-lg text-white mt-1">
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    <div className="bg-neutral-50 p-4 border-[3px] border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                      <p className="font-pixel-sm text-[8px] text-neutral-500 uppercase">Penjualan Utama</p>
+                      <h4 className="font-pixel-lg text-2xl text-black font-bold mt-1">
                         Rp {grossSales.toLocaleString("id-ID")}
                       </h4>
                     </div>
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                      <p className="text-[9px] text-white/40 uppercase font-semibold tracking-wider">Royalti Resale</p>
-                      <h4 className="font-heading font-bold text-lg text-green-400 mt-1">
+                    <div className="bg-neutral-50 p-4 border-[3px] border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                      <p className="font-pixel-sm text-[8px] text-neutral-500 uppercase">Royalti Resale</p>
+                      <h4 className="font-pixel-lg text-2xl text-[#4CAF50] font-bold mt-1">
                         + Rp {resaleRoyalties.toLocaleString("id-ID")}
                       </h4>
                     </div>
-                    <div className="bg-white/5 p-4 rounded-xl border border-white/5">
-                      <p className="text-[9px] text-white/40 uppercase font-semibold tracking-wider">Platform Fee</p>
-                      <h4 className="font-heading font-bold text-lg text-warm-400 mt-1">
+                    <div className="bg-[#FF5722]/10 p-4 border-[3px] border-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                      <p className="font-pixel-sm text-[8px] text-[#FF5722] uppercase">Platform Fee</p>
+                      <h4 className="font-pixel-lg text-2xl text-[#FF5722] font-bold mt-1">
                         Rp 0
                       </h4>
-                      <p className="text-[8px] text-warm-400/70 mt-1 font-bold uppercase tracking-wider">PROMO!</p>
+                      <p className="font-pixel-sm text-[7px] text-[#FF5722] font-bold uppercase tracking-wider mt-1">PROMO!</p>
                     </div>
                   </div>
 
-                  {/* Bar */}
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] text-white/50 font-semibold">Proporsi Pendapatan:</p>
-                    <div className="w-full bg-white/10 h-3 rounded-full overflow-hidden flex">
-                      <div className="bg-warm-500 h-full transition-all duration-300" style={{ width: `${primaryPercentage}%` }} />
-                      <div className="bg-green-500 h-full transition-all duration-300" style={{ width: `${royaltyPercentage}%` }} />
+                  {/* Proportion Bar */}
+                  <div className="space-y-2">
+                    <p className="font-pixel-sm text-[9px] text-black uppercase font-bold">Proporsi Pendapatan:</p>
+                    <div className="w-full bg-neutral-200 border-[3px] border-black h-6 flex overflow-hidden">
+                      <div className="bg-[#FF5722] h-full border-r-[3px] border-black" style={{ width: `${primaryPercentage}%` }} />
+                      <div className="bg-[#4CAF50] h-full" style={{ width: `${royaltyPercentage}%` }} />
                     </div>
-                    <div className="flex gap-4 text-[9px] text-white/40 font-mono">
-                      <span className="flex items-center gap-1"><span className="w-2 h-2 bg-warm-500 rounded" /> Primer ({primaryPercentage}%)</span>
-                      <span className="flex items-center gap-1"><span className="w-2 h-2 bg-green-500 rounded" /> Royalti ({royaltyPercentage}%)</span>
+                    <div className="flex gap-4 font-pixel-sm text-[8px] text-neutral-500">
+                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-[#FF5722] border border-black" /> Primer ({primaryPercentage}%)</span>
+                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 bg-[#4CAF50] border border-black" /> Royalti ({royaltyPercentage}%)</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Net total */}
-                <div className="pt-5 mt-5 border-t border-white/10 relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="pt-6 mt-6 border-t-[3px] border-black flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
-                    <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">Total Pendapatan Bersih</p>
-                    <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-gradient-warm leading-tight mt-0.5">
+                    <p className="font-pixel-sm text-[8px] text-neutral-500 uppercase font-bold">Total Pendapatan Bersih</p>
+                    <h2 className="font-pixel-lg text-3xl sm:text-4xl text-black font-bold leading-tight mt-1">
                       Rp {netEarnings.toLocaleString("id-ID")}
                     </h2>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[10px] text-white/40 bg-white/4 px-3 py-2 rounded-lg border border-white/5">
-                    <Info className="w-3.5 h-3.5 text-warm-400 shrink-0" />
+                  <div className="flex items-center gap-1.5 font-pixel-sm text-[8px] uppercase bg-neutral-50 border-2 border-black p-2.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                    <Info className="w-4 h-4 text-[#FF5722] shrink-0 stroke-[2.5]" />
                     <span>Hingga 112% lebih tinggi dari konvensional</span>
                   </div>
                 </div>
@@ -496,207 +487,203 @@ export default function CreatorPage() {
           </div>
         </section>
 
-        <hr className="section-divider" />
-
         {/* ═══════════════════════════════════════════════════════
-            SECTION 3: Features (Compact 2x3 Grid)
+            SECTION 3: Features
         ═══════════════════════════════════════════════════════ */}
-        <section className="section-spacing section-container">
+        <section className="py-16 section-container">
           <div className="text-center max-w-xl mx-auto mb-10">
-            <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-bark">
+            <h2 className="font-pixel-lg text-4xl text-black uppercase font-bold">
               Fitur Unggulan
             </h2>
-            <p className="text-stone text-sm mt-2">
+            <p className="font-pixel-sm text-[10px] text-neutral-700 mt-2">
               Teknologi Web3 tercanggih untuk event creator.
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feat) => (
               <div
                 key={feat.title}
-                className="group rounded-2xl bg-white/60 border border-bark/6 p-5 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-300 flex gap-4 items-start"
+                className="group bg-white border-[3px] border-black p-5 hover:-translate-y-0.5 shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:shadow-[5px_5px_0_0_rgba(0,0,0,1)] transition-all duration-100 flex gap-4 items-start"
               >
-                <div className="w-10 h-10 rounded-xl bg-linear-to-br from-warm-400 to-warm-600 text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-                  <feat.icon className="w-5 h-5" />
+                <div className="w-11 h-11 border-[3px] border-black bg-[#FF5722] text-white flex items-center justify-center shrink-0 shadow-[2px_2px_0_0_rgba(0,0,0,1)] group-hover:scale-105 transition-transform">
+                  <feat.icon className="w-5 h-5 stroke-[2.5]" />
                 </div>
                 <div>
-                  <h3 className="font-heading font-bold text-sm text-bark mb-1">{feat.title}</h3>
-                  <p className="text-stone text-xs leading-relaxed">{feat.desc}</p>
+                  <h3 className="font-pixel-lg text-2xl font-bold text-black mb-1.5 uppercase">{feat.title}</h3>
+                  <p className="font-pixel-sm text-[9px] text-neutral-600 leading-relaxed">{feat.desc}</p>
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        <hr className="section-divider" />
-
         {/* ═══════════════════════════════════════════════════════
             SECTION 4: Event Launcher Form
         ═══════════════════════════════════════════════════════ */}
-        <section className="section-spacing" id="launcher-section">
+        <section className="py-16 bg-white/20 border-t-4 border-black" id="launcher-section">
           <div className="section-container max-w-3xl">
-            <div className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white/60 p-6 sm:p-8 shadow-card relative overflow-hidden">
-              <div className="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-warm-500/5 blur-[60px]" />
+            <div className="bg-white neo-border neo-shadow p-6 sm:p-8">
+              
+              {/* Header */}
+              <div className="text-center max-w-md mx-auto mb-8">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FF5722]/15 border-2 border-black text-[#FF5722] font-pixel-sm text-[9px] uppercase tracking-wider font-bold mb-3">
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  Creator Portal
+                </span>
+                <h2 className="font-pixel-lg text-4xl text-black font-bold uppercase">
+                  Luncurkan Tiket Acara Baru
+                </h2>
+                <p className="font-pixel-sm text-[10px] text-neutral-700 mt-2">
+                  Hubungkan wallet untuk on-chain, atau coba langsung dalam Mode Sandbox.
+                </p>
+              </div>
 
-              <div className="relative z-10">
-                {/* Header */}
-                <div className="text-center max-w-md mx-auto mb-8">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-warm-50 text-warm-700 text-[11px] font-bold border border-warm-100 uppercase tracking-wider mb-3">
-                    <PlusCircle className="w-3.5 h-3.5" />
-                    Creator Portal
-                  </span>
-                  <h2 className="font-heading font-extrabold text-xl sm:text-2xl text-bark">
-                    Luncurkan Tiket Acara Baru
-                  </h2>
-                  <p className="text-stone text-xs mt-1.5">
-                    Hubungkan wallet untuk on-chain, atau coba langsung dalam Mode Sandbox.
-                  </p>
-                </div>
-
-                {!isConnected ? (
-                  /* Wallet Lock */
-                  <div className="flex flex-col items-center justify-center py-12 text-center bg-sand/20 border border-bark/4 rounded-xl p-6">
-                    <div className="w-12 h-12 rounded-xl bg-sand/50 flex items-center justify-center mb-4">
-                      <Ticket className="w-5 h-5 text-stone/30" />
-                    </div>
-                    <h4 className="font-heading font-semibold text-base text-bark mb-1">
-                      Hubungkan Wallet
-                    </h4>
-                    <p className="text-stone text-xs max-w-xs mb-5">
-                      Hubungkan wallet Anda untuk membuka formulir.
-                    </p>
-                    <ConnectKitButton />
+              {!isConnected ? (
+                /* Wallet Lock */
+                <div className="flex flex-col items-center justify-center py-12 text-center bg-neutral-50 border-[3px] border-black p-6">
+                  <div className="w-12 h-12 border-[3px] border-black bg-white flex items-center justify-center mb-4 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                    <Ticket className="w-6 h-6 text-black -rotate-45" />
                   </div>
-                ) : (
-                  /* Form */
-                  <form onSubmit={handleLaunchEvent} className="space-y-5">
-                    {/* Mode Banner */}
-                    <div className={`p-3.5 rounded-xl border text-xs flex gap-3 ${
-                      isOwner
-                        ? "bg-green-50/70 border-green-100 text-green-800"
-                        : "bg-amber-50/70 border-amber-100 text-amber-800"
-                    }`}>
-                      {isOwner ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
-                      ) : (
-                        <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                      )}
-                      <div>
-                        <p className="font-bold text-[11px]">
-                          {isOwner ? "Mode: On-Chain (Base Sepolia)" : "Mode: Sandbox / Simulasi"}
-                        </p>
-                        <p className="text-[10px] opacity-80 mt-0.5 leading-relaxed">
-                          {isOwner
-                            ? "Tiket akan ter-mint di blockchain Base Sepolia."
-                            : "Event disimpan di browser lokal (localStorage) sebagai demo."}
-                        </p>
-                      </div>
+                  <h4 className="font-pixel-lg text-2xl text-black font-bold uppercase mb-1">
+                    Hubungkan Wallet
+                  </h4>
+                  <p className="font-pixel-sm text-[9px] text-neutral-600 max-w-xs mb-5 uppercase">
+                    Hubungkan wallet Anda untuk membuka formulir.
+                  </p>
+                  <div className="neo-border-button"><ConnectKitButton /></div>
+                </div>
+              ) : (
+                /* Form */
+                <form onSubmit={handleLaunchEvent} className="space-y-6">
+                  {/* Mode Banner */}
+                  <div className={`p-4 border-[3px] border-black text-xs flex gap-3 ${
+                    isOwner
+                      ? "bg-[#4CAF50]/15 text-black"
+                      : "bg-[#FF5722]/15 text-black"
+                  }`}>
+                    {isOwner ? (
+                      <CheckCircle2 className="w-5 h-5 text-[#4CAF50] shrink-0 mt-0.5 stroke-[2.5]" />
+                    ) : (
+                      <ShieldAlert className="w-5 h-5 text-[#FF5722] shrink-0 mt-0.5 stroke-[2.5]" />
+                    )}
+                    <div className="font-pixel-sm">
+                      <p className="font-bold text-[10px] uppercase">
+                        {isOwner ? "Mode: On-Chain (Base Sepolia)" : "Mode: Sandbox / Simulasi"}
+                      </p>
+                      <p className="text-[8px] text-neutral-600 mt-1.5 leading-relaxed uppercase">
+                        {isOwner
+                          ? "Tiket akan ter-mint di blockchain Base Sepolia secara permanen."
+                          : "Event disimpan di browser lokal (localStorage) sebagai demo simulasi."}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Form fields */}
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="font-pixel-sm text-[9px] font-bold text-black block uppercase tracking-wider">Nama Event</label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: Coldplay Jakarta"
+                        value={eventName}
+                        onChange={(e) => setEventName(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 border-[3px] border-black bg-white font-pixel-sm text-[9px] focus:outline-hidden"
+                      />
                     </div>
 
-                    {/* Form fields */}
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Nama Event</label>
-                        <input
-                          type="text"
-                          placeholder="Contoh: Coldplay Jakarta"
-                          value={eventName}
-                          onChange={(e) => setEventName(e.target.value)}
-                          required
-                          className="input-field"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Kategori NFT</label>
+                    <div className="space-y-2">
+                      <label className="font-pixel-sm text-[9px] font-bold text-black block uppercase tracking-wider">Kategori NFT</label>
+                      <div className="relative">
                         <select
                           value={eventCategory}
                           onChange={(e) => setEventCategory(e.target.value)}
-                          className="input-field appearance-none cursor-pointer"
+                          className="w-full pl-4 pr-10 py-3 border-[3px] border-black bg-white font-pixel-sm text-[9px] appearance-none cursor-pointer"
                         >
                           <option value="1">Reguler (Token #1)</option>
                           <option value="2">VIP (Token #2)</option>
                           <option value="3">VVIP (Token #3)</option>
                         </select>
+                        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-black pointer-events-none stroke-[2.5]" />
                       </div>
+                    </div>
 
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Harga (IDRX)</label>
-                        <input
-                          type="number"
-                          min="1000"
-                          value={eventPrice}
-                          onChange={(e) => setEventPrice(Number(e.target.value))}
-                          required
-                          className="input-field font-mono"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <label className="font-pixel-sm text-[9px] font-bold text-black block uppercase tracking-wider">Harga (IDRX)</label>
+                      <input
+                        type="number"
+                        min="1000"
+                        value={eventPrice}
+                        onChange={(e) => setEventPrice(Number(e.target.value))}
+                        required
+                        className="w-full px-4 py-3 border-[3px] border-black bg-white font-mono text-xs text-black focus:outline-hidden"
+                      />
+                    </div>
 
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Jumlah Tiket</label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={eventVolume}
-                          onChange={(e) => setEventVolume(Number(e.target.value))}
-                          required
-                          className="input-field font-mono"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <label className="font-pixel-sm text-[9px] font-bold text-black block uppercase tracking-wider">Jumlah Tiket</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={eventVolume}
+                        onChange={(e) => setEventVolume(Number(e.target.value))}
+                        required
+                        className="w-full px-4 py-3 border-[3px] border-black bg-white font-mono text-xs text-black focus:outline-hidden"
+                      />
+                    </div>
 
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Kota</label>
+                    <div className="space-y-2">
+                      <label className="font-pixel-sm text-[9px] font-bold text-black block uppercase tracking-wider">Kota</label>
+                      <div className="relative">
                         <select
                           value={eventCity}
                           onChange={(e) => setEventCity(e.target.value)}
-                          className="input-field appearance-none cursor-pointer"
+                          className="w-full pl-4 pr-10 py-3 border-[3px] border-black bg-white font-pixel-sm text-[9px] appearance-none cursor-pointer"
                         >
                           <option value="Jakarta">Jakarta</option>
                           <option value="Bandung">Bandung</option>
                           <option value="Yogyakarta">Yogyakarta</option>
                           <option value="Surabaya">Surabaya</option>
                         </select>
+                        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-black pointer-events-none stroke-[2.5]" />
                       </div>
+                    </div>
 
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Venue</label>
-                        <input
-                          type="text"
-                          placeholder="Contoh: Stadion GBK"
-                          value={eventVenue}
-                          onChange={(e) => setEventVenue(e.target.value)}
-                          required
-                          className="input-field"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <label className="font-pixel-sm text-[9px] font-bold text-black block uppercase tracking-wider">Venue</label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: Stadion GBK"
+                        value={eventVenue}
+                        onChange={(e) => setEventVenue(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 border-[3px] border-black bg-white font-pixel-sm text-[9px] focus:outline-hidden"
+                      />
+                    </div>
 
-                      <div className="space-y-1.5">
-                        <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Tanggal</label>
-                        <input
-                          type="text"
-                          placeholder="Contoh: 12 Juli 2026"
-                          value={eventDate}
-                          onChange={(e) => setEventDate(e.target.value)}
-                          required
-                          className="input-field"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <label className="font-pixel-sm text-[9px] font-bold text-black block uppercase tracking-wider">Tanggal</label>
+                      <input
+                        type="text"
+                        placeholder="Contoh: 12 Juli 2026"
+                        value={eventDate}
+                        onChange={(e) => setEventDate(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 border-[3px] border-black bg-white font-pixel-sm text-[9px] focus:outline-hidden"
+                      />
+                    </div>
 
-                      <div className="space-y-1.5">
-                        <div className="flex justify-between items-center">
-                          <label className="text-[11px] font-semibold text-bark block uppercase tracking-wider">Price Ceiling</label>
-                          <span className="text-[10px] text-warm-600 font-bold">
-                            {isOwner ? "10% (Default)" : `Max ${priceCeilingMarkup}%`}
-                          </span>
-                        </div>
+                    <div className="space-y-2">
+                      <label className="font-pixel-sm text-[9px] font-bold text-black block uppercase tracking-wider">Price Ceiling</label>
+                      <div className="relative">
                         <select
                           disabled={isOwner}
                           value={isOwner ? 10 : priceCeilingMarkup}
                           onChange={(e) => {
                             if (!isOwner) setPriceCeilingMarkup(Number(e.target.value));
                           }}
-                          className={`input-field appearance-none ${
+                          className={`w-full pl-4 pr-10 py-3 border-[3px] border-black bg-white font-pixel-sm text-[9px] appearance-none ${
                             isOwner ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
                           }`}
                         >
@@ -705,21 +692,23 @@ export default function CreatorPage() {
                           <option value="10">10% (1.1x)</option>
                           <option value="20">20% (1.2x)</option>
                         </select>
-                        {isOwner && (
-                          <p className="text-[9px] text-amber-600 leading-relaxed flex items-start gap-1">
-                            <ShieldAlert className="w-3 h-3 shrink-0 mt-0.5" />
-                            Mode On-Chain: Ceiling dikunci 10% di smart contract.
-                          </p>
-                        )}
+                        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-black pointer-events-none stroke-[2.5]" />
                       </div>
+                      {isOwner && (
+                        <p className="font-pixel-sm text-[8px] text-amber-600 leading-relaxed flex items-start gap-1 uppercase mt-1">
+                          <ShieldAlert className="w-3.5 h-3.5 shrink-0 mt-0.5 stroke-[2.5]" />
+                          Mode On-Chain: Ceiling dikunci 10% di smart contract.
+                        </p>
+                      )}
                     </div>
+                  </div>
 
-                    {/* Submit */}
-                    <button
-                      type="submit"
-                      disabled={isLaunching}
-                      className="w-full py-3.5 rounded-xl bg-linear-to-r from-warm-500 to-warm-600 text-white font-heading font-bold text-sm shadow-warm hover:shadow-warm-lg hover:scale-[1.01] transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
-                    >
+                  {/* Submit */}
+                  <button
+                    type="submit"
+                    disabled={isLaunching}
+                    className="w-full py-4 border-[3px] border-black bg-[#FF5722] text-white font-pixel-sm text-[10px] uppercase font-bold shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-[#E64A19] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_rgba(0,0,0,1)] transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer"
+                  >
                       {isLaunching ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -736,7 +725,6 @@ export default function CreatorPage() {
                 )}
               </div>
             </div>
-          </div>
         </section>
       </main>
 

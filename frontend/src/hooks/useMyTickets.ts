@@ -1,6 +1,7 @@
 import { useAccount, useReadContracts } from "wagmi";
 import { NFT_ABI, NFT_ADDRESS } from "@/config/contracts";
 import type { Abi } from "viem";
+import { baseSepolia } from "viem/chains";
 
 export interface TicketHolder {
   name: string;
@@ -33,12 +34,14 @@ export function useMyTickets() {
           abi: NFT_ABI as Abi,
           functionName: "balanceOf" as const,
           args: [address, BigInt(tokenId)] as const,
+          chainId: baseSepolia.id,
         },
         {
           address: NFT_ADDRESS,
           abi: NFT_ABI as Abi,
           functionName: "getTicketHolders" as const,
           args: [address, BigInt(tokenId)] as const,
+          chainId: baseSepolia.id,
         },
       ])
     : [];

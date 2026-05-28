@@ -262,28 +262,7 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  // ─── Load Simulated Sandbox Events ──────────────────────────────────────
-
-  useEffect(() => {
-    try {
-      const rawSimulated = localStorage.getItem("billet_simulated_events");
-      if (rawSimulated) {
-        const parsed = JSON.parse(rawSimulated);
-        const formatted: RichEvent[] = parsed.map((item: any) => ({
-          ...item,
-          tokenId: BigInt(item.tokenId),
-          amount: BigInt(item.amount),
-          pricePerUnit: BigInt(item.pricePerUnit),
-          originalPrice: BigInt(item.originalPrice)
-        }));
-        setCustomEvents(formatted);
-      }
-    } catch (e) {
-      console.error("Error reading simulated sandbox events:", e);
-    }
-  }, []);
-
-  // ─── Merge On-Chain Listings & Mock Events ──────────────────────────────
+  // ─── Filter Events ──────────────────────────────────────────────────────
 
   const allEvents = useMemo(() => {
     // Convert on-chain active listings to RichEvent structure
@@ -313,8 +292,8 @@ export default function Home() {
       };
     });
 
-    return [...chainEvents, ...customEvents, ...mockEvents];
-  }, [activeListings, customEvents]);
+    return [...chainEvents];
+  }, [activeListings]);
 
   // ─── Filter Events ──────────────────────────────────────────────────────
 
@@ -329,14 +308,9 @@ export default function Home() {
       
       const matchCity = !selectedCity || event.city === selectedCity;
 
-      const matchType =
-        selectedTypeFilter === 'all' ||
-        (selectedTypeFilter === 'onchain' && !event.isMock) ||
-        (selectedTypeFilter === 'sandbox' && event.isMock);
-
-      return matchSearch && matchCategory && matchCity && matchType;
+      return matchSearch && matchCategory && matchCity;
     });
-  }, [allEvents, searchQuery, selectedCategory, selectedCity, selectedTypeFilter]);
+  }, [allEvents, searchQuery, selectedCategory, selectedCity]);
 
   // ─── Buy / Simulation Action ────────────────────────────────────────────
 
@@ -360,111 +334,164 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-cream relative">
+    <div className="min-h-screen flex flex-col neo-grid-bg relative text-black">
       <Navbar />
 
       <main className="flex-1 pb-24">
-        {/* ─── Carousel Hero Banner ──────────────────────────────────────── */}
-        <section className="relative overflow-hidden w-full h-95 sm:h-105 md:h-115 bg-bark text-white">
-          {carouselBanners.map((banner, i) => {
-            const isActive = i === carouselIndex;
-            return (
-              <div
-                key={banner.id}
-                className={`absolute inset-0 w-full h-full flex flex-col justify-end transition-all duration-700 ease-in-out ${
-                  isActive
-                    ? "opacity-100 scale-100 z-10"
-                    : "opacity-0 scale-105 pointer-events-none z-0"
-                }`}
-              >
-                {/* Visual Background Pattern */}
-                <div
-                  className={`absolute inset-0 ${banner.gradient}`}
-                />
-                <div className="absolute inset-0 bg-black/20" />
+        {/* ─── Hero Section (Neo-Brutalist Jendela Retro) ────────────────── */}
+        <section className="max-w-7xl mx-auto px-5 sm:px-8 pt-12 pb-8">
+          <div className="grid lg:grid-cols-12 gap-8 items-start">
+            
+            {/* Left Column: Title Window & Feature List Window */}
+            <div className="lg:col-span-7 space-y-8">
+              {/* Retro Window 1: Large Tilted Banner */}
+              <div className="bg-white neo-border neo-shadow p-6 relative overflow-hidden -rotate-1 hover:rotate-0 transition-transform duration-200">
+                <div className="absolute top-2 right-3 flex items-center gap-1.5 font-pixel-sm text-[9px] border-2 border-black px-1.5 py-0.5 bg-neutral-200">
+                  <span>TRIAL & ERROR</span>
+                  <span className="font-bold border-l-2 border-black pl-1.5">X</span>
+                </div>
+                <div className="pt-6">
+                  <h1 className="font-pixel-lg text-5xl sm:text-6xl md:text-7xl font-bold tracking-widest text-black leading-tight uppercase">
+                    Billet L2
+                  </h1>
+                  <p className="font-pixel-sm text-[9px] mt-3 text-neutral-700 tracking-tight leading-relaxed">
+                    DECENTRALIZED EVENT TICKETING ON BASE
+                  </p>
+                </div>
+              </div>
 
-                {/* Banner Content */}
-                <div className="max-w-7xl mx-auto px-5 sm:px-8 pb-12 sm:pb-16 w-full relative z-20 flex flex-col md:flex-row md:items-end justify-between gap-6">
-                  <div className="max-w-2xl">
-                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/10 text-xs font-semibold text-warm-200 mb-4 border border-white/10">
-                      <Sparkles className="w-3.5 h-3.5 text-warm-400" />
-                      {banner.badgeText}
-                    </span>
-                    <p className="text-sm font-heading font-semibold text-warm-400 tracking-wide mb-1 uppercase">
-                      {banner.tagline}
-                    </p>
-                    <h1 className="font-heading font-extrabold text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight leading-[1.05] mb-4">
-                      {banner.title}
-                    </h1>
-                    <p className="text-white/80 text-sm sm:text-base max-w-lg mb-4 line-clamp-2">
-                      {banner.desc}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs sm:text-sm text-white/60">
-                      <span className="flex items-center gap-1.5">
-                        <Calendar className="w-4 h-4 text-warm-400" />
-                        {banner.date}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <MapPin className="w-4 h-4 text-warm-400" />
-                        {banner.venue}
-                      </span>
-                    </div>
+              {/* Retro Window 2: Features List */}
+              <div className="bg-white neo-border neo-shadow">
+                {/* Title Bar */}
+                <div className="bg-[#F3BE22]/30 border-b-[3.5px] border-black px-4 py-2.5 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3.5 h-3.5 rounded-full bg-[#FF5722] border-2 border-black" />
+                    <div className="w-3.5 h-3.5 rounded-full bg-[#4CAF50] border-2 border-black" />
+                    <div className="w-3.5 h-3.5 rounded-full bg-blue-500 border-2 border-black" />
                   </div>
-
-                  <div className="shrink-0 flex items-center gap-3">
-                    <Link
-                      href="/events"
-                      className="group px-6 py-3 rounded-2xl bg-linear-to-r from-warm-500 to-warm-600 text-white font-heading font-bold text-sm shadow-warm-lg hover:shadow-2xl hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 flex items-center gap-2"
+                  <span className="font-pixel-sm text-[9px] uppercase text-black font-bold">INFO_SYSTEM.EXE</span>
+                </div>
+                {/* Body */}
+                <div className="p-6 space-y-6">
+                  <h3 className="font-pixel-lg text-3xl font-bold text-black uppercase">
+                    E-Learning & Ticketing:
+                  </h3>
+                  <ul className="space-y-3 font-pixel-sm text-[10px] text-black">
+                    <li className="flex items-center gap-2">
+                      <span className="text-[#FF5722] text-lg">■</span> - 100% On-Chain Base Sepolia
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-[#4CAF50] text-lg">■</span> - Price Ceiling Anti-Scalper
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-[#9C27B0] text-lg">■</span> - Bioskop Bebas Calo / Resale
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-blue-500 text-lg">■</span> - Instant QR Gatekeeper Verification
+                    </li>
+                  </ul>
+                  
+                  <div className="pt-2">
+                    <button
+                      onClick={() => {
+                        document.getElementById("events-section")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className="px-6 py-3 bg-[#FF5722] text-white font-pixel-sm text-[10px] uppercase neo-btn cursor-pointer"
                     >
-                      Beli Tiket
-                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                    </Link>
+                      Beli Tiket Sekarang!
+                    </button>
                   </div>
                 </div>
               </div>
-            );
-          })}
+            </div>
 
-          {/* Navigation Controls */}
-          <div className="absolute bottom-6 right-8 z-30 flex items-center gap-2">
-            {carouselBanners.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => setCarouselIndex(idx)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  idx === carouselIndex ? "w-6 bg-warm-500" : "w-2 bg-white/40"
-                }`}
-                aria-label={`Slide ${idx + 1}`}
-              />
-            ))}
+            {/* Right Column: Event Carousel Window (Edward Newgate mockup style) */}
+            <div className="lg:col-span-5">
+              <div className="bg-white neo-border neo-shadow">
+                {/* Title Bar */}
+                <div className="bg-[#4CAF50]/20 border-b-[3.5px] border-black px-4 py-2.5 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3.5 h-3.5 rounded-full bg-[#FF5722] border-2 border-black" />
+                    <div className="w-3.5 h-3.5 rounded-full bg-[#4CAF50] border-2 border-black" />
+                  </div>
+                  <span className="font-pixel-sm text-[9px] uppercase text-black font-bold">BILLET_CAROUSEL.EXE</span>
+                </div>
+                {/* Body */}
+                <div className="p-4">
+                  {/* Image/Gradient area resembling photo in reference */}
+                  <div className={`h-64 sm:h-72 border-[3.5px] border-black relative overflow-hidden flex flex-col justify-end text-white p-5 ${carouselBanners[carouselIndex].gradient}`}>
+                    {/* Retro elements overlay */}
+                    <div className="absolute top-3 left-3 bg-black border-2 border-black text-white px-2 py-0.5 font-pixel-sm text-[8px]">
+                      {carouselBanners[carouselIndex].badgeText}
+                    </div>
+                    <div className="absolute top-3 right-3 bg-white border-2 border-black text-black w-8 h-8 flex items-center justify-center font-bold">
+                      ★
+                    </div>
+                    <div className="relative z-10 space-y-2 bg-black/40 p-3 border-2 border-black backdrop-blur-xs">
+                      <h4 className="font-pixel-lg text-2xl uppercase font-bold leading-tight line-clamp-1">
+                        {carouselBanners[carouselIndex].title}
+                      </h4>
+                      <p className="font-pixel-sm text-[9px] text-white/90 line-clamp-2 leading-relaxed">
+                        {carouselBanners[carouselIndex].desc}
+                      </p>
+                      <p className="font-pixel-sm text-[8px] text-[#4CAF50]">
+                        {carouselBanners[carouselIndex].date} @ {carouselBanners[carouselIndex].venue}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Character/Active Tag Badge similar to Edward Newgate */}
+                  <div className="mt-4 bg-[#4CAF50] border-[3.5px] border-black p-3 text-center neo-shadow-sm">
+                    <span className="font-pixel-sm text-xs text-white uppercase tracking-wider font-bold">
+                      ★ HOT DEALS ★
+                    </span>
+                  </div>
+
+                  {/* Navigation dots */}
+                  <div className="mt-4 flex items-center justify-center gap-3">
+                    {carouselBanners.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCarouselIndex(idx)}
+                        className={`w-4 h-4 border-2 border-black transition-all cursor-pointer ${
+                          idx === carouselIndex ? "bg-[#FF5722] -translate-x-px -translate-y-px shadow-[2px_2px_0_0_rgba(0,0,0,1)]" : "bg-white"
+                        }`}
+                        aria-label={`Slide ${idx + 1}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </section>
 
         {/* ─── Search & Category Selector ───────────────────────────────── */}
-        <section className="relative z-30 -mt-8 max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="rounded-3xl glass-strong p-5 shadow-warm-lg flex flex-col md:flex-row gap-4 items-center justify-between">
+        <section id="events-section" className="max-w-7xl mx-auto px-5 sm:px-8 py-8 relative z-30">
+          <div className="bg-white neo-border neo-shadow p-6 flex flex-col lg:flex-row gap-6 items-center justify-between">
             {/* Search Input */}
-            <div className="relative w-full md:flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone/50" />
+            <div className="relative w-full lg:flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-black stroke-[2.5]" />
               <input
                 type="text"
-                placeholder="Cari konser musik, webinar, olahraga di Billet..."
+                placeholder="Cari event musik, seminar, seni di Base..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-5 py-3.5 rounded-2xl border border-bark/10 bg-cream/30 focus:bg-white focus:border-warm-500 focus:outline-hidden text-bark placeholder:text-stone/40 text-sm font-medium transition-all"
+                className="w-full pl-12 pr-5 py-3.5 border-[3.5px] border-black bg-white focus:bg-yellow-50/20 focus:outline-hidden text-black placeholder:text-neutral-500 font-pixel-sm text-[10px] transition-all"
               />
             </div>
 
             {/* Quick Category Pills */}
-            <div className="flex flex-wrap items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+            <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
               {["Semua", "Musik", "Seminar", "Olahraga", "Seni"].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-4.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold font-heading transition-all duration-200 shrink-0 ${
+                  className={`px-4.5 py-2.5 border-[3px] border-black font-pixel-sm text-[10px] uppercase transition-all duration-100 shrink-0 cursor-pointer ${
                     selectedCategory === cat
-                      ? "bg-bark text-white shadow-xs"
-                      : "glass text-stone hover:text-bark hover:bg-white/70"
+                      ? "bg-black text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] -translate-x-px -translate-y-px"
+                      : "bg-white text-black hover:bg-neutral-50 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:-translate-x-px hover:-translate-y-px"
                   }`}
                 >
                   {cat}
@@ -474,179 +501,135 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ─── Active Event List ("Event Seru Untukmu") ─────────────────── */}
-        <section className="max-w-7xl mx-auto px-5 sm:px-8 pt-16">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 border-b border-bark/5 pb-6">
+        {/* ─── Active Event List ─────────────────────────────────────────── */}
+        <section className="max-w-7xl mx-auto px-5 sm:px-8 py-8">
+          <div className="bg-white neo-border neo-shadow p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-bark flex items-center gap-2">
+              <h2 className="font-pixel-lg text-4xl text-black flex items-center gap-3 uppercase font-bold">
                 Event Seru Untukmu
-                <span className="w-2.5 h-2.5 rounded-full bg-warm-500 animate-ping shrink-0" />
+                <span className="w-3.5 h-3.5 bg-[#FF5722] border-2 border-black inline-block shrink-0 animate-ping" />
               </h2>
-              <p className="text-stone text-sm sm:text-base mt-1">
-                Beli langsung dari organizer atau penjual resale resmi terverifikasi Base L2.
+              <p className="font-pixel-sm text-[10px] text-neutral-700 mt-2">
+                Beli langsung dari organizer resmi secara 100% on-chain di Base L2.
               </p>
             </div>
 
-            {/* Source Tab Filters & Reset Buttons */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex p-1 rounded-2xl bg-sand/65 border border-bark/5 items-center gap-1 shadow-inner">
-                <button
-                  onClick={() => setSelectedTypeFilter('all')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-heading transition-all duration-200 ${
-                    selectedTypeFilter === 'all'
-                      ? "bg-bark text-white shadow-xs"
-                      : "text-stone hover:text-bark"
-                  }`}
-                >
-                  Semua
-                </button>
-                <button
-                  onClick={() => setSelectedTypeFilter('onchain')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-heading transition-all duration-200 ${
-                    selectedTypeFilter === 'onchain'
-                      ? "bg-green-500 text-white shadow-md"
-                      : "text-stone hover:text-bark"
-                  }`}
-                >
-                  On-Chain Base
-                </button>
-                <button
-                  onClick={() => setSelectedTypeFilter('sandbox')}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-heading transition-all duration-200 ${
-                    selectedTypeFilter === 'sandbox'
-                      ? "bg-warm-500 text-white shadow-warm"
-                      : "text-stone hover:text-bark"
-                  }`}
-                >
-                  Sandbox Demo
-                </button>
-              </div>
-
-              {(selectedCity || selectedCategory !== "Semua" || searchQuery || selectedTypeFilter !== 'all') && (
-                <button
-                  onClick={() => {
-                    setSelectedCity("");
-                    setSelectedCategory("Semua");
-                    setSearchQuery("");
-                    setSelectedTypeFilter('all');
-                  }}
-                  className="px-3.5 py-2 rounded-xl bg-warm-100 text-warm-700 text-xs font-bold hover:bg-warm-200 transition-colors border border-warm-200 shrink-0"
-                >
-                  Reset Filter
-                </button>
-              )}
-            </div>
+            {/* Reset Filter Button */}
+            {(selectedCity || selectedCategory !== "Semua" || searchQuery) && (
+              <button
+                onClick={() => {
+                  setSelectedCity("");
+                  setSelectedCategory("Semua");
+                  setSearchQuery("");
+                }}
+                className="px-4 py-2 border-[3px] border-black bg-[#FF5722] text-white font-pixel-sm text-[9px] uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-[#E64A19] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_rgba(0,0,0,1)] cursor-pointer"
+              >
+                Reset Filter
+              </button>
+            )}
           </div>
 
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20 bg-white/40 rounded-3xl border border-bark/5">
-              <div className="w-10 h-10 border-4 border-warm-200 border-t-warm-500 rounded-full animate-spin mb-4" />
-              <p className="text-stone text-sm">Menyelaraskan data tiket dari blockchain...</p>
+            <div className="flex flex-col items-center justify-center py-20 bg-white neo-border neo-shadow">
+              <div className="w-12 h-12 border-4 border-black border-t-[#FF5722] rounded-full animate-spin mb-4" />
+              <p className="font-pixel-sm text-xs">Menyelaraskan data tiket dari blockchain...</p>
             </div>
           ) : filteredEvents.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center bg-white/40 rounded-3xl border border-bark/5 p-6">
-              <AlertCircle className="w-12 h-12 text-stone/40 mb-4" />
-              <h3 className="font-heading font-semibold text-lg text-bark mb-1">
+            <div className="flex flex-col items-center justify-center py-20 text-center bg-white neo-border neo-shadow p-6">
+              <AlertCircle className="w-12 h-12 text-black mb-4 stroke-[2.5]" />
+              <h3 className="font-pixel-lg text-3xl font-bold mb-2 uppercase">
                 Event Tidak Ditemukan
               </h3>
-              <p className="text-stone text-sm max-w-sm">
+              <p className="font-pixel-sm text-[10px] text-neutral-600 max-w-sm">
                 Coba sesuaikan kata kunci pencarian Anda, ganti filter kategori, atau klik kota lain.
               </p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredEvents.map((event) => {
-                const categoryColor = event.category === "Musik" ? "bg-purple-100 text-purple-700" :
-                                      event.category === "Seminar" ? "bg-blue-100 text-blue-700" :
-                                      event.category === "Olahraga" ? "bg-green-100 text-green-700" :
-                                      "bg-orange-100 text-orange-700";
-
-                const cardStyleClass = event.isMock
-                  ? "border border-dashed border-bark/15 bg-white/40 hover:border-warm-400"
-                  : "border border-solid border-warm-500/25 bg-linear-to-br from-white/70 to-warm-50/15 shadow-warm hover:shadow-warm-lg hover:border-warm-500";
+                const categoryColor = event.category === "Musik" ? "bg-[#9C27B0] text-white" :
+                                      event.category === "Seminar" ? "bg-blue-600 text-white" :
+                                      event.category === "Olahraga" ? "bg-[#4CAF50] text-white" :
+                                      "bg-[#FF5722] text-white";
 
                 return (
                   <div
                     key={event.listingId}
                     onClick={() => handleBuyClick(event)}
-                    className={`group relative rounded-3xl overflow-hidden hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col justify-between ${cardStyleClass}`}
+                    className="group bg-white neo-border neo-shadow overflow-hidden hover:-translate-y-1 active:translate-y-px transition-all duration-200 cursor-pointer flex flex-col justify-between"
                   >
                     {/* Header Image Gradient */}
-                    <div className={`h-36 bg-linear-to-br ${event.bannerGradient} relative overflow-hidden shrink-0`}>
-                      {/* Grid overlays */}
-                      <div className="absolute inset-0 bg-black/10 opacity-30" />
-                      <div className="absolute inset-0 bg-radial-at-t from-white/20 to-transparent" />
-
+                    <div className={`h-40 bg-linear-to-br ${event.bannerGradient} relative border-b-[3.5px] border-black overflow-hidden shrink-0`}>
                       {/* Floating Category tag */}
-                      <div className="absolute top-4 left-4">
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold shadow-xs ${categoryColor}`}>
+                      <div className="absolute top-3 left-3">
+                        <span className={`inline-flex items-center px-2.5 py-1 border-[2.5px] border-black font-pixel-sm text-[8px] uppercase font-bold ${categoryColor}`}>
                           {event.category}
                         </span>
                       </div>
 
                       {/* Blockchain Verified Badge */}
-                      <div className="absolute top-4 right-4 flex items-center gap-1.5">
+                      <div className="absolute top-3 right-3 flex items-center gap-1.5">
                         {event.isMock ? (
-                          <span className="px-2.5 py-1 rounded-full bg-bark/40 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider">
+                          <span className="px-2 py-0.5 border-2 border-black bg-neutral-200 font-pixel-sm text-[8px] text-black uppercase">
                             Demo
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-500 text-white text-[10px] font-extrabold uppercase tracking-wider shadow-sm animate-pulse-warm">
+                          <span className="inline-flex items-center px-2 py-0.5 border-2 border-black bg-[#4CAF50] text-white font-pixel-sm text-[8px] uppercase tracking-wider shadow-sm animate-pulse-warm">
                             On-Chain
                           </span>
                         )}
                         {event.isResale && (
-                          <span className="px-2.5 py-1 rounded-full bg-bark/85 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-wider">
+                          <span className="px-2 py-0.5 border-2 border-black bg-black text-white font-pixel-sm text-[8px] uppercase">
                             Resale
                           </span>
                         )}
                       </div>
 
                       {/* City Badge Bottom Left */}
-                      <div className="absolute bottom-3 left-4 flex items-center gap-1 text-white/95 text-xs font-semibold drop-shadow-sm">
-                        <MapPin className="w-3.5 h-3.5 text-warm-400" />
+                      <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-white border-2 border-black text-black px-2 py-0.5 font-pixel-sm text-[8px] uppercase">
+                        <MapPin className="w-3 h-3 text-[#FF5722] stroke-[2.5]" />
                         {event.city}
                       </div>
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-6 flex-1 flex flex-col justify-between">
+                    <div className="p-5 flex-1 flex flex-col justify-between">
                       <div>
                         {/* Event Title */}
-                        <h3 className="font-heading font-extrabold text-lg text-bark mb-1.5 leading-tight group-hover:text-warm-600 transition-colors">
+                        <h3 className="font-pixel-lg text-2xl font-bold text-black mb-3.5 leading-tight group-hover:text-[#FF5722] transition-colors uppercase">
                           {event.title}
                         </h3>
 
                         {/* Location and Date details */}
-                        <div className="space-y-1 mb-4">
-                          <div className="flex items-center gap-2 text-stone text-xs">
-                            <Calendar className="w-3.5 h-3.5 text-stone/50" />
+                        <div className="space-y-2 mb-4 font-pixel-sm text-[9px] text-neutral-700">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-3.5 h-3.5 text-black stroke-[2.5]" />
                             <span>{event.date}</span>
                           </div>
-                          <div className="flex items-center gap-2 text-stone text-xs">
-                            <MapPin className="w-3.5 h-3.5 text-stone/50" />
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-3.5 h-3.5 text-black stroke-[2.5]" />
                             <span className="line-clamp-1">{event.venue}</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Pricing row */}
-                      <div className="pt-4 border-t border-bark/5 flex items-end justify-between">
+                      <div className="pt-4 border-t-[3px] border-black flex items-end justify-between">
                         <div>
-                          <p className="text-[10px] text-stone/60 font-medium uppercase tracking-wider mb-0.5">
+                          <p className="font-pixel-sm text-[8px] text-neutral-500 uppercase mb-1">
                             {event.isResale ? "Harga Resale" : "Harga Mulai"}
                           </p>
-                          <p className="font-heading font-extrabold text-xl text-bark">
+                          <p className="font-pixel-lg text-2xl font-bold text-black">
                             {formatIDRX(event.pricePerUnit)}
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs text-stone font-medium">
-                            <strong className="text-bark">{event.amount.toString()}</strong> tiket
+                        <div className="flex items-center gap-2">
+                          <span className="font-pixel-sm text-[8px] text-black">
+                            <strong className="text-[#FF5722]">{event.amount.toString()}</strong> TIKET
                           </span>
-                          <div className="w-8 h-8 rounded-xl bg-warm-500 text-white flex items-center justify-center group-hover:scale-105 transition-transform shadow-xs">
-                            <ArrowRight className="w-4 h-4" />
+                          <div className="w-9 h-9 border-[3px] border-black bg-[#FF5722] text-white flex items-center justify-center shadow-[2px_2px_0_0_rgba(0,0,0,1)] group-hover:-translate-x-px group-hover:-translate-y-px group-hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all">
+                            <ArrowRight className="w-5 h-5 stroke-[2.5]" />
                           </div>
                         </div>
                       </div>
@@ -659,18 +642,18 @@ export default function Home() {
         </section>
 
         {/* ─── Trending Banner Slider ───────────────────────────────────── */}
-        <section className="max-w-7xl mx-auto px-5 sm:px-8 pt-20">
-          <div className="rounded-3xl bg-bark p-8 sm:p-12 text-white relative overflow-hidden">
+        <section className="max-w-7xl mx-auto px-5 sm:px-8 py-8">
+          <div className="bg-white neo-border neo-shadow p-8 sm:p-12 relative overflow-hidden">
             <div className="relative max-w-2xl space-y-6">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warm-500/20 text-warm-300 text-xs font-bold border border-warm-500/20 uppercase tracking-wide">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FF5722]/15 border-2 border-black text-[#FF5722] font-pixel-sm text-[8px] uppercase tracking-wide">
                 <Volume2 className="w-3.5 h-3.5" />
                 Anti-Scalper Guarantee
               </span>
-              <h2 className="font-heading font-black text-3xl sm:text-4xl md:text-5xl leading-tight">
+              <h2 className="font-pixel-lg text-4xl sm:text-5xl font-black text-black leading-tight uppercase">
                 Kesal Dengan Calo? <br />
-                Billet Adalah <span className="text-gradient-warm">Jawabannya!</span>
+                Billet Adalah <span className="text-[#FF5722]">Jawabannya!</span>
               </h2>
-              <p className="text-white/70 text-sm sm:text-base leading-relaxed">
+              <p className="font-pixel-sm text-[10px] text-neutral-800 leading-relaxed">
                 Kami menerapkan sistem **Price Ceiling (Batas Harga Maksimum)** otomatis di dalam kontrak pintar ERC-1155. 
                 Tiket tidak dapat dijual kembali melebihi batas markup (misal maksimal 1.1x). 
                 Pembeli terlindungi, kreator tetap mendapatkan royalti resale otomatis.
@@ -682,10 +665,10 @@ export default function Home() {
                   { title: "Verifikasi Base L2", desc: "Tiket NFT ERC-1155 Sah" }
                 ].map((stat, i) => (
                   <div key={i} className="flex gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-warm-400 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-bold text-xs sm:text-sm">{stat.title}</p>
-                      <p className="text-white/50 text-[11px] sm:text-xs">{stat.desc}</p>
+                    <CheckCircle2 className="w-5 h-5 text-[#4CAF50] shrink-0 mt-0.5 stroke-[2.5]" />
+                    <div className="font-pixel-sm">
+                      <p className="font-bold text-[10px] text-black">{stat.title}</p>
+                      <p className="text-neutral-500 text-[8px] mt-0.5">{stat.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -695,42 +678,42 @@ export default function Home() {
         </section>
 
         {/* ─── Billet Cinema Ticket Category ("Billet Bioskop") ─────────── */}
-        <section className="max-w-7xl mx-auto px-5 sm:px-8 pt-20">
-          <div className="flex items-end justify-between mb-8">
+        <section className="max-w-7xl mx-auto px-5 sm:px-8 py-8">
+          <div className="bg-white neo-border neo-shadow p-6 mb-8 flex items-center justify-between gap-4">
             <div>
-              <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-bark flex items-center gap-2">
+              <h2 className="font-pixel-lg text-4xl text-black flex items-center gap-2 uppercase font-bold">
                 Billet Bioskop
-                <Clapperboard className="w-6 h-6 text-warm-500" />
+                <Clapperboard className="w-7 h-7 text-[#FF5722] stroke-2" />
               </h2>
-              <p className="text-stone text-sm sm:text-base mt-1">
+              <p className="font-pixel-sm text-[10px] text-neutral-700 mt-2">
                 Tonton film blockbuster favorit Anda dengan sistem tiket digital bebas calo.
               </p>
             </div>
             <Link
               href="/events"
-              className="text-warm-600 hover:text-warm-700 font-semibold text-sm flex items-center gap-1 group shrink-0"
+              className="text-[#FF5722] hover:text-[#E64A19] font-pixel-sm text-[10px] uppercase font-bold flex items-center gap-1 group shrink-0"
             >
-              Lihat Semua
-              <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+              Semua
+              <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 stroke-[2.5]" />
             </Link>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {mockMovies.map((movie) => (
               <div
                 key={movie.id}
                 onClick={() => {
                   toast.success(`[Simulasi Bioskop] Tiket "${movie.title}" berhasil di-booking!`, {
                     description: "Terima kasih telah menggunakan sistem Billet Cinema.",
-                    icon: <Film className="w-5 h-5 text-warm-500" />
+                    icon: <Film className="w-5 h-5 text-[#FF5722]" />
                   });
                 }}
-                className="group relative rounded-3xl glass p-5 hover:shadow-warm-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer flex gap-4"
+                className="group bg-white neo-border neo-shadow p-5 hover:-translate-y-1 active:translate-y-px transition-all duration-200 cursor-pointer flex gap-4"
               >
                 {/* Poster Placeholder */}
-                <div className={`w-24 h-32 rounded-2xl ${movie.imageUrl} shrink-0 relative overflow-hidden flex flex-col justify-between p-3 text-white shadow-md`}>
+                <div className={`w-24 h-32 border-3 border-black ${movie.imageUrl} shrink-0 relative overflow-hidden flex flex-col justify-between p-3 text-white shadow-md`}>
                   <Film className="w-4 h-4 text-white/50" />
-                  <span className="text-[10px] font-bold tracking-wider uppercase bg-white/20 backdrop-blur-xs px-1.5 py-0.5 rounded text-center">
+                  <span className="font-pixel-sm text-[7px] font-bold bg-black text-white px-1 py-0.5 text-center">
                     BIOSKOP
                   </span>
                 </div>
@@ -738,21 +721,20 @@ export default function Home() {
                 {/* Details */}
                 <div className="flex flex-col justify-between py-1">
                   <div>
-                    <span className="text-[10px] font-bold text-stone/50 uppercase tracking-widest">
+                    <span className="font-pixel-sm text-[8px] font-bold text-neutral-500 uppercase tracking-widest">
                       {movie.genre}
                     </span>
-                    <h3 className="font-heading font-bold text-base sm:text-lg text-bark mt-0.5 group-hover:text-warm-600 transition-colors">
+                    <h3 className="font-pixel-lg text-2xl font-bold text-black mt-1 group-hover:text-[#FF5722] transition-colors uppercase">
                       {movie.title}
                     </h3>
-                    <p className="text-stone text-xs mt-1">Durasi: {movie.duration}</p>
+                    <p className="font-pixel-sm text-[8px] text-neutral-500 mt-1">Durasi: {movie.duration}</p>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 bg-amber-100 text-amber-700 px-2 py-0.5 rounded-lg text-xs font-bold">
-                      <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                      {movie.rating}
+                    <div className="flex items-center gap-1 bg-amber-100 border-2 border-black text-black px-2 py-0.5 font-pixel-sm text-[8px] font-bold">
+                      ★ {movie.rating}
                     </div>
-                    <p className="font-heading font-extrabold text-sm sm:text-base text-bark">
+                    <p className="font-pixel-lg text-xl font-bold text-black">
                       Rp {movie.price.toLocaleString("id-ID")}
                     </p>
                   </div>
@@ -763,17 +745,17 @@ export default function Home() {
         </section>
 
         {/* ─── Explore by City ("Jelajahi Event di Kotamu") ─────────────── */}
-        <section className="max-w-7xl mx-auto px-5 sm:px-8 pt-20">
-          <div className="mb-8">
-            <h2 className="font-heading font-extrabold text-2xl sm:text-3xl text-bark flex items-center gap-2">
+        <section className="max-w-7xl mx-auto px-5 sm:px-8 py-8">
+          <div className="bg-white neo-border neo-shadow p-6 mb-8">
+            <h2 className="font-pixel-lg text-4xl text-black flex items-center gap-2 uppercase font-bold">
               Jelajahi Event di Kotamu
             </h2>
-            <p className="text-stone text-sm sm:text-base mt-1">
+            <p className="font-pixel-sm text-[10px] text-neutral-700 mt-2">
               Temukan keseruan langsung di kota Anda dengan cepat dan praktis.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {cities.map((city) => {
               const isSelected = selectedCity === city.name;
               return (
@@ -783,23 +765,22 @@ export default function Home() {
                     if (isSelected) setSelectedCity(""); // toggle off
                     else {
                       setSelectedCity(city.name);
-                      // Scroll event grid into view
-                      document.getElementById("events-header")?.scrollIntoView({ behavior: "smooth" });
+                      document.getElementById("events-section")?.scrollIntoView({ behavior: "smooth" });
                     }
                   }}
-                  className={`group rounded-3xl p-6 text-center cursor-pointer transition-all duration-300 border ${
+                  className={`group p-6 text-center cursor-pointer transition-all duration-200 border-[3.5px] border-black ${
                     isSelected
-                      ? "bg-warm-500 text-white border-warm-600 scale-[1.02] shadow-warm"
-                      : `bg-linear-to-br ${city.color} border-bark/5 hover:border-warm-500/20 hover:scale-[1.01] hover:shadow-xs`
+                      ? "bg-[#FF5722] text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] -translate-x-px -translate-y-px"
+                      : `bg-white text-black hover:border-[#FF5722] hover:-translate-y-0.5 shadow-[4px_4px_0_0_rgba(0,0,0,1)]`
                   }`}
                 >
-                  <div className="text-3xl sm:text-4xl mb-3 transition-transform group-hover:scale-110">
+                  <div className="text-4xl mb-3 transition-transform group-hover:scale-110">
                     {city.icon}
                   </div>
-                  <h3 className={`font-heading font-bold text-base sm:text-lg ${isSelected ? "text-white" : "text-bark"}`}>
+                  <h3 className={`font-pixel-lg text-2xl font-bold uppercase ${isSelected ? "text-white" : "text-black"}`}>
                     {city.name}
                   </h3>
-                  <p className={`text-xs mt-1 ${isSelected ? "text-white/80" : "text-stone/60"}`}>
+                  <p className={`font-pixel-sm text-[8px] mt-1 ${isSelected ? "text-white/80" : "text-neutral-500"}`}>
                     {city.count}
                   </p>
                 </div>

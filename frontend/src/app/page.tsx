@@ -112,6 +112,7 @@ export default function Home() {
       };
     });
 
+    // Sandbox mock/localStorage events have been completely removed. Only real on-chain events are returned.
     return chainEvents;
   }, [activeListings]);
 

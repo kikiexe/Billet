@@ -139,6 +139,7 @@ export default function CreatorPage() {
       });
 
       const priceInWei = parseUnits(eventPrice.toString(), 18);
+      // Category is passed directly as a string parameter (e.g. "Musik", "Seminar", etc.)
 
       const tx = await writeContractAsync({
         address: MARKETPLACE_ADDRESS,

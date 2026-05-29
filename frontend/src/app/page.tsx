@@ -4,26 +4,20 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import {
   Search,
-  Sparkles,
   ArrowRight,
-  ChevronLeft,
-  ChevronRight,
   Calendar,
   MapPin,
-  Film,
-  Star,
-  Ticket,
-  Tag,
   Volume2,
-  Trophy,
-  BookOpen,
-  Clapperboard,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Tag,
+  Shield,
+  Activity
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { BuyTicketDialog } from "@/components/events/BuyTicketDialog";
+import { Grainient } from "@/components/ui/Grainient";
 import { useListings, type ListingWithId } from "@/hooks/useListings";
 import { formatIDRX, getCategoryName, getCategoryGradient } from "@/lib/format";
 import { toast } from "sonner";
@@ -51,8 +45,8 @@ const carouselBanners = [
     date: "12 Juli 2026",
     venue: "Stadion Utama GBK, Jakarta",
     category: "Musik",
-    gradient: "bg-warm-600",
-    badgeText: "Terpopuler"
+    gradient: "from-red-950 via-neutral-900 to-black",
+    badgeText: "TERPOPULER"
   },
   {
     id: 2,
@@ -62,8 +56,8 @@ const carouselBanners = [
     date: "15-18 Juni 2026",
     venue: "Gedung Sate IT Hub, Bandung",
     category: "Seminar",
-    gradient: "bg-bark",
-    badgeText: "Rekomendasi"
+    gradient: "from-blue-950 via-neutral-900 to-black",
+    badgeText: "REKOMENDASI"
   },
   {
     id: 3,
@@ -73,135 +67,10 @@ const carouselBanners = [
     date: "22-26 Juli 2026",
     venue: "Istora Senayan, Jakarta",
     category: "Olahraga",
-    gradient: "bg-warm-700",
-    badgeText: "Tiket Terbatas"
+    gradient: "from-emerald-950 via-neutral-900 to-black",
+    badgeText: "TIKET TERBATAS"
   }
 ];
-
-// ─── Mock Events Database ────────────────────────────────────────────────
-
-const mockEvents: RichEvent[] = [
-  {
-    listingId: 101,
-    seller: "0x3D3630A175B5F345672A1BCE3C45FFB123456789",
-    tokenId: 2n, // VIP
-    amount: 15n,
-    pricePerUnit: 350000000000000000000000n, // Rp 350.000 (calibrated to 18 decimals)
-    originalPrice: 350000000000000000000000n,
-    active: true,
-    isResale: false,
-    title: "Tulus: Retrospektif Tour 2026",
-    category: "Musik",
-    city: "Jakarta",
-    date: "12 Juli 2026",
-    venue: "Stadion Utama GBK",
-    isMock: true,
-    bannerGradient: "from-purple-500 to-indigo-600"
-  },
-  {
-    listingId: 102,
-    seller: "0x8A8078F67A123EBC3D2A1C34FF8A123456789ABC",
-    tokenId: 1n, // Reguler
-    amount: 45n,
-    pricePerUnit: 150000000000000000000000n, // Rp 150.000
-    originalPrice: 150000000000000000000000n,
-    active: true,
-    isResale: false,
-    title: "Web3 & AI Summit 2026",
-    category: "Seminar",
-    city: "Bandung",
-    date: "15 Juni 2026",
-    venue: "Gedung Sate IT Hub",
-    isMock: true,
-    bannerGradient: "from-blue-500 to-cyan-600"
-  },
-  {
-    listingId: 103,
-    seller: "0x1A1612C28DF0B234D3A1B28C8A54EFB123456789",
-    tokenId: 1n, // Reguler
-    amount: 20n,
-    pricePerUnit: 200000000000000000000000n, // Rp 200.000
-    originalPrice: 200000000000000000000000n,
-    active: true,
-    isResale: false,
-    title: "Jakarta Half Marathon",
-    category: "Olahraga",
-    city: "Jakarta",
-    date: "22 Juli 2026",
-    venue: "Istora Senayan",
-    isMock: true,
-    bannerGradient: "from-green-500 to-teal-600"
-  },
-  {
-    listingId: 104,
-    seller: "0xE85A2A1A75B5F345672A1BCE3C45FFB123456789",
-    tokenId: 1n, // Reguler
-    amount: 30n,
-    pricePerUnit: 180000000000000000000000n, // Rp 180.000
-    originalPrice: 180000000000000000000000n,
-    active: true,
-    isResale: true,
-    title: "Gudang Merdeka: Rock Concert",
-    category: "Musik",
-    city: "Yogyakarta",
-    date: "05 Juni 2026",
-    venue: "Stadion Kridosono",
-    isMock: true,
-    bannerGradient: "from-rose-500 to-[#FF6B35]"
-  },
-  {
-    listingId: 105,
-    seller: "0x9A3A1BC28DF0B234D3A1B28C8A54EFB123456789",
-    tokenId: 3n, // VVIP
-    amount: 8n,
-    pricePerUnit: 450000000000000000000000n, // Rp 450.000
-    originalPrice: 400000000000000000000000n, // Original Rp 400.000
-    active: true,
-    isResale: true,
-    title: "Svara Festival: Harmoni Alam",
-    category: "Musik",
-    city: "Surabaya",
-    date: "30 Juni 2026",
-    venue: "Kawasan Hutan Pinus",
-    isMock: true,
-    bannerGradient: "from-amber-500 via-orange-500 to-[#FF6B35]"
-  },
-  {
-    listingId: 106,
-    seller: "0xC44A22F67A123EBC3D2A1C34FF8A123456789ABC",
-    tokenId: 1n, // Reguler
-    amount: 25n,
-    pricePerUnit: 80000000000000000000000n, // Rp 80.000
-    originalPrice: 80000000000000000000000n,
-    active: true,
-    isResale: false,
-    title: "Jogja Art & Culture Show",
-    category: "Seni",
-    city: "Yogyakarta",
-    date: "10 Juni 2026",
-    venue: "Taman Budaya Yogyakarta",
-    isMock: true,
-    bannerGradient: "from-violet-500 to-fuchsia-600"
-  },
-  {
-    listingId: 107,
-    seller: "0x2563EBA175B5F345672A1BCE3C45FFB123456789",
-    tokenId: 1n, // Reguler
-    amount: 50n,
-    pricePerUnit: 50000000000000000000000n, // Rp 50.000
-    originalPrice: 50000000000000000000000n,
-    active: true,
-    isResale: false,
-    title: "Next-Gen Dev: React & Solidity",
-    category: "Seminar",
-    city: "Surabaya",
-    date: "25 Juni 2026",
-    venue: "Grand City Hall",
-    isMock: true,
-    bannerGradient: "from-[#FF8A50] to-[#E85A2A]"
-  }
-];
-
 
 export default function Home() {
   const { activeListings, isLoading, refetch } = useListings();
@@ -209,8 +78,6 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
   const [selectedListing, setSelectedListing] = useState<ListingWithId | null>(null);
-  const [customEvents, setCustomEvents] = useState<RichEvent[]>([]);
-  const [selectedTypeFilter, setSelectedTypeFilter] = useState<'all' | 'onchain' | 'sandbox'>('all');
 
   // ─── Carousel Auto-Play ─────────────────────────────────────────────────
 
@@ -224,11 +91,9 @@ export default function Home() {
   // ─── Filter Events ──────────────────────────────────────────────────────
 
   const allEvents = useMemo(() => {
-    // Convert on-chain active listings to RichEvent structure
     const chainEvents: RichEvent[] = activeListings.map((listing) => {
-      const isRes = listing.isResale;
       const catId = Number(listing.tokenId);
-      
+
       let cat: "Musik" | "Seminar" | "Olahraga" | "Seni" = "Musik";
       if (catId === 1) cat = "Musik";
       else if (catId === 2) cat = "Seminar";
@@ -245,23 +110,25 @@ export default function Home() {
         category: cat,
         city: city,
         date: "28 Juni 2026",
-        venue: "Billet Arena Base",
+        venue: "Billet Arena Base L2",
         isMock: false,
-        bannerGradient: getCategoryGradient(listing.tokenId)
+        bannerGradient: "from-red-950 to-neutral-900"
       };
     });
 
-    return [...chainEvents];
-  }, [activeListings]);
+    // Merge simulated sandbox mock events if there are no chain events, or for demo completeness
+    const sandboxItems = typeof window !== "undefined" ? localStorage.getItem("billet_simulated_events") : null;
+    const customListings: RichEvent[] = sandboxItems ? JSON.parse(sandboxItems) : [];
 
-  // ─── Filter Events ──────────────────────────────────────────────────────
+    return [...chainEvents, ...customListings];
+  }, [activeListings]);
 
   const filteredEvents = useMemo(() => {
     return allEvents.filter((event) => {
       const matchSearch =
         event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         event.venue.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       const matchCategory =
         selectedCategory === "Semua" || event.category === selectedCategory;
 
@@ -269,18 +136,16 @@ export default function Home() {
     });
   }, [allEvents, searchQuery, selectedCategory]);
 
-  // ─── Buy / Simulation Action ────────────────────────────────────────────
+  // ─── Checkout Simulation ───────────────────────────────────────────────
 
   const handleBuyClick = (event: RichEvent) => {
     if (event.isMock) {
-      // Mock Event Checkout simulation
-      toast.success(`[Simulasi] Tiket untuk "${event.title}" berhasil masuk keranjang!`, {
-        description: "Hubungkan wallet Anda dan kunjungi halaman /creator untuk meluncurkan tiket asli Anda sendiri secara on-chain.",
+      toast.success(`[Simulasi] Tiket "${event.title}" berhasil masuk antrean!`, {
+        description: "Hubungkan wallet Anda dan kunjungi halaman /creator untuk meluncurkan tiket asli Anda secara on-chain.",
         duration: 5000,
-        icon: <CheckCircle2 className="w-5 h-5 text-green-500" />
+        icon: <CheckCircle2 className="w-5 h-5 text-primary" />
       });
     } else {
-      // Real Blockchain listing opens the buy dialog
       setSelectedListing(event);
     }
   };
@@ -291,133 +156,194 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col neo-grid-bg relative text-black">
+    <div className="min-h-screen flex flex-col bg-canvas text-white">
       <Navbar />
 
       <main className="flex-1 pb-24">
-        {/* ─── Hero Section (Neo-Brutalist Jendela Retro) ────────────────── */}
-        <section className="max-w-7xl mx-auto px-5 sm:px-8 pt-12 pb-8">
-          <div className="grid lg:grid-cols-12 gap-8 items-start">
-            
-            {/* Left Column: Title Window & Feature List Window */}
-            <div className="lg:col-span-7 space-y-8">
-              {/* Retro Window 1: Large Tilted Banner */}
-              <div className="bg-white neo-border neo-shadow p-6 relative overflow-hidden -rotate-1 hover:rotate-0 transition-transform duration-200">
-                <div className="absolute top-2 right-3 flex items-center gap-1.5 font-pixel-sm text-[9px] border-2 border-black px-1.5 py-0.5 bg-neutral-200">
-                  <span>TRIAL & ERROR</span>
-                  <span className="font-bold border-l-2 border-black pl-1.5">X</span>
-                </div>
-                <div className="pt-6">
-                  <h1 className="font-pixel-lg text-5xl sm:text-6xl md:text-7xl font-bold tracking-widest text-black leading-tight uppercase">
-                    Billet L2
-                  </h1>
-                  <p className="font-pixel-sm text-[9px] mt-3 text-neutral-700 tracking-tight leading-relaxed">
-                    DECENTRALIZED EVENT TICKETING ON BASE
-                  </p>
-                </div>
+        {/* ─── Hero Section (Full-bleed Cinematic Editorial) ────────────── */}
+        <section className="relative w-full overflow-hidden border-b border-hairline">
+          {/* Main Visual Cinematic Container */}
+          <div className="relative w-full h-[calc(100vh-64px)] md:h-[calc(100vh-80px)] flex flex-col justify-center">
+
+            {/* Background WebGL Grainient */}
+            <div className="absolute inset-0 z-0 opacity-80 pointer-events-none">
+              <Grainient
+                color1="#fc3b10"
+                color2="#ff4d4d"
+                color3="#0a0202"
+                timeSpeed={0.5}
+                colorBalance={-0.1}
+                warpStrength={3.0}
+                warpFrequency={4.0}
+                warpSpeed={1.5}
+                warpAmplitude={35.0}
+                blendAngle={45.0}
+                blendSoftness={0.05}
+                rotationAmount={500.0}
+                noiseScale={2.0}
+                grainAmount={0.16}
+                grainScale={2.5}
+                contrast={1.6}
+                saturation={1.3}
+                zoom={0.85}
+              />
+            </div>
+
+            {/* KOREKSI 2: Overlay bg-canvas/40 dihapus total agar tidak memblokir interaksi blend-mode. 
+                Hanya sisakan gradient bawah agar transisi ke section selanjutnya tidak terputus kasar */}
+            <div className="absolute inset-0 bg-linear-to-t from-canvas via-transparent to-transparent z-10 pointer-events-none" />
+
+            {/* Container Utama Teks */}
+            <div className="section-container relative z-20 w-full flex flex-col">
+              <span className="self-start font-caption-uppercase text-[12px] md:text-[14px] tracking-[3px] text-white bg-white/5 border border-white/20 px-4 py-1.5 w-fit block mb-4 md:mb-0 font-bold">
+                DECENTRALIZED TICKETING PROTOCOL
+              </span>
+
+              {/* JUDUL & DESKRIPSI */}
+              <div className="max-w-5xl mx-auto flex flex-col items-center text-center mt-4">
+                <h1 style={{ fontFamily: 'Roboto, sans-serif' }} className="text-[12vw] sm:text-[100px] md:text-[150px] lg:text-[180px] font-black leading-[0.8] uppercase tracking-[-0.04em] text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/40 pb-2">
+                  BILLET
+                </h1>
+
+                <p style={{ fontFamily: 'Roboto, sans-serif' }} className="text-base sm:text-lg md:text-xl text-white/70 leading-relaxed max-w-3xl font-light tracking-wide mt-6">
+                  Protokol tiket desentralisasi di jaringan Base. Membatasi ruang gerak pihak ketiga melalui sistem batas harga sekunder otomatis dan memastikan distribusi royalti <span className="text-white font-medium">on-chain</span> yang transparan.
+                </p>
               </div>
 
-              {/* Retro Window 2: Features List */}
-              <div className="bg-white neo-border neo-shadow">
-                {/* Title Bar */}
-                <div className="bg-[#F3BE22]/30 border-b-[3.5px] border-black px-4 py-2.5 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3.5 h-3.5 rounded-full bg-[#FF5722] border-2 border-black" />
-                    <div className="w-3.5 h-3.5 rounded-full bg-[#4CAF50] border-2 border-black" />
-                    <div className="w-3.5 h-3.5 rounded-full bg-blue-500 border-2 border-black" />
-                  </div>
-                  <span className="font-pixel-sm text-[9px] uppercase text-black font-bold">INFO_SYSTEM.EXE</span>
-                </div>
-                {/* Body */}
-                <div className="p-6 space-y-6">
-                  <h3 className="font-pixel-lg text-3xl font-bold text-black uppercase">
-                    E-Learning & Ticketing:
-                  </h3>
-                  <ul className="space-y-3 font-pixel-sm text-[10px] text-black">
-                    <li className="flex items-center gap-2">
-                      <span className="text-[#FF5722] text-lg">■</span> - 100% On-Chain Base Sepolia
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-[#4CAF50] text-lg">■</span> - Price Ceiling Anti-Scalper
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-[#9C27B0] text-lg">■</span> - Bioskop Bebas Calo / Resale
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-blue-500 text-lg">■</span> - Instant QR Gatekeeper Verification
-                    </li>
-                  </ul>
-                  
-                  <div className="pt-2">
-                    <button
-                      onClick={() => {
-                        document.getElementById("events-section")?.scrollIntoView({ behavior: "smooth" });
-                      }}
-                      className="px-6 py-3 bg-[#FF5722] text-white font-pixel-sm text-[10px] uppercase neo-btn cursor-pointer"
-                    >
-                      Beli Tiket Sekarang!
-                    </button>
-                  </div>
-                </div>
+              {/* TOMBOL AKSI */}
+              <div className="flex flex-wrap justify-center gap-4 pt-8 mx-auto">
+                <button
+                  onClick={() => {
+                    document.getElementById("events-section")?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="btn-primary text-sm px-8 py-4"
+                >
+                  JELAJAHI EVENT
+                </button>
+                <Link
+                  href="/creator"
+                  className="btn-outline text-sm px-8 py-4"
+                >
+                  TERBITKAN TIKET
+                </Link>
               </div>
             </div>
 
-            {/* Right Column: Event Carousel Window (Edward Newgate mockup style) */}
-            <div className="lg:col-span-5">
-              <div className="bg-white neo-border neo-shadow">
-                {/* Title Bar */}
-                <div className="bg-[#4CAF50]/20 border-b-[3.5px] border-black px-4 py-2.5 flex items-center justify-between">
+          </div>
+        </section>
+        {/* ─── Trackside Specs & Highlights (Ferrari Racing Cell Theme) ─── */}
+        <section className="border-b border-hairline py-16 bg-canvas">
+          <div className="section-container">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+              {[
+                { pos: "01", title: "100% ON-CHAIN SECURE", desc: "Tiket dicetak sebagai NFT ERC-1155 yang tak dapat diduplikasi." },
+                { pos: "02", title: "PRICE CEILING PROTECTION", desc: "Membatasi markup harga resale sekunder maksimal 1.1x secara otomatis." },
+                { pos: "03", title: "RESALE ROYALTIES", desc: "Royalti mengalir otomatis kembali kepada kreator orisinil." },
+                { pos: "04", title: "QR TICKET VERIFICATION", desc: "Sistem verifikasi instan di pintu masuk via scan QR cryptographic." }
+              ].map((spec, i) => (
+                <div key={i} className="flex flex-col space-y-3 justify-between">
+                  <div className="font-number-display text-primary leading-none">
+                    {spec.pos}
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-caption-uppercase text-[11px] tracking-[1.1px] text-white">
+                      {spec.title}
+                    </h4>
+                    <p className="font-body-sm text-[13px] text-body leading-normal">
+                      {spec.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ─── Interactive Carousel Specs Split ───────────────────────── */}
+        <section className="section-container py-16">
+          <div className="grid lg:grid-cols-12 gap-8 items-stretch">
+
+            {/* Left Column: Carousel Showroom Card */}
+            <div className="lg:col-span-8 border border-hairline bg-canvas-elevated flex flex-col justify-between">
+              {/* Carousel Head / Status */}
+              <div className="border-b border-hairline px-6 py-4 flex items-center justify-between">
+                <span className="font-caption-uppercase text-[11px] tracking-[1px] text-white">
+                  SPECIFICATION SHOWCASE
+                </span>
+                <span className="font-caption-uppercase text-[11px] tracking-[1px] text-primary">
+                  {carouselBanners[carouselIndex].badgeText}
+                </span>
+              </div>
+
+              {/* Slider Main View */}
+              <div className="p-8 space-y-8 flex-1 flex flex-col justify-center">
+                <div className="space-y-4">
+                  <h3 className="font-display-lg text-3xl sm:text-5xl font-medium uppercase tracking-tight text-white">
+                    {carouselBanners[carouselIndex].title}
+                  </h3>
+                  <p className="font-body-md text-sm text-body leading-relaxed max-w-xl">
+                    {carouselBanners[carouselIndex].desc}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-x-8 gap-y-2 border-t border-hairline pt-6 font-body-sm text-[13px] text-body">
                   <div className="flex items-center gap-2">
-                    <div className="w-3.5 h-3.5 rounded-full bg-[#FF5722] border-2 border-black" />
-                    <div className="w-3.5 h-3.5 rounded-full bg-[#4CAF50] border-2 border-black" />
+                    <Calendar className="w-4 h-4 text-primary" />
+                    <span>{carouselBanners[carouselIndex].date}</span>
                   </div>
-                  <span className="font-pixel-sm text-[9px] uppercase text-black font-bold">BILLET_CAROUSEL.EXE</span>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-primary" />
+                    <span>{carouselBanners[carouselIndex].venue}</span>
+                  </div>
                 </div>
-                {/* Body */}
-                <div className="p-4">
-                  {/* Image/Gradient area resembling photo in reference */}
-                  <div className={`h-64 sm:h-72 border-[3.5px] border-black relative overflow-hidden flex flex-col justify-end text-white p-5 ${carouselBanners[carouselIndex].gradient}`}>
-                    {/* Retro elements overlay */}
-                    <div className="absolute top-3 left-3 bg-black border-2 border-black text-white px-2 py-0.5 font-pixel-sm text-[8px]">
-                      {carouselBanners[carouselIndex].badgeText}
-                    </div>
-                    <div className="absolute top-3 right-3 bg-white border-2 border-black text-black w-8 h-8 flex items-center justify-center font-bold">
-                      ★
-                    </div>
-                    <div className="relative z-10 space-y-2 bg-black/40 p-3 border-2 border-black backdrop-blur-xs">
-                      <h4 className="font-pixel-lg text-2xl uppercase font-bold leading-tight line-clamp-1">
-                        {carouselBanners[carouselIndex].title}
-                      </h4>
-                      <p className="font-pixel-sm text-[9px] text-white/90 line-clamp-2 leading-relaxed">
-                        {carouselBanners[carouselIndex].desc}
-                      </p>
-                      <p className="font-pixel-sm text-[8px] text-[#4CAF50]">
-                        {carouselBanners[carouselIndex].date} @ {carouselBanners[carouselIndex].venue}
-                      </p>
-                    </div>
-                  </div>
+              </div>
 
-                  {/* Character/Active Tag Badge similar to Edward Newgate */}
-                  <div className="mt-4 bg-[#4CAF50] border-[3.5px] border-black p-3 text-center neo-shadow-sm">
-                    <span className="font-pixel-sm text-xs text-white uppercase tracking-wider font-bold">
-                      ★ HOT DEALS ★
-                    </span>
-                  </div>
-
-                  {/* Navigation dots */}
-                  <div className="mt-4 flex items-center justify-center gap-3">
-                    {carouselBanners.map((_, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setCarouselIndex(idx)}
-                        className={`w-4 h-4 border-2 border-black transition-all cursor-pointer ${
-                          idx === carouselIndex ? "bg-[#FF5722] -translate-x-px -translate-y-px shadow-[2px_2px_0_0_rgba(0,0,0,1)]" : "bg-white"
+              {/* Slider Navigation Bar */}
+              <div className="border-t border-hairline px-6 py-4 flex items-center justify-between">
+                {/* Dots */}
+                <div className="flex items-center gap-2">
+                  {carouselBanners.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCarouselIndex(idx)}
+                      className={`w-2.5 h-2.5 transition-all duration-300 ${idx === carouselIndex ? "bg-primary scale-110" : "bg-muted hover:bg-body"
                         }`}
-                        aria-label={`Slide ${idx + 1}`}
-                      />
-                    ))}
-                  </div>
+                      aria-label={`Slide ${idx + 1}`}
+                    />
+                  ))}
                 </div>
+
+                <button
+                  onClick={() => {
+                    const matchedEvent = allEvents.find(e => e.title.includes(carouselBanners[carouselIndex].title));
+                    if (matchedEvent) handleBuyClick(matchedEvent);
+                  }}
+                  className="font-caption-uppercase text-[11px] tracking-[1px] text-white hover:text-primary flex items-center gap-2"
+                >
+                  SIMULASI CHECKOUT <ArrowRight className="w-4 h-4 text-primary" />
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: Mini spec board */}
+            <div className="lg:col-span-4 border border-hairline bg-canvas flex flex-col justify-between p-8 space-y-6">
+              <span className="font-caption-uppercase text-[11px] tracking-[1.4px] text-primary">
+                PROMO HIGHLIGHT
+              </span>
+              <div className="space-y-4">
+                <h3 className="font-display-md text-2xl uppercase tracking-tight text-white leading-tight">
+                  ANTI-SCALPER CEILING GUARANTEE
+                </h3>
+                <p className="font-body-sm text-[13px] text-body leading-relaxed">
+                  Semua transaksi tiket terproteksi otomatis oleh kontrak pintar ERC-1155 pada jaringan Base L2.
+                  Markup harga tiket sekunder dibatasi secara ketat, menghilangkan calo yang mengeksploitasi penggemar.
+                </p>
+              </div>
+              <div className="pt-2 border-t border-hairline flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-primary animate-pulse-corsa" />
+                <span className="font-caption-uppercase text-[10px] text-body tracking-wider">
+                  ACTIVATED ON BASE SEPOLIA TESTNET
+                </span>
               </div>
             </div>
 
@@ -425,31 +351,30 @@ export default function Home() {
         </section>
 
         {/* ─── Search & Category Selector ───────────────────────────────── */}
-        <section id="events-section" className="max-w-7xl mx-auto px-5 sm:px-8 py-8 relative z-30">
-          <div className="bg-white neo-border neo-shadow p-6 flex flex-col lg:flex-row gap-6 items-center justify-between">
-            {/* Search Input */}
+        <section id="events-section" className="section-container py-8 scroll-mt-24">
+          <div className="border border-hairline bg-canvas-elevated p-6 flex flex-col lg:flex-row gap-6 items-center justify-between">
+            {/* Minimal Search Input */}
             <div className="relative w-full lg:flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-black stroke-[2.5]" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-soft" />
               <input
                 type="text"
-                placeholder="Cari event musik, seminar, seni di Base..."
+                placeholder="Cari event musik, seminar, seni..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-5 py-3.5 border-[3.5px] border-black bg-white focus:bg-yellow-50/20 focus:outline-hidden text-black placeholder:text-neutral-500 font-pixel-sm text-[10px] transition-all"
+                className="w-full pl-11 pr-5 py-3 border border-hairline bg-canvas focus:outline-hidden text-white placeholder:text-muted-soft font-body-md text-sm transition-all focus:border-primary"
               />
             </div>
 
-            {/* Quick Category Pills */}
+            {/* Category Pills */}
             <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
               {["Semua", "Musik", "Seminar", "Olahraga", "Seni"].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-4.5 py-2.5 border-[3px] border-black font-pixel-sm text-[10px] uppercase transition-all duration-100 shrink-0 cursor-pointer ${
-                    selectedCategory === cat
-                      ? "bg-black text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] -translate-x-px -translate-y-px"
-                      : "bg-white text-black hover:bg-neutral-50 hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:-translate-x-px hover:-translate-y-px"
-                  }`}
+                  className={`px-4 py-2 border font-caption-uppercase text-[11px] tracking-wider transition-all duration-200 cursor-pointer ${selectedCategory === cat
+                    ? "bg-primary text-white border-primary"
+                    : "bg-canvas text-body border-hairline hover:text-white hover:border-body"
+                    }`}
                 >
                   {cat}
                 </button>
@@ -459,133 +384,122 @@ export default function Home() {
         </section>
 
         {/* ─── Active Event List ─────────────────────────────────────────── */}
-        <section className="max-w-7xl mx-auto px-5 sm:px-8 py-8">
-          <div className="bg-white neo-border neo-shadow p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <section className="section-container py-8">
+          <div className="border-b border-hairline pb-4 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <h2 className="font-pixel-lg text-4xl text-black flex items-center gap-3 uppercase font-bold">
-                Event Seru Untukmu
-                <span className="w-3.5 h-3.5 bg-[#FF5722] border-2 border-black inline-block shrink-0 animate-ping" />
+              <h2 className="font-display-md text-2xl uppercase tracking-tight text-white flex items-center gap-3">
+                EVENT TERSEDIA
+                <span className="w-2 h-2 bg-primary inline-block shrink-0 animate-pulse-corsa" />
               </h2>
-              <p className="font-pixel-sm text-[10px] text-neutral-700 mt-2">
-                Beli langsung dari organizer resmi secara 100% on-chain di Base L2.
+              <p className="font-body-sm text-[13px] text-body mt-1">
+                Beli tiket terverifikasi langsung dari organizer resmi secara 100% on-chain.
               </p>
             </div>
 
-            {/* Reset Filter Button */}
             {(selectedCategory !== "Semua" || searchQuery) && (
               <button
                 onClick={() => {
                   setSelectedCategory("Semua");
                   setSearchQuery("");
                 }}
-                className="px-4 py-2 border-[3px] border-black bg-[#FF5722] text-white font-pixel-sm text-[9px] uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-[#E64A19] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_rgba(0,0,0,1)] cursor-pointer"
+                className="px-4 py-2 border border-primary text-primary font-caption-uppercase text-[10px] tracking-wider hover:bg-primary hover:text-white transition-all cursor-pointer"
               >
-                Reset Filter
+                RESET FILTERS
               </button>
             )}
           </div>
 
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20 bg-white neo-border neo-shadow">
-              <div className="w-12 h-12 border-4 border-black border-t-[#FF5722] rounded-full animate-spin mb-4" />
-              <p className="font-pixel-sm text-xs">Menyelaraskan data tiket dari blockchain...</p>
+            <div className="flex flex-col items-center justify-center py-20 border border-hairline bg-canvas-elevated">
+              <div className="w-10 h-10 border-2 border-hairline border-t-primary rounded-full animate-spin mb-4" />
+              <p className="font-body-sm text-sm text-body">Menyelaraskan data tiket dari blockchain...</p>
             </div>
           ) : filteredEvents.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center bg-white neo-border neo-shadow p-6">
-              <AlertCircle className="w-12 h-12 text-black mb-4 stroke-[2.5]" />
-              <h3 className="font-pixel-lg text-3xl font-bold mb-2 uppercase">
-                Event Tidak Ditemukan
+            <div className="flex flex-col items-center justify-center py-20 text-center border border-hairline bg-canvas-elevated p-6">
+              <AlertCircle className="w-10 h-10 text-primary mb-4" />
+              <h3 className="font-display-md text-2xl uppercase tracking-tight mb-2">
+                EVENT TIDAK DITEMUKAN
               </h3>
-              <p className="font-pixel-sm text-[10px] text-neutral-600 max-w-sm">
-                Coba sesuaikan kata kunci pencarian Anda, ganti filter kategori, atau klik kota lain.
+              <p className="font-body-sm text-[13px] text-body max-w-sm">
+                Coba sesuaikan kata kunci pencarian Anda, ganti filter kategori, atau tambahkan tiket simulasi baru.
               </p>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredEvents.map((event) => {
-                const categoryColor = event.category === "Musik" ? "bg-[#9C27B0] text-white" :
-                                      event.category === "Seminar" ? "bg-blue-600 text-white" :
-                                      event.category === "Olahraga" ? "bg-[#4CAF50] text-white" :
-                                      "bg-[#FF5722] text-white";
-
+                const isMusik = event.category === "Musik";
                 return (
                   <div
                     key={event.listingId}
                     onClick={() => handleBuyClick(event)}
-                    className="group bg-white neo-border neo-shadow overflow-hidden hover:-translate-y-1 active:translate-y-px transition-all duration-200 cursor-pointer flex flex-col justify-between"
+                    className="group border border-hairline bg-canvas-elevated overflow-hidden hover:border-primary transition-all duration-300 cursor-pointer flex flex-col justify-between"
                   >
-                    {/* Header Image Gradient */}
-                    <div className={`h-40 bg-linear-to-br ${event.bannerGradient} relative border-b-[3.5px] border-black overflow-hidden shrink-0`}>
+                    {/* Header Image representation */}
+                    <div className="h-40 bg-radial-[circle_at_center] from-primary/10 via-neutral-900 to-neutral-950 relative border-b border-hairline overflow-hidden shrink-0">
+
                       {/* Floating Category tag */}
-                      <div className="absolute top-3 left-3">
-                        <span className={`inline-flex items-center px-2.5 py-1 border-[2.5px] border-black font-pixel-sm text-[8px] uppercase font-bold ${categoryColor}`}>
+                      <div className="absolute top-4 left-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 border border-primary/20 bg-primary/10 font-caption-uppercase text-[9px] tracking-wider text-primary">
                           {event.category}
                         </span>
                       </div>
 
                       {/* Blockchain Verified Badge */}
-                      <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                      <div className="absolute top-4 right-4 flex items-center gap-1.5">
                         {event.isMock ? (
-                          <span className="px-2 py-0.5 border-2 border-black bg-neutral-200 font-pixel-sm text-[8px] text-black uppercase">
-                            Demo
+                          <span className="px-2 py-0.5 border border-hairline bg-canvas text-body font-caption-uppercase text-[9px] tracking-wider">
+                            SANDBOX
                           </span>
                         ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 border-2 border-black bg-[#4CAF50] text-white font-pixel-sm text-[8px] uppercase tracking-wider shadow-sm animate-pulse-warm">
-                            On-Chain
-                          </span>
-                        )}
-                        {event.isResale && (
-                          <span className="px-2 py-0.5 border-2 border-black bg-black text-white font-pixel-sm text-[8px] uppercase">
-                            Resale
+                          <span className="inline-flex items-center px-2 py-0.5 border border-primary bg-primary text-white font-caption-uppercase text-[9px] tracking-wider animate-pulse-corsa">
+                            ON-CHAIN
                           </span>
                         )}
                       </div>
 
                       {/* City Badge Bottom Left */}
-                      <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-white border-2 border-black text-black px-2 py-0.5 font-pixel-sm text-[8px] uppercase">
-                        <MapPin className="w-3 h-3 text-[#FF5722] stroke-[2.5]" />
+                      <div className="absolute bottom-4 left-4 flex items-center gap-1.5 bg-canvas/80 border border-hairline text-white px-2 py-0.5 font-caption-uppercase text-[9px] tracking-wider">
+                        <MapPin className="w-3 h-3 text-primary" />
                         {event.city}
                       </div>
                     </div>
 
                     {/* Content Section */}
-                    <div className="p-5 flex-1 flex flex-col justify-between">
-                      <div>
-                        {/* Event Title */}
-                        <h3 className="font-pixel-lg text-2xl font-bold text-black mb-3.5 leading-tight group-hover:text-[#FF5722] transition-colors uppercase">
+                    <div className="p-6 flex-1 flex flex-col justify-between space-y-6">
+                      <div className="space-y-2">
+                        <h3 className="font-display-md text-xl uppercase tracking-tight text-white leading-tight group-hover:text-primary transition-colors">
                           {event.title}
                         </h3>
 
-                        {/* Location and Date details */}
-                        <div className="space-y-2 mb-4 font-pixel-sm text-[9px] text-neutral-700">
+                        <div className="space-y-1 font-body-sm text-[13px] text-body pt-1">
                           <div className="flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5 text-black stroke-[2.5]" />
+                            <Calendar className="w-3.5 h-3.5 text-primary" />
                             <span>{event.date}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <MapPin className="w-3.5 h-3.5 text-black stroke-[2.5]" />
-                            <span className="line-clamp-1">{event.venue}</span>
+                            <MapPin className="w-3.5 h-3.5 text-primary" />
+                            <span className="truncate">{event.venue}</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Pricing row */}
-                      <div className="pt-4 border-t-[3px] border-black flex items-end justify-between">
+                      <div className="pt-4 border-t border-hairline flex items-center justify-between">
                         <div>
-                          <p className="font-pixel-sm text-[8px] text-neutral-500 uppercase mb-1">
-                            {event.isResale ? "Harga Resale" : "Harga Mulai"}
+                          <p className="font-caption-uppercase text-[9px] text-body tracking-wider mb-0.5">
+                            {event.isResale ? "HARGA RESALE" : "HARGA MULAI"}
                           </p>
-                          <p className="font-pixel-lg text-2xl font-bold text-black">
+                          <p className="font-title-md text-lg text-white">
                             {formatIDRX(event.pricePerUnit)}
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <span className="font-pixel-sm text-[8px] text-black">
-                            <strong className="text-[#FF5722]">{event.amount.toString()}</strong> TIKET
+                        <div className="flex items-center gap-3">
+                          <span className="font-caption-uppercase text-[9px] text-body tracking-wider">
+                            <strong className="text-primary">{event.amount.toString()}</strong> TIKET
                           </span>
-                          <div className="w-9 h-9 border-[3px] border-black bg-[#FF5722] text-white flex items-center justify-center shadow-[2px_2px_0_0_rgba(0,0,0,1)] group-hover:-translate-x-px group-hover:-translate-y-px group-hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all">
-                            <ArrowRight className="w-5 h-5 stroke-[2.5]" />
+                          <div className="w-9 h-9 border border-hairline bg-canvas flex items-center justify-center transition-all duration-200 group-hover:bg-primary group-hover:border-primary group-hover:text-white">
+                            <ArrowRight className="w-4 h-4 text-white" />
                           </div>
                         </div>
                       </div>
@@ -596,43 +510,6 @@ export default function Home() {
             </div>
           )}
         </section>
-
-        {/* ─── Trending Banner Slider ───────────────────────────────────── */}
-        <section className="max-w-7xl mx-auto px-5 sm:px-8 py-8">
-          <div className="bg-white neo-border neo-shadow p-8 sm:p-12 relative overflow-hidden">
-            <div className="relative max-w-2xl space-y-6">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FF5722]/15 border-2 border-black text-[#FF5722] font-pixel-sm text-[8px] uppercase tracking-wide">
-                <Volume2 className="w-3.5 h-3.5" />
-                Anti-Scalper Guarantee
-              </span>
-              <h2 className="font-pixel-lg text-4xl sm:text-5xl font-black text-black leading-tight uppercase">
-                Kesal Dengan Calo? <br />
-                Billet Adalah <span className="text-[#FF5722]">Jawabannya!</span>
-              </h2>
-              <p className="font-pixel-sm text-[10px] text-neutral-800 leading-relaxed">
-                Kami menerapkan sistem **Price Ceiling (Batas Harga Maksimum)** otomatis di dalam kontrak pintar ERC-1155. 
-                Tiket tidak dapat dijual kembali melebihi batas markup (misal maksimal 1.1x). 
-                Pembeli terlindungi, kreator tetap mendapatkan royalti resale otomatis.
-              </p>
-              <div className="pt-2 flex flex-wrap items-center gap-6">
-                {[
-                  { title: "Price Ceiling", desc: "Batas Markup Otomatis" },
-                  { title: "Royalti Kreator", desc: "100% Mengalir Otomatis" },
-                  { title: "Verifikasi Base L2", desc: "Tiket NFT ERC-1155 Sah" }
-                ].map((stat, i) => (
-                  <div key={i} className="flex gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-[#4CAF50] shrink-0 mt-0.5 stroke-[2.5]" />
-                    <div className="font-pixel-sm">
-                      <p className="font-bold text-[10px] text-black">{stat.title}</p>
-                      <p className="text-neutral-500 text-[8px] mt-0.5">{stat.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
 
       </main>
 

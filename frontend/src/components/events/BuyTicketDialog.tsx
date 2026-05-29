@@ -83,16 +83,9 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
 
     try {
       const names = holderData.map((h) => h.name.trim());
-      // Hash NIK client-side using Keccak-256 before transmitting, protecting PII privacy on-chain.
-      // NOTE (Trade-off): The marketplace smart contract ABI expects string[] for niks, not bytes32[].
-      // We store the hash hex string representation ('0x...') on-chain. This successfully mitigates PII exposure
-      // without requiring a smart contract redeployment, although a native bytes32[] is more gas-optimal for storage.
       const niks = holderData.map((h) => keccak256(toBytes(h.nik.trim())));
 
-      // Calculate total in ether format for the hook
-      // pricePerUnit is already in wei, we need to convert to string
       const totalInWei = listing.pricePerUnit * BigInt(amount);
-      // formatUnits with 18 decimals to get the ether string
       const totalEther = formatUnits(totalInWei, 18);
 
       await executePurchase(
@@ -112,51 +105,52 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
 
   return (
     <div
-      className="fixed inset-0 z-100 flex items-center justify-center p-4"
+      className="fixed inset-0 z-100 flex items-center justify-center p-4 text-white"
       id="buy-ticket-dialog"
     >
-      {/* Backdrop */}
+      {/* Backdrop overlay */}
       <div
-        className="absolute inset-0 bg-bark/40 backdrop-blur-sm animate-fade-in"
+        className="absolute inset-0 bg-canvas/80 backdrop-blur-xs animate-fade-in"
         onClick={txState === "idle" ? onClose : undefined}
       />
 
-      {/* Dialog */}
-      <div className="relative w-full max-w-lg rounded-2xl bg-white/90 backdrop-blur-xl shadow-warm-lg animate-fade-in-up overflow-hidden border border-white/60">
-        {/* ─── Header ─────────────────────────────────────── */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4">
+      {/* Dialog container sharp corners */}
+      <div className="relative w-full max-w-lg bg-canvas-elevated shadow-2xl animate-fade-in-up overflow-hidden border border-hairline rounded-none">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-hairline">
           <div>
-            <h2 className="font-heading font-bold text-xl text-bark">
-              Beli Tiket
+            <h2 className="font-display font-semibold text-lg uppercase tracking-tight text-white">
+              BELI TIKET
             </h2>
-            <p className="text-sm text-stone mt-0.5">
-              {categoryName} — Listing #{listing.listingId}
+            <p className="font-body-sm text-[12px] text-body mt-0.5">
+              {categoryName} — LISTING #{listing.listingId}
             </p>
           </div>
           {txState === "idle" && (
             <button
               onClick={onClose}
-              className="p-2 rounded-xl hover:bg-sand/60 text-stone transition-colors"
+              className="p-1 border border-hairline hover:border-white text-body hover:text-white transition-colors"
               id="dialog-close"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        {/* ─── Progress Steps ─────────────────────────────── */}
-        <div className="px-6 pb-4">
+        {/* Progress Steps custom box outlines */}
+        <div className="px-6 py-4 bg-canvas/40 border-b border-hairline">
           <div className="flex items-center gap-1">
             {steps.map((step, i) => (
               <div key={step.id} className="flex items-center flex-1">
                 <div
                   className={`
-                    w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all
+                    w-6 h-6 flex items-center justify-center text-[10px] font-bold shrink-0 transition-all rounded-none border
                     ${i < currentStepIndex
-                      ? "bg-green-500 text-white"
+                      ? "bg-[#03904a] border-[#03904a] text-white"
                       : i === currentStepIndex
-                        ? "bg-warm-500 text-white shadow-warm"
-                        : "bg-sand/80 text-stone/40"
+                        ? "bg-primary border-primary text-white"
+                        : "bg-canvas-elevated border-hairline text-body"
                     }
                   `}
                 >
@@ -168,20 +162,20 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                 </div>
                 {i < steps.length - 1 && (
                   <div
-                    className={`flex-1 h-0.5 mx-2 rounded transition-colors ${
-                      i < currentStepIndex ? "bg-green-400" : "bg-sand/80"
+                    className={`flex-1 h-[1px] mx-2 transition-colors ${
+                      i < currentStepIndex ? "bg-[#03904a]" : "bg-hairline"
                     }`}
                   />
                 )}
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-2">
+          <div className="flex justify-between mt-2 font-caption-uppercase text-[8px] tracking-wider text-body">
             {steps.map((step, i) => (
               <span
                 key={step.id}
-                className={`text-[10px] font-medium flex-1 text-center ${
-                  i <= currentStepIndex ? "text-bark" : "text-stone/30"
+                className={`flex-1 text-center ${
+                  i <= currentStepIndex ? "text-white font-bold" : "text-body/30"
                 }`}
               >
                 {step.label}
@@ -190,99 +184,101 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
           </div>
         </div>
 
-        <hr className="section-divider" />
-
-        {/* ─── Body ───────────────────────────────────────── */}
-        <div className="px-6 py-5 max-h-[60vh] overflow-y-auto">
+        {/* Body content */}
+        <div className="px-6 py-5 max-h-[60vh] overflow-y-auto space-y-6">
           {txState === "success" ? (
             /* Success State */
-            <div className="text-center py-8">
-              <div className="w-16 h-16 rounded-2xl bg-green-50 border border-green-100 flex items-center justify-center mx-auto mb-5">
-                <CheckCircle2 className="w-8 h-8 text-green-600" />
+            <div className="text-center py-6 space-y-4">
+              <div className="w-12 h-12 border border-[#03904a]/30 bg-[#03904a]/10 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-6 h-6 text-[#03904a]" />
               </div>
-              <h3 className="font-heading font-bold text-2xl text-bark mb-2">
-                Pembelian Berhasil!
-              </h3>
-              <p className="text-stone text-sm mb-6 max-w-xs mx-auto">
-                {amount} tiket {categoryName} berhasil dibeli.
-                Cek di halaman "Tiket Saya" untuk detailnya.
-              </p>
+              <div className="space-y-2">
+                <h3 className="font-display-md text-xl uppercase tracking-tight text-white">
+                  PEMBELIAN SELESAI
+                </h3>
+                <p className="font-body-sm text-[13px] text-body max-w-xs mx-auto">
+                  {amount} tiket {categoryName} berhasil ditransfer ke akun Anda. 
+                  Dapatkan check-in instan on-chain di halaman "Tiket Saya".
+                </p>
+              </div>
               <button
                 onClick={onClose}
-                className="px-6 py-2.5 rounded-xl bg-linear-to-r from-warm-500 to-warm-600 text-white font-heading font-semibold text-sm shadow-warm hover:shadow-warm-lg transition-all"
+                className="btn-primary h-10 py-0 rounded-none w-fit font-bold"
                 id="dialog-done"
               >
-                Selesai
+                SELESAI
               </button>
             </div>
           ) : txState !== "idle" ? (
-            /* Processing State */
-            <div className="text-center py-10">
-              <Loader2 className="w-10 h-10 text-warm-500 animate-spin mx-auto mb-5" />
-              <h3 className="font-heading font-bold text-xl text-bark mb-2">
-                {txState === "approving"
-                  ? "Menunggu Approval IDRX..."
-                  : "Memproses Pembelian..."}
-              </h3>
-              <p className="text-stone text-sm max-w-xs mx-auto">
-                {txState === "approving"
-                  ? "Konfirmasi transaksi approve di wallet Anda."
-                  : "Konfirmasi transaksi pembelian di wallet Anda."}
-              </p>
+            /* Transaction processing */
+            <div className="text-center py-10 space-y-4">
+              <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto" />
+              <div className="space-y-2">
+                <h3 className="font-display-md text-xl uppercase tracking-tight text-white">
+                  {txState === "approving"
+                    ? "APPROVING STABLECOIN..."
+                    : "MENYELESAIKAN PENJUALAN..."}
+                </h3>
+                <p className="font-body-sm text-[13px] text-body max-w-xs mx-auto">
+                  {txState === "approving"
+                    ? "Silakan tanda tangani transaksi persetujuan token IDRX di dompet Anda."
+                    : "Menghubungi smart contract penjualan tiket Billet L2..."}
+                </p>
+              </div>
             </div>
           ) : (
-            /* Form State */
+            /* Form input state */
             <>
               {!isConnected ? (
-                <div className="text-center py-8">
-                  <AlertCircle className="w-10 h-10 text-warm-500 mx-auto mb-3" />
-                  <p className="text-stone font-medium">
-                    Hubungkan wallet Anda terlebih dahulu.
+                <div className="text-center py-8 space-y-3">
+                  <AlertCircle className="w-8 h-8 text-primary mx-auto" />
+                  <p className="font-body-sm text-[13px] text-body">
+                    Harap hubungkan dompet Web3 Anda untuk memproses transaksi.
                   </p>
                 </div>
               ) : (
                 <div className="space-y-5">
-                  {/* Amount selector */}
-                  <div>
-                    <label className="text-sm font-semibold text-bark mb-2.5 block">
+                  {/* Amount Selector custom buttons */}
+                  <div className="space-y-2">
+                    <label className="font-caption-uppercase text-[10px] text-body block tracking-wider">
                       Jumlah Tiket
                     </label>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => handleAmountChange(amount - 1)}
                         disabled={amount <= 1}
-                        className="w-10 h-10 rounded-xl bg-sand/50 border border-bark/6 flex items-center justify-center text-bark font-bold text-lg hover:bg-sand/80 disabled:opacity-30 transition-all"
+                        className="w-10 h-10 border border-hairline bg-canvas hover:border-white flex items-center justify-center text-white disabled:opacity-30 transition-all font-bold rounded-none"
                       >
                         −
                       </button>
-                      <span className="font-heading font-bold text-2xl text-bark w-12 text-center">
+                      <span className="font-display font-bold text-xl text-white w-12 text-center">
                         {amount}
                       </span>
                       <button
                         onClick={() => handleAmountChange(amount + 1)}
                         disabled={amount >= maxAmount}
-                        className="w-10 h-10 rounded-xl bg-sand/50 border border-bark/6 flex items-center justify-center text-bark font-bold text-lg hover:bg-sand/80 disabled:opacity-30 transition-all"
+                        className="w-10 h-10 border border-hairline bg-canvas hover:border-white flex items-center justify-center text-white disabled:opacity-30 transition-all font-bold rounded-none"
                       >
                         +
                       </button>
-                      <span className="text-xs text-stone/50 ml-1">
-                        maks. {maxAmount}
+                      <span className="font-caption-uppercase text-[9px] text-muted tracking-wider ml-1">
+                        MAKS. {maxAmount} LBR
                       </span>
                     </div>
                   </div>
 
-                  {/* Holder data inputs */}
+                  {/* Holder info registration */}
                   <div className="space-y-3">
-                    <label className="text-sm font-semibold text-bark block">
-                      Data Pemegang Tiket
+                    <label className="font-caption-uppercase text-[10px] text-body block tracking-wider">
+                      Registrasi Pemegang Tiket
                     </label>
                     {holderData.map((holder, i) => (
                       <div
                         key={i}
-                        className="rounded-xl bg-sand/25 border border-bark/4 p-4 space-y-2.5"
+                        className="border border-hairline bg-canvas p-4 space-y-3"
                       >
-                        <p className="text-[10px] font-semibold text-stone/50 uppercase tracking-wider">
-                          Pemegang #{i + 1}
+                        <p className="font-caption-uppercase text-[9px] text-primary tracking-wider font-bold">
+                          PEMEGANG TIKET #{i + 1}
                         </p>
                         <input
                           type="text"
@@ -291,61 +287,61 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                           onChange={(e) =>
                             handleHolderChange(i, "name", e.target.value)
                           }
-                          className="input-field"
+                          className="w-full input-on-dark"
                           id={`holder-name-${i}`}
                         />
                         <input
                           type="text"
-                          placeholder="NIK (16 digit)"
+                          placeholder="NIK (16 Digit)"
                           value={holder.nik}
                           onChange={(e) =>
                             handleHolderChange(i, "nik", e.target.value)
                           }
-                          className="input-field font-mono"
+                          className="w-full input-on-dark font-mono text-xs"
                           id={`holder-nik-${i}`}
                         />
                       </div>
                     ))}
                   </div>
 
-                  {/* Error */}
+                  {/* Error display */}
                   {errorMsg && (
-                    <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50/60 border border-red-100 rounded-xl p-3">
+                    <div className="flex items-center gap-2 font-body-sm text-[13px] text-primary bg-primary/10 border border-primary/20 p-3">
                       <AlertCircle className="w-4 h-4 shrink-0" />
                       {errorMsg}
                     </div>
                   )}
 
-                  {/* Summary */}
-                  <div className="rounded-xl bg-warm-50/50 border border-warm-100/50 p-4 space-y-2">
+                  {/* Pricing summary */}
+                  <div className="border border-hairline bg-canvas p-4 space-y-2 font-body-sm text-[13px] text-body">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-stone">Harga per tiket</span>
-                      <span className="text-sm text-bark font-medium">
+                      <span>Harga Satuan</span>
+                      <span className="text-white font-medium">
                         {formatIDRX(listing.pricePerUnit)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-stone">Jumlah</span>
-                      <span className="text-sm text-bark font-medium">
+                      <span>Jumlah Tiket</span>
+                      <span className="text-white font-medium">
                         × {amount}
                       </span>
                     </div>
-                    <div className="border-t border-warm-200/40 my-1" />
+                    <div className="border-t border-hairline my-1.5" />
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-semibold text-bark">Total</span>
-                      <span className="font-heading font-bold text-xl text-warm-700">
+                      <span className="font-bold text-white uppercase">TOTAL</span>
+                      <span className="font-display font-bold text-lg text-primary">
                         {totalPriceFormatted}
                       </span>
                     </div>
                   </div>
 
-                  {/* Submit */}
+                  {/* Submit Button */}
                   <button
                     onClick={handleSubmit}
-                    className="w-full py-3.5 rounded-xl bg-linear-to-r from-warm-500 to-warm-600 text-white font-heading font-semibold text-base shadow-warm hover:shadow-warm-lg hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2"
+                    className="btn-primary w-full tracking-[1.4px] flex items-center justify-center gap-2 rounded-none font-bold"
                     id="buy-submit"
                   >
-                    Beli Sekarang
+                    BELI TIKET SEKARANG
                     <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>

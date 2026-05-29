@@ -35,21 +35,21 @@ export default function GatekeeperPage() {
   // 2. Fetch User Tickets
   const contracts = scannedAddress
     ? TOKEN_IDS.flatMap((tokenId) => [
-        {
-          address: NFT_ADDRESS,
-          abi: NFT_ABI as Abi,
-          functionName: "balanceOf" as const,
-          args: [scannedAddress as `0x${string}`, BigInt(tokenId)] as const,
-          chainId: baseSepolia.id,
-        },
-        {
-          address: NFT_ADDRESS,
-          abi: NFT_ABI as Abi,
-          functionName: "getTicketHolders" as const,
-          args: [scannedAddress as `0x${string}`, BigInt(tokenId)] as const,
-          chainId: baseSepolia.id,
-        },
-      ])
+      {
+        address: NFT_ADDRESS,
+        abi: NFT_ABI as Abi,
+        functionName: "balanceOf" as const,
+        args: [scannedAddress as `0x${string}`, BigInt(tokenId)] as const,
+        chainId: baseSepolia.id,
+      },
+      {
+        address: NFT_ADDRESS,
+        abi: NFT_ABI as Abi,
+        functionName: "getTicketHolders" as const,
+        args: [scannedAddress as `0x${string}`, BigInt(tokenId)] as const,
+        chainId: baseSepolia.id,
+      },
+    ])
     : [];
 
   const { data: userTicketsData, isLoading: fetchingTickets, refetch: refetchTickets } = useReadContracts({
@@ -105,157 +105,169 @@ export default function GatekeeperPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col neo-grid-bg relative text-black">
+    <div className="min-h-screen flex flex-col bg-canvas text-white">
       <Navbar />
 
-      <main className="flex-1 flex flex-col items-center py-12 px-4 sm:px-6">
+      <main className="flex-1 flex flex-col items-center py-16 px-4 sm:px-6">
         <div className="w-full max-w-2xl">
-          {/* Header */}
-          <div className="bg-white neo-border neo-shadow p-6 relative overflow-hidden -rotate-1 hover:rotate-0 transition-transform duration-200 text-center mb-10">
-            <div className="absolute top-2 right-3 flex items-center gap-1.5 font-pixel-sm text-[9px] border-2 border-black px-1.5 py-0.5 bg-neutral-200">
-              <span>GATEKEEPER.EXE</span>
-              <span className="font-bold border-l-2 border-black pl-1.5">X</span>
-            </div>
-            <div className="pt-6 flex flex-col items-center">
-              <div className="w-14 h-14 bg-white border-[3px] border-black flex items-center justify-center shadow-[3px_3px_0_0_rgba(0,0,0,1)] mb-4">
-                <Shield className="w-8 h-8 text-black" />
-              </div>
-              <h1 className="font-pixel-lg text-4xl font-bold uppercase text-black">Gatekeeper Scanner</h1>
-              <p className="font-pixel-sm text-[9px] text-neutral-600 mt-2">Verifikasi & Check-In tiket pengunjung secara on-chain.</p>
+
+          {/* Header Console Box */}
+          <div className="border border-hairline bg-canvas-elevated p-8 text-center mb-10 space-y-4">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/20 text-primary font-caption-uppercase text-[10px] tracking-wider w-fit mx-auto">
+              <Shield className="w-4 h-4" />
+              TRACK SECURITY CONSOLE
+            </span>
+            <div className="space-y-1">
+              <h1 className="font-display-md text-3xl uppercase tracking-tight text-white">GATEKEEPER SCANNER</h1>
+              <p className="font-body-sm text-[13px] text-body">Verifikasi identitas dan status check-in tiket pengunjung secara on-chain.</p>
             </div>
           </div>
 
           {!isConnected ? (
-            <div className="bg-white neo-border neo-shadow p-8 text-center space-y-4">
-              <Shield className="w-12 h-12 text-black mx-auto stroke-[2.5]" />
-              <h3 className="font-pixel-lg text-2xl font-bold uppercase">Akses Terbatas</h3>
-              <p className="font-pixel-sm text-[10px] text-neutral-600">Hubungkan wallet dengan akses Panitia (Gatekeeper) untuk melanjutkan.</p>
-              <div className="flex justify-center neo-border-button"><ConnectKitButton /></div>
+            /* Locked Block */
+            <div className="border border-hairline bg-canvas-elevated p-8 text-center space-y-6">
+              <Shield className="w-12 h-12 text-primary mx-auto" />
+              <div className="space-y-2">
+                <h3 className="font-display-md text-xl uppercase tracking-tight text-white">AKSES DIBATASI</h3>
+                <p className="font-body-sm text-[13px] text-body max-w-xs mx-auto">
+                  Hubungkan dompet Web3 terdaftar dengan wewenang Panitia Gatekeeper untuk memulai validasi.
+                </p>
+              </div>
+              <div className="flex justify-center">
+                <ConnectKitButton />
+              </div>
             </div>
           ) : checkingRole ? (
-            <div className="flex flex-col items-center py-10 bg-white neo-border neo-shadow">
-              <Loader2 className="w-8 h-8 text-[#FF5722] animate-spin mb-4" />
-              <p className="font-pixel-sm text-xs">Memverifikasi otorisasi...</p>
+            <div className="flex flex-col items-center py-16 border border-hairline bg-canvas-elevated">
+              <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
+              <p className="font-body-sm text-sm text-body">Memverifikasi lisensi gatekeeper...</p>
             </div>
           ) : !isGateKeeper ? (
-            <div className="bg-white border-[3px] border-red-500 neo-shadow p-8 text-center space-y-4">
-              <Shield className="w-12 h-12 text-red-500 mx-auto stroke-[2.5]" />
-              <h3 className="font-pixel-lg text-2xl font-bold text-red-600 uppercase">Akses Ditolak</h3>
-              <p className="font-pixel-sm text-[10px] text-red-800">Wallet Anda ({address?.slice(0,6)}...{address?.slice(-4)}) tidak terdaftar sebagai Gatekeeper.</p>
-              <div className="flex justify-center neo-border-button"><ConnectKitButton /></div>
+            /* Rejected Block */
+            <div className="border border-primary bg-primary/5 p-8 text-center space-y-6">
+              <Shield className="w-12 h-12 text-primary mx-auto" />
+              <div className="space-y-2">
+                <h3 className="font-display-md text-xl uppercase tracking-tight text-white">OTORISASI DITOLAK</h3>
+                <p className="font-body-sm text-[13px] text-body max-w-sm mx-auto">
+                  Dompet Anda ({address?.slice(0, 6)}...{address?.slice(-4)}) tidak terdaftar sebagai Gatekeeper di smart contract Billet L2.
+                </p>
+              </div>
+              <div className="flex justify-center">
+                <ConnectKitButton />
+              </div>
             </div>
           ) : !scannedAddress ? (
+            /* Scanning Box */
             <div className="space-y-8 animate-fade-in">
-              <div className="bg-white neo-border neo-shadow p-4">
-                {/* Title bar */}
-                <div className="bg-[#4CAF50]/20 border-b-[3px] border-black px-3 py-1.5 flex items-center justify-between mb-4">
-                  <span className="font-pixel-sm text-[9px] uppercase font-bold text-black">LIVE_CAMERA_SCANNER</span>
-                  <div className="w-3 h-3 rounded-full bg-[#4CAF50] border border-black animate-pulse" />
+              <div className="border border-hairline bg-canvas-elevated p-6">
+                <div className="border-b border-hairline pb-3 mb-6 flex items-center justify-between">
+                  <span className="font-caption-uppercase text-[11px] tracking-[1px] text-white">CAMERA VIEWER</span>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse-corsa" />
+                    <span className="font-caption-uppercase text-[9px] text-primary tracking-wider">ACTIVE CAMERA</span>
+                  </div>
                 </div>
-                <Scanner onScan={setScannedAddress} />
+                <div className="border border-hairline overflow-hidden bg-black/40">
+                  <Scanner onScan={setScannedAddress} />
+                </div>
               </div>
-              
+
               <div className="relative flex items-center py-2">
-                <div className="grow border-t-3 border-black"></div>
-                <span className="shrink-0 px-4 font-pixel-sm text-[9px] font-bold text-black uppercase tracking-wider">ATAU</span>
-                <div className="grow border-t-3 border-black"></div>
+                <div className="grow border-t border-hairline"></div>
+                <span className="shrink-0 px-4 font-caption-uppercase text-[10px] text-body tracking-widest font-bold">ATAU CARI MANUAL</span>
+                <div className="grow border-t border-hairline"></div>
               </div>
 
               <form onSubmit={handleManualSearch} className="flex gap-2">
                 <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-black stroke-[2.5]" />
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-soft" />
                   <input
                     type="text"
-                    placeholder="Masukkan Address 0x..."
+                    placeholder="Masukkan alamat dompet 0x..."
                     value={manualInput}
                     onChange={(e) => setManualInput(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3.5 border-[3.5px] border-black bg-white focus:outline-hidden font-mono text-xs text-black"
+                    className="w-full input-on-dark font-mono text-xs pl-11"
                   />
                 </div>
-                <button type="submit" className="px-6 py-3.5 bg-black hover:bg-neutral-900 text-white font-pixel-sm text-[10px] uppercase border-[3.5px] border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_rgba(0,0,0,1)] shrink-0 cursor-pointer">
-                  Cari
+                <button type="submit" className="btn-primary shrink-0 font-bold h-12 py-0 border-none rounded-none px-6">
+                  CARI
                 </button>
               </form>
             </div>
           ) : (
-            <div className="animate-fade-in">
+            /* Results Panel */
+            <div className="animate-fade-in space-y-6">
               <button
                 onClick={() => setScannedAddress(null)}
-                className="flex items-center gap-2 border-[2.5px] border-black bg-white text-black px-3.5 py-1.5 font-pixel-sm text-[9px] uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_rgba(0,0,0,1)] mb-6 transition-all cursor-pointer"
+                className="btn-outline flex items-center gap-2 text-xs tracking-wider h-10 border border-hairline hover:border-white py-0 px-4 rounded-none"
               >
-                <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
-                Kembali ke Scanner
+                <ArrowLeft className="w-4 h-4 text-primary" />
+                KEMBALI KE SCANNER
               </button>
 
-              <div className="bg-white neo-border neo-shadow p-6 md:p-8">
-                {/* Title bar */}
-                <div className="bg-[#FF5722]/10 border-b-[3.5px] border-black px-4 py-2.5 flex items-center justify-between -mx-6 -mt-6 md:-mx-8 md:-mt-8 mb-6">
-                  <span className="font-pixel-sm text-[9px] uppercase font-bold text-black">RESULT_TICKET_DECRYPTION.EXE</span>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-3.5 h-3.5 rounded-full bg-[#FF5722] border-2 border-black" />
-                    <div className="w-3.5 h-3.5 rounded-full bg-[#4CAF50] border-2 border-black" />
-                  </div>
-                </div>
+              <div className="border border-hairline bg-canvas-elevated p-6 sm:p-8">
 
-                <div className="mb-6">
-                  <h2 className="font-pixel-sm text-[8px] text-neutral-500 uppercase mb-1">Hasil Scan Wallet</h2>
-                  <p className="font-mono text-xs md:text-sm text-black break-all bg-neutral-50 border-2 border-black p-3 font-bold">{scannedAddress}</p>
+                <div className="border-b border-hairline pb-4 mb-6">
+                  <span className="font-caption-uppercase text-[9px] text-body tracking-wider">ALAMAT PENGUNJUNG</span>
+                  <p className="font-mono text-xs md:text-sm text-white break-all bg-canvas border border-hairline p-3 mt-1.5 font-bold">{scannedAddress}</p>
                 </div>
 
                 {fetchingTickets ? (
-                  <div className="flex flex-col items-center py-10">
-                    <Loader2 className="w-8 h-8 text-[#FF5722] animate-spin mb-4" />
-                    <p className="font-pixel-sm text-[9px] text-neutral-600">Memuat data tiket pengunjung...</p>
+                  <div className="flex flex-col items-center py-16">
+                    <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
+                    <p className="font-body-sm text-sm text-body">Membaca saldo tiket...</p>
                   </div>
                 ) : tickets.length === 0 || tickets.every(t => t.holders.filter(h => h.registered).length === 0) ? (
-                  <div className="bg-neutral-50 border-[3px] border-black rounded-none p-8 text-center">
-                    <ScanLine className="w-10 h-10 text-black mx-auto mb-3 stroke-[2.5]" />
-                    <h3 className="font-pixel-lg text-2xl font-bold uppercase mb-1">Tidak Ada Tiket</h3>
-                    <p className="font-pixel-sm text-[9px] text-neutral-600">Pengunjung ini tidak memiliki tiket aktif yang terdaftar.</p>
+                  <div className="border border-hairline bg-canvas p-8 text-center space-y-4">
+                    <ScanLine className="w-10 h-10 text-primary mx-auto" />
+                    <div className="space-y-1">
+                      <h3 className="font-display-md text-xl uppercase tracking-tight text-white">TIDAK ADA TIKET</h3>
+                      <p className="font-body-sm text-[13px] text-body">Pengunjung ini belum memiliki tiket aktif terdaftar.</p>
+                    </div>
                   </div>
                 ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     {tickets.map((ticket) => {
                       const registeredHolders = ticket.holders
                         .map((h, i) => ({ ...h, originalIndex: i }))
                         .filter((h) => h.registered);
-                      
+
                       if (registeredHolders.length === 0) return null;
 
                       return (
                         <div key={ticket.tokenId} className="space-y-4">
-                          <h3 className="font-pixel-lg text-2xl font-bold uppercase text-black border-b-[3px] border-black pb-2">
+                          <h3 className="font-display-md text-lg uppercase tracking-tight text-white border-b border-hairline pb-2">
                             {getCategoryName(ticket.tokenId)}
                           </h3>
-                          
+
                           <div className="grid gap-4">
                             {registeredHolders.map((holder) => (
-                              <div key={holder.originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border-[3px] border-black bg-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] relative overflow-hidden">
-                                <div className={`absolute top-0 bottom-0 left-0 w-2.5 bg-linear-to-b ${getCategoryGradient(ticket.tokenId)} border-r-3 border-black`} />
-                                
+                              <div key={holder.originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-hairline bg-canvas relative overflow-hidden">
+                                <div className="absolute top-0 bottom-0 left-0 w-1 bg-primary" />
+
                                 <div className="pl-4 flex-1">
                                   <div className="flex items-center gap-2 mb-1">
-                                    <User className="w-4 h-4 text-black stroke-[2.5]" />
-                                    <p className="font-pixel-sm text-[10px] text-black font-bold uppercase">{holder.name || "—"}</p>
+                                    <User className="w-4 h-4 text-primary" />
+                                    <p className="font-caption-uppercase text-[11px] text-white tracking-wider font-bold">{holder.name || "—"}</p>
                                   </div>
-                                  <p className="font-pixel-sm text-[8px] text-neutral-600 uppercase">NIK: {holder.nik || "—"} • ID: {ticket.tokenId}-{holder.originalIndex}</p>
+                                  <p className="font-body-sm text-xs text-body">NIK: {holder.nik || "—"} • ID: {ticket.tokenId}-{holder.originalIndex}</p>
                                 </div>
 
                                 <div className="shrink-0 pl-4 sm:pl-0">
                                   {holder.used ? (
-                                    <div className="px-4 py-2 border-[2.5px] border-black bg-[#4CAF50] text-white font-pixel-sm text-[9px] uppercase font-bold shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
-                                      Telah Check-in
+                                    <div className="px-4 py-2 border border-primary/20 bg-primary/10 text-primary font-caption-uppercase text-[10px] tracking-wider text-center">
+                                      TELAH MASUK
                                     </div>
                                   ) : (
                                     <button
                                       onClick={() => handleCheckIn(ticket.tokenId, holder.originalIndex)}
                                       disabled={isCheckingIn || isWaitingTx}
-                                      className="w-full sm:w-auto px-6 py-2 border-[2.5px] border-black bg-[#FF5722] text-white font-pixel-sm text-[9px] uppercase font-bold shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-[#E64A19] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_0_rgba(0,0,0,1)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                      className="btn-primary text-[10px] tracking-wider h-9 px-4 py-0 font-bold border-none rounded-none flex items-center justify-center gap-2 disabled:opacity-50"
                                     >
                                       {isCheckingIn || isWaitingTx ? (
-                                        <><Loader2 className="w-3 h-3 animate-spin" /> Memproses...</>
+                                        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> VERIFIKASI...</>
                                       ) : (
-                                        <>Check-in Masuk</>
+                                        <>CHECK-IN SEKARANG</>
                                       )}
                                     </button>
                                   )}

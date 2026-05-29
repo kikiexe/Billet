@@ -624,7 +624,6 @@ export default function CreatorPage() {
                         <option value="0">0% (Sama Harga)</option>
                         <option value="5">5% (Markup 1.05x)</option>
                         <option value="10">10% (Markup 1.10x)</option>
-                        <option value="20">20% (Markup 1.20x)</option>
                       </select>
                       <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white pointer-events-none" />
                     </div>

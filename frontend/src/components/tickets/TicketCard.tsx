@@ -13,9 +13,11 @@ interface TicketCardProps {
   tokenId: number;
   holder: TicketHolder;
   index: number;
+  balance?: bigint;
+  unusedIndex?: number;
 }
 
-export function TicketCard({ tokenId, holder, index }: TicketCardProps) {
+export function TicketCard({ tokenId, holder, index, balance, unusedIndex }: TicketCardProps) {
   const categoryName = getCategoryName(tokenId);
   const isUsed = holder.used;
   const { address } = useAccount();
@@ -142,6 +144,8 @@ export function TicketCard({ tokenId, holder, index }: TicketCardProps) {
     }
   };
 
+  const isReselling = !isUsed && balance !== undefined && unusedIndex !== undefined && unusedIndex >= Number(balance);
+
   return (
     <>
       <div
@@ -149,7 +153,9 @@ export function TicketCard({ tokenId, holder, index }: TicketCardProps) {
           group relative border overflow-hidden transition-all duration-300 rounded-none flex flex-col justify-between h-full
           ${isUsed
             ? "border-hairline bg-canvas-elevated/40 opacity-60"
-            : "border-hairline bg-canvas-elevated hover:border-primary"
+            : isReselling
+              ? "border-orange-500/30 bg-canvas-elevated/80 opacity-90"
+              : "border-hairline bg-canvas-elevated hover:border-primary"
           }
         `}
         id={`ticket-card-${tokenId}-${index}`}
@@ -164,6 +170,11 @@ export function TicketCard({ tokenId, holder, index }: TicketCardProps) {
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 border border-semantic-success/20 bg-semantic-success/10 text-semantic-success font-caption-uppercase text-[9px] tracking-wider">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 TERPAKAI
+              </span>
+            ) : isReselling ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 border border-orange-500/20 bg-orange-500/10 text-orange-500 font-caption-uppercase text-[9px] tracking-wider">
+                <Tag className="w-3.5 h-3.5" />
+                DIJUAL (RESALE)
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 border border-primary/20 bg-primary/10 text-primary font-caption-uppercase text-[9px] tracking-wider">
@@ -199,7 +210,7 @@ export function TicketCard({ tokenId, holder, index }: TicketCardProps) {
           </div>
 
           {/* ─── Resell Action Button ─────────────────────── */}
-          {!isUsed && (
+          {!isUsed && !isReselling && (
             <button
               onClick={() => setIsResellModalOpen(true)}
               className="w-full mt-4 py-2 border border-primary/40 text-primary font-caption-uppercase text-[10px] tracking-wider hover:bg-primary hover:text-white transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 h-10 font-bold"

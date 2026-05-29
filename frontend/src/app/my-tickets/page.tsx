@@ -118,14 +118,21 @@ export default function MyTicketsPage() {
                     </div>
 
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                      {registeredHolders.map((holder, idx) => (
-                        <TicketCard
-                          key={`${ticket.tokenId}-${idx}`}
-                          tokenId={ticket.tokenId}
-                          holder={holder}
-                          index={idx}
-                        />
-                      ))}
+                      {registeredHolders.map((holder, idx) => {
+                        const unusedRegisteredHolders = registeredHolders.filter((h) => !h.used);
+                        const unusedIndex = holder.used ? -1 : unusedRegisteredHolders.indexOf(holder);
+
+                        return (
+                          <TicketCard
+                            key={`${ticket.tokenId}-${idx}`}
+                            tokenId={ticket.tokenId}
+                            holder={holder}
+                            index={idx}
+                            balance={ticket.balance}
+                            unusedIndex={unusedIndex}
+                          />
+                        );
+                      })}
                     </div>
                   </div>
                 );

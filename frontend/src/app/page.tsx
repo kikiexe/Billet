@@ -92,25 +92,21 @@ export default function Home() {
 
   const allEvents = useMemo(() => {
     const chainEvents: RichEvent[] = activeListings.map((listing) => {
-      const catId = Number(listing.tokenId);
+      const details = listing.eventDetails;
 
-      let cat: "Musik" | "Seminar" | "Olahraga" | "Seni" = "Musik";
-      if (catId === 1) cat = "Musik";
-      else if (catId === 2) cat = "Seminar";
-      else if (catId === 3) cat = "Olahraga";
-
-      let city: "Jakarta" | "Bandung" | "Yogyakarta" | "Surabaya" = "Jakarta";
-      if (listing.listingId % 4 === 1) city = "Bandung";
-      else if (listing.listingId % 4 === 2) city = "Yogyakarta";
-      else if (listing.listingId % 4 === 3) city = "Surabaya";
+      const title = details?.title || `Tiket Resmi Billet: #${listing.tokenId.toString()}`;
+      const cat = (details?.category || "Musik") as "Musik" | "Seminar" | "Olahraga" | "Seni";
+      const city = (details?.city || "Jakarta") as "Jakarta" | "Bandung" | "Yogyakarta" | "Surabaya";
+      const date = details?.date || "28 Juni 2026";
+      const venue = details?.venue || "Billet Arena Base L2";
 
       return {
         ...listing,
-        title: `Tiket Resmi Billet: ${getCategoryName(listing.tokenId)}`,
+        title,
         category: cat,
-        city: city,
-        date: "28 Juni 2026",
-        venue: "Billet Arena Base L2",
+        city,
+        date,
+        venue,
         isMock: false,
         bannerGradient: "from-red-950 to-neutral-900"
       };

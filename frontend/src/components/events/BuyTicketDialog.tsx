@@ -36,6 +36,7 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
   if (!listing) return null;
 
   const maxAmount = Number(listing.amount);
+  const maxPurchase = Math.min(5, maxAmount);
   const totalPriceWei = listing.pricePerUnit * BigInt(amount);
   const totalPriceFormatted = formatIDRX(totalPriceWei);
   const categoryName = getCategoryName(listing.tokenId);
@@ -49,7 +50,7 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
 
   // Update holder count when amount changes
   const handleAmountChange = (newAmount: number) => {
-    const clamped = Math.max(1, Math.min(newAmount, maxAmount));
+    const clamped = Math.max(1, Math.min(newAmount, maxPurchase));
     setAmount(clamped);
     setHolderData((prev) => {
       if (clamped > prev.length) {
@@ -254,13 +255,13 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                       </span>
                       <button
                         onClick={() => handleAmountChange(amount + 1)}
-                        disabled={amount >= maxAmount}
+                        disabled={amount >= maxPurchase}
                         className="w-10 h-10 border border-hairline bg-canvas hover:border-white flex items-center justify-center text-white disabled:opacity-30 transition-all font-bold rounded-none"
                       >
                         +
                       </button>
                       <span className="font-caption-uppercase text-[9px] text-muted tracking-wider ml-1">
-                        MAKS. {maxAmount} LBR
+                        MAKS. {maxPurchase} LBR
                       </span>
                     </div>
                   </div>

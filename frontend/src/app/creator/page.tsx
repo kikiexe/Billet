@@ -134,56 +134,35 @@ export default function CreatorPage() {
     setIsLaunching(true);
 
     try {
-      if (isOwner) {
-        toast.info("Memulai transaksi on-chain ke Base Sepolia...", {
-          description: "Harap setujui permintaan tanda tangan di wallet Anda."
-        });
+      toast.info("Memulai transaksi on-chain ke Base Sepolia...", {
+        description: "Harap setujui permintaan tanda tangan di wallet Anda."
+      });
 
-        const priceInWei = parseUnits(eventPrice.toString(), 18);
+      const priceInWei = parseUnits(eventPrice.toString(), 18);
+      const categoryLabel = eventCategory === "1" ? "Musik" : eventCategory === "2" ? "Seminar" : eventCategory === "3" ? "Olahraga" : "Seni";
 
-        const tx = await writeContractAsync({
-          address: MARKETPLACE_ADDRESS,
-          abi: MARKETPLACE_ABI,
-          functionName: "listPrimary",
-          args: [BigInt(eventCategory), BigInt(eventVolume), priceInWei]
-        });
+      const tx = await writeContractAsync({
+        address: MARKETPLACE_ADDRESS,
+        abi: MARKETPLACE_ABI,
+        functionName: "createAndListEvent",
+        args: [{
+          supply: BigInt(eventVolume),
+          price: priceInWei,
+          ceilingBps: BigInt(10000 + priceCeilingMarkup * 100),
+          royaltyBps: 500n, // 5% royalty to creator
+          start: 0n,
+          end: 0n,
+          title: eventName,
+          venue: eventVenue,
+          date: eventDate,
+          city: eventCity,
+          category: categoryLabel
+        }]
+      });
 
-        toast.success("Transaksi Sukses! Tiket Berhasil Diluncurkan On-Chain!", {
-          description: `Tx Hash: ${tx.slice(0, 10)}...`,
-          duration: 5000
-        });
-      }
-
-      // Always register in simulated local storage
-      const simulatedListing = {
-        listingId: Math.floor(Math.random() * 900) + 200,
-        seller: address || "0x0000000000000000000000000000000000000000",
-        tokenId: Number(eventCategory),
-        amount: Number(eventVolume),
-        pricePerUnit: parseUnits(eventPrice.toString(), 18).toString(),
-        originalPrice: parseUnits(eventPrice.toString(), 18).toString(),
-        priceCeilingBps: Number(10000 + (isOwner ? 10 : priceCeilingMarkup) * 100),
-        active: true,
-        isResale: false,
-        title: eventName,
-        category: eventCategory === "1" ? "Musik" : eventCategory === "2" ? "Seminar" : "Olahraga",
-        city: eventCity,
-        date: eventDate,
-        venue: eventVenue,
-        isMock: true,
-        bannerGradient: "from-red-950 to-neutral-900"
-      };
-
-      const rawSimulated = localStorage.getItem("billet_simulated_events");
-      const simulatedList = rawSimulated ? JSON.parse(rawSimulated) : [];
-
-      simulatedList.push(simulatedListing);
-      localStorage.setItem("billet_simulated_events", JSON.stringify(simulatedList));
-
-      toast.success(isOwner ? "Sandbox Terdaftar!" : "Mode Sandbox Sukses!", {
-        description: `Event "${eventName}" berhasil dibuat dalam Mode Sandbox dan terdaftar secara lokal.`,
-        duration: 6000,
-        icon: <CheckCircle2 className="w-5 h-5 text-primary" />
+      toast.success("Event & Tiket Berhasil Diluncurkan On-Chain!", {
+        description: `Tx Hash: ${tx.slice(0, 10)}...`,
+        duration: 5000
       });
 
       setEventName("");
@@ -526,23 +505,14 @@ export default function CreatorPage() {
               /* launch Form */
               <form onSubmit={handleLaunchEvent} className="space-y-6">
                 {/* Mode status indicator */}
-                <div className={`p-4 border text-xs flex gap-3 ${isOwner
-                  ? "bg-semantic-success/10 border-semantic-success/30 text-white"
-                  : "bg-primary/10 border-primary/30 text-white"
-                  }`}>
-                  {isOwner ? (
-                    <CheckCircle2 className="w-5 h-5 text-semantic-success shrink-0 mt-0.5" />
-                  ) : (
-                    <ShieldAlert className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                  )}
+                <div className="p-4 border text-xs flex gap-3 bg-semantic-success/10 border-semantic-success/30 text-white">
+                  <CheckCircle2 className="w-5 h-5 text-semantic-success shrink-0 mt-0.5" />
                   <div className="space-y-1">
                     <p className="font-caption-uppercase text-[11px] tracking-[1.1px] font-bold">
-                      {isOwner ? "MODE: ON-CHAIN SECURE (BASE SEPOLIA)" : "MODE: DEMO SANDBOX ACTIVATED"}
+                      MODE: ON-CHAIN SECURE (BASE SEPOLIA)
                     </p>
                     <p className="font-body-sm text-[13px] text-body leading-relaxed">
-                      {isOwner
-                        ? "Anda memiliki hak owner. Tiket akan secara resmi didaftarkan di smart contract Base Sepolia."
-                        : "Akun Anda terdaftar sebagai Kreator tamu. Event akan disimpan dalam sandbox lokal browser untuk simulasi."}
+                      Sistem Multi-Creator aktif. Tiket Anda akan dicetak sebagai NFT ERC-1155 dan didaftarkan langsung ke smart contract secara real-time.
                     </p>
                   </div>
                 </div>
@@ -646,13 +616,9 @@ export default function CreatorPage() {
                     <label className="font-caption-uppercase text-[10px] text-body block tracking-wider">Price Ceiling Markup</label>
                     <div className="relative">
                       <select
-                        disabled={isOwner}
-                        value={isOwner ? 10 : priceCeilingMarkup}
-                        onChange={(e) => {
-                          if (!isOwner) setPriceCeilingMarkup(Number(e.target.value));
-                        }}
-                        className={`w-full pl-4 pr-10 py-3 border border-hairline bg-canvas text-white font-body-sm text-sm appearance-none focus:outline-none focus:border-primary ${isOwner ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-                          }`}
+                        value={priceCeilingMarkup}
+                        onChange={(e) => setPriceCeilingMarkup(Number(e.target.value))}
+                        className="w-full pl-4 pr-10 py-3 border border-hairline bg-canvas text-white font-body-sm text-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
                       >
                         <option value="0">0% (Sama Harga)</option>
                         <option value="5">5% (Markup 1.05x)</option>
@@ -661,12 +627,6 @@ export default function CreatorPage() {
                       </select>
                       <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white pointer-events-none" />
                     </div>
-                    {isOwner && (
-                      <p className="font-caption-uppercase text-[8px] text-primary flex items-start gap-1 mt-1 leading-normal">
-                        <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
-                        ON-CHAIN CEILING TERPATRI 10%
-                      </p>
-                    )}
                   </div>
                 </div>
 
@@ -684,7 +644,7 @@ export default function CreatorPage() {
                   ) : (
                     <>
                       <PlusCircle className="w-4 h-4" />
-                      {isOwner ? "LUNCURKAN TIKET ON-CHAIN" : "SIMULASIKAN TIKET SANDBOX"}
+                      LUNCURKAN TIKET ON-CHAIN
                     </>
                   )}
                 </button>

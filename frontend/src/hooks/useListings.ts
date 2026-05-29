@@ -1,5 +1,5 @@
 import { useReadContracts } from "wagmi";
-import { MARKETPLACE_ABI, MARKETPLACE_ADDRESS } from "@/config/contracts";
+import { MARKETPLACE_ABI, MARKETPLACE_ADDRESS, NFT_ABI, NFT_ADDRESS } from "@/config/contracts";
 import type { Abi } from "viem";
 import { baseSepolia } from "viem/chains";
 
@@ -13,13 +13,24 @@ export interface Listing {
   isResale: boolean;
 }
 
+export interface EventDetails {
+  title: string;
+  venue: string;
+  date: string;
+  city: string;
+  category: string;
+  creator: `0x${string}`;
+}
+
 export interface ListingWithId extends Listing {
   listingId: number;
+  eventDetails?: EventDetails;
 }
 
 /**
  * Fetches all listings from the TicketMarketplace smart contract.
- * Iterates through listing IDs 0..maxId and filters for active ones.
+ * Iterates through listing IDs 0..maxId and filters for active ones,
+ * enriching each active listing with dynamic on-chain metadata.
  */
 export function useListings(maxId = 20) {
   // Create contract calls for IDs 0 through maxId
@@ -57,16 +68,64 @@ export function useListings(maxId = 20) {
     }
   }
 
-  const activeListings = listings.filter((l) => l.active);
-  const primaryListings = activeListings.filter((l) => !l.isResale);
-  const resaleListings = activeListings.filter((l) => l.isResale);
+  const activeListingsRaw = listings.filter((l) => l.active);
+
+  // Extract token IDs from raw active listings to fetch metadata
+  const activeTokenIds = activeListingsRaw.map((l) => l.tokenId);
+
+  // =========================================================================
+  // LIMITASI BACA N+1 RPC (THESIS/POC NOTICE):
+  // Hook ini melakukan query paralel `eventDetails` langsung dari RPC node 
+  // on-chain untuk setiap listing aktif. Ini menciptakan overhead RPC (N+1 read).
+  // Pada lingkungan skala produksi komersial, data ini harus diproses 
+  // menggunakan Graph/Ponder Indexer demi performa yang optimal.
+  // =========================================================================
+  const eventDetailsCalls = activeTokenIds.map((tokenId) => ({
+    address: NFT_ADDRESS,
+    abi: NFT_ABI as Abi,
+    functionName: "eventDetails" as const,
+    args: [tokenId] as const,
+    chainId: baseSepolia.id,
+  }));
+
+  const { data: eventDetailsData, isLoading: isLoadingDetails } = useReadContracts({
+    contracts: eventDetailsCalls,
+    query: {
+      enabled: activeTokenIds.length > 0,
+      refetchInterval: 15_000,
+    },
+  });
+
+  const activeListingsEnriched: ListingWithId[] = activeListingsRaw.map((listing, index) => {
+    const detailsResult = eventDetailsData?.[index];
+    const details = detailsResult?.status === "success"
+      ? (detailsResult.result as unknown as [string, string, string, string, string, `0x${string}`])
+      : null;
+
+    return {
+      ...listing,
+      eventDetails: details
+        ? {
+            title: details[0],
+            venue: details[1],
+            date: details[2],
+            city: details[3],
+            category: details[4],
+            creator: details[5],
+          }
+        : undefined,
+    };
+  });
+
+  const primaryListings = activeListingsEnriched.filter((l) => !l.isResale);
+  const resaleListings = activeListingsEnriched.filter((l) => l.isResale);
 
   return {
     allListings: listings,
-    activeListings,
+    activeListings: activeListingsEnriched,
     primaryListings,
     resaleListings,
-    isLoading,
+    isLoading: isLoading || (activeTokenIds.length > 0 && isLoadingDetails),
     error,
     refetch,
   };

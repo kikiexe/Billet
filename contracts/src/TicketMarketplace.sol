@@ -37,6 +37,42 @@ contract TicketMarketplace is
         PAYMENT_TOKEN = IERC20(paymentTokenAddress);
     }
 
+    // ─── Event Creation & Listing ────────────────────────────────────────────
+
+    /// @notice Membuat kategori tiket baru on-chain dan langsung mendaftarkannya untuk primary sale.
+    /// @dev Fungsi atomic ini dapat dipanggil oleh kreator/agency mana saja (SaaS multi-creator platform).
+    function createAndListEvent(
+        TicketNFT.EventParams calldata params
+    )
+        external
+        override
+        returns (uint256)
+    {
+        if (params.supply == 0) revert ZeroAmount();
+
+        // 1. Buat kategori tiket dan mint ke marketplace secara atomic
+        uint256 tokenId = TICKET_NFT.createTicketCategory(
+            msg.sender,
+            params
+        );
+
+        // 2. Daftarkan primary listing di marketplace
+        uint256 listingId = _nextListingId++;
+        _listings[listingId] = Listing({
+            seller:        msg.sender,
+            tokenId:       tokenId,
+            amount:        params.supply,
+            pricePerUnit:  params.price,
+            originalPrice: params.price,
+            active:        true,
+            isResale:      false
+        });
+
+        emit TicketListed(listingId, msg.sender, tokenId, params.supply, params.price, false);
+
+        return listingId;
+    }
+
     // ─── Primary Listing ─────────────────────────────────────────────────────
 
     /// @notice Organizer mendaftarkan tiket untuk primary sale.
@@ -140,6 +176,7 @@ contract TicketMarketplace is
         nonReentrant
     {
         if (amount == 0)         revert ZeroAmount();
+        if (amount > 5)          revert ExceedsMaxPurchaseLimit();
         if (niks.length != amount || names.length != amount) revert ArrayLengthMismatch();
 
         Listing storage listing = _listings[listingId];

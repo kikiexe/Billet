@@ -48,10 +48,35 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
     /// @dev tokenId => timestamp selesai penjualan.
     mapping(uint256 => uint256) public saleEnd;
 
-    // Contoh token ID (bisa digunakan sebagai konstanta atau dinamis)
-    uint256 public constant REGULER = 1;
-    uint256 public constant VIP     = 2;
-    uint256 public constant VVIP    = 3;
+    // ─── Event Metadata & Dynamic IDs (Multi-Creator SaaS Platform) ──────────
+
+    struct EventDetails {
+        string title;
+        string venue;
+        string date;
+        string city;
+        string category;
+        address creator;
+    }
+
+    struct EventParams {
+        uint256 supply;
+        uint256 price;
+        uint256 ceilingBps;
+        uint96  royaltyBps;
+        uint256 start;
+        uint256 end;
+        string  title;
+        string  venue;
+        string  date;
+        string  city;
+        string  category;
+    }
+
+    /// @notice Metadata on-chain untuk setiap kategori tiket (Token ID)
+    mapping(uint256 => EventDetails) public eventDetails;
+
+    uint256 private _nextTokenId;
 
     // ─── Events ──────────────────────────────────────────────────────────────
 
@@ -69,7 +94,9 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
     constructor(string memory uri_)
         ERC1155(uri_)
         Ownable(msg.sender)
-    {}
+    {
+        _nextTokenId = 1;
+    }
 
     // ─── Admin Functions ─────────────────────────────────────────────────────
 
@@ -137,6 +164,44 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         totalMinted[tokenId] += amount;
         _mint(authorizedMarketplace, tokenId, amount, "");
     }
+
+    /// @notice Membuat kategori tiket baru secara dinamis.
+    /// @dev LIMITASI PoC: Fungsi ini terbuka bagi publik untuk menyederhanakan demonstrasi platform.
+    ///      Pada sistem produksi komersial, pencegahan spam token ID kosong diselesaikan menggunakan
+    ///      mekanisme staking deposit token, whitelist kreator, atau pembuatan berbayar (creation fee).
+    function createTicketCategory(
+        address creator,
+        EventParams calldata params
+    ) external returns (uint256) {
+        if (msg.sender != authorizedMarketplace && msg.sender != owner()) revert UnauthorizedTransfer();
+
+        uint256 tokenId = _nextTokenId++;
+
+        maxSupply[tokenId]       = params.supply;
+        primaryPrice[tokenId]    = params.price;
+        priceCeilingBps[tokenId] = params.ceilingBps;
+        saleStart[tokenId]       = params.start;
+        saleEnd[tokenId]         = params.end;
+
+        // Set royalti ERC-2981 langsung mengalir ke dompet creator (bukan owner platform)
+        _setTokenRoyalty(tokenId, creator, params.royaltyBps);
+
+        // Simpan metadata di blockchain
+        eventDetails[tokenId] = EventDetails({
+            title: params.title,
+            venue: params.venue,
+            date: params.date,
+            city: params.city,
+            category: params.category,
+            creator: creator
+        });
+
+        totalMinted[tokenId] += params.supply;
+        _mint(authorizedMarketplace, tokenId, params.supply, "");
+
+        return tokenId;
+    }
+
 
     /// @notice Dapatkan rentang waktu penjualan tiket.
     function getSaleWindow(uint256 tokenId) external view returns (uint256, uint256) {
@@ -210,7 +275,8 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         uint256 tokenId,
         uint256 index
     ) external {
-        if (!isGateKeeper[msg.sender] && msg.sender != owner()) revert NotGateKeeper();
+        address creator = eventDetails[tokenId].creator;
+        if (!isGateKeeper[msg.sender] && msg.sender != owner() && msg.sender != creator) revert NotGateKeeper();
         
         uint256 length = _ticketHolders[from][tokenId].length;
         require(index < length, "Index out of bounds");

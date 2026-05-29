@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
+import {TicketNFT} from "../TicketNFT.sol";
+
 interface ITicketMarketplace {
 
     // ─── Structs ─────────────────────────────────────────────────────────────
@@ -53,8 +55,13 @@ interface ITicketMarketplace {
     error InsufficientUnusedTickets(uint256 available, uint256 requested);
     error ZeroAddress();
     error InsufficientListingAmount(uint256 available, uint256 requested);
+    error ExceedsMaxPurchaseLimit();
 
     // ─── Functions ───────────────────────────────────────────────────────────
+
+    function createAndListEvent(
+        TicketNFT.EventParams calldata params
+    ) external returns (uint256);
 
     function listPrimary(
         uint256 tokenId,

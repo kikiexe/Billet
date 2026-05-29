@@ -92,35 +92,28 @@ export default function Home() {
 
   const allEvents = useMemo(() => {
     const chainEvents: RichEvent[] = activeListings.map((listing) => {
-      const catId = Number(listing.tokenId);
+      const details = listing.eventDetails;
 
-      let cat: "Musik" | "Seminar" | "Olahraga" | "Seni" = "Musik";
-      if (catId === 1) cat = "Musik";
-      else if (catId === 2) cat = "Seminar";
-      else if (catId === 3) cat = "Olahraga";
-
-      let city: "Jakarta" | "Bandung" | "Yogyakarta" | "Surabaya" = "Jakarta";
-      if (listing.listingId % 4 === 1) city = "Bandung";
-      else if (listing.listingId % 4 === 2) city = "Yogyakarta";
-      else if (listing.listingId % 4 === 3) city = "Surabaya";
+      const title = details?.title || `Tiket Resmi Billet: #${listing.tokenId.toString()}`;
+      const cat = (details?.category || "Musik") as "Musik" | "Seminar" | "Olahraga" | "Seni";
+      const city = (details?.city || "Jakarta") as "Jakarta" | "Bandung" | "Yogyakarta" | "Surabaya";
+      const date = details?.date || "28 Juni 2026";
+      const venue = details?.venue || "Billet Arena Base L2";
 
       return {
         ...listing,
-        title: `Tiket Resmi Billet: ${getCategoryName(listing.tokenId)}`,
+        title,
         category: cat,
-        city: city,
-        date: "28 Juni 2026",
-        venue: "Billet Arena Base L2",
+        city,
+        date,
+        venue,
         isMock: false,
         bannerGradient: "from-red-950 to-neutral-900"
       };
     });
 
-    // Merge simulated sandbox mock events if there are no chain events, or for demo completeness
-    const sandboxItems = typeof window !== "undefined" ? localStorage.getItem("billet_simulated_events") : null;
-    const customListings: RichEvent[] = sandboxItems ? JSON.parse(sandboxItems) : [];
-
-    return [...chainEvents, ...customListings];
+    // Sandbox mock/localStorage events have been completely removed. Only real on-chain events are returned.
+    return chainEvents;
   }, [activeListings]);
 
   const filteredEvents = useMemo(() => {
@@ -139,15 +132,7 @@ export default function Home() {
   // ─── Checkout Simulation ───────────────────────────────────────────────
 
   const handleBuyClick = (event: RichEvent) => {
-    if (event.isMock) {
-      toast.success(`[Simulasi] Tiket "${event.title}" berhasil masuk antrean!`, {
-        description: "Hubungkan wallet Anda dan kunjungi halaman /creator untuk meluncurkan tiket asli Anda secara on-chain.",
-        duration: 5000,
-        icon: <CheckCircle2 className="w-5 h-5 text-primary" />
-      });
-    } else {
-      setSelectedListing(event);
-    }
+    setSelectedListing(event);
   };
 
   const handleBuySuccess = () => {

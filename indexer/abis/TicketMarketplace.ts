@@ -84,6 +84,82 @@ export const abi = [
   },
   {
     "type": "function",
+    "name": "createAndListEvent",
+    "inputs": [
+      {
+        "name": "params",
+        "type": "tuple",
+        "internalType": "struct TicketNFT.EventParams",
+        "components": [
+          {
+            "name": "supply",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "price",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "ceilingBps",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "royaltyBps",
+            "type": "uint96",
+            "internalType": "uint96"
+          },
+          {
+            "name": "start",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "end",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "title",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "venue",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "date",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "city",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "category",
+            "type": "string",
+            "internalType": "string"
+          }
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "getListing",
     "inputs": [
       {
@@ -429,6 +505,11 @@ export const abi = [
   {
     "type": "error",
     "name": "ArrayLengthMismatch",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ExceedsMaxPurchaseLimit",
     "inputs": []
   },
   {

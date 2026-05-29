@@ -85,7 +85,7 @@ export default function CreatorPage() {
   // ─── Form State ────────────────────────────────────────────────────────
 
   const [eventName, setEventName] = useState("");
-  const [eventCategory, setEventCategory] = useState("1"); // 1=Reguler, 2=VIP, 3=VVIP
+  const [eventCategory, setEventCategory] = useState("Musik");
   const [eventPrice, setEventPrice] = useState<number>(150000);
   const [eventVolume, setEventVolume] = useState<number>(500);
   const [eventCity, setEventCity] = useState("Jakarta");
@@ -139,7 +139,6 @@ export default function CreatorPage() {
       });
 
       const priceInWei = parseUnits(eventPrice.toString(), 18);
-      const categoryLabel = eventCategory === "1" ? "Musik" : eventCategory === "2" ? "Seminar" : eventCategory === "3" ? "Olahraga" : "Seni";
 
       const tx = await writeContractAsync({
         address: MARKETPLACE_ADDRESS,
@@ -156,7 +155,7 @@ export default function CreatorPage() {
           venue: eventVenue,
           date: eventDate,
           city: eventCity,
-          category: categoryLabel
+          category: eventCategory
         }]
       });
 
@@ -539,9 +538,10 @@ export default function CreatorPage() {
                         onChange={(e) => setEventCategory(e.target.value)}
                         className="w-full pl-4 pr-10 py-3 border border-hairline bg-canvas text-white font-body-sm text-sm appearance-none cursor-pointer focus:outline-none focus:border-primary"
                       >
-                        <option value="1">Reguler (Token #1)</option>
-                        <option value="2">VIP (Token #2)</option>
-                        <option value="3">VVIP (Token #3)</option>
+                        <option value="Musik">Musik</option>
+                        <option value="Seminar">Seminar</option>
+                        <option value="Olahraga">Olahraga</option>
+                        <option value="Seni">Seni</option>
                       </select>
                       <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white pointer-events-none" />
                     </div>

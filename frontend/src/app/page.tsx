@@ -112,11 +112,7 @@ export default function Home() {
       };
     });
 
-    // Merge simulated sandbox mock events if there are no chain events, or for demo completeness
-    const sandboxItems = typeof window !== "undefined" ? localStorage.getItem("billet_simulated_events") : null;
-    const customListings: RichEvent[] = sandboxItems ? JSON.parse(sandboxItems) : [];
-
-    return [...chainEvents, ...customListings];
+    return chainEvents;
   }, [activeListings]);
 
   const filteredEvents = useMemo(() => {
@@ -135,15 +131,7 @@ export default function Home() {
   // ─── Checkout Simulation ───────────────────────────────────────────────
 
   const handleBuyClick = (event: RichEvent) => {
-    if (event.isMock) {
-      toast.success(`[Simulasi] Tiket "${event.title}" berhasil masuk antrean!`, {
-        description: "Hubungkan wallet Anda dan kunjungi halaman /creator untuk meluncurkan tiket asli Anda secara on-chain.",
-        duration: 5000,
-        icon: <CheckCircle2 className="w-5 h-5 text-primary" />
-      });
-    } else {
-      setSelectedListing(event);
-    }
+    setSelectedListing(event);
   };
 
   const handleBuySuccess = () => {

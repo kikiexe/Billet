@@ -6,7 +6,6 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 
 contract TicketNFT is ERC1155, ERC2981, Ownable {
-
     // ─── Structs ─────────────────────────────────────────────────────────────
 
     struct TicketHolder {
@@ -28,7 +27,8 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
     mapping(uint256 => string) public ticketCategoryName;
 
     /// @dev owner => tokenId => TicketHolder[]
-    mapping(address => mapping(uint256 => TicketHolder[])) private _ticketHolders;
+    mapping(address => mapping(uint256 => TicketHolder[]))
+        private _ticketHolders;
 
     /// @dev tokenId => harga primary sale dalam wei (untuk referensi ceiling).
     mapping(uint256 => uint256) public primaryPrice;
@@ -63,14 +63,14 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         uint256 supply;
         uint256 price;
         uint256 ceilingBps;
-        uint96  royaltyBps;
+        uint96 royaltyBps;
         uint256 start;
         uint256 end;
-        string  title;
-        string  venue;
-        string  date;
-        string  city;
-        string  category;
+        string title;
+        string venue;
+        string date;
+        string city;
+        string category;
     }
 
     /// @notice Metadata on-chain untuk setiap kategori tiket (Token ID)
@@ -80,21 +80,26 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
 
     // ─── Events ──────────────────────────────────────────────────────────────
 
-    event TicketCheckedIn(address indexed from, uint256 indexed tokenId, uint256 index);
+    event TicketCheckedIn(
+        address indexed from,
+        uint256 indexed tokenId,
+        uint256 index
+    );
 
     // ─── Errors ──────────────────────────────────────────────────────────────
 
     error UnauthorizedTransfer();
-    error ExceedsMaxSupply(uint256 tokenId, uint256 requested, uint256 remaining);
+    error ExceedsMaxSupply(
+        uint256 tokenId,
+        uint256 requested,
+        uint256 remaining
+    );
     error MarketplaceNotSet();
     error NotGateKeeper();
 
     // ─── Constructor ─────────────────────────────────────────────────────────
 
-    constructor(string memory uri_)
-        ERC1155(uri_)
-        Ownable(msg.sender)
-    {
+    constructor(string memory uri_) ERC1155(uri_) Ownable(msg.sender) {
         _nextTokenId = 1;
     }
 
@@ -102,10 +107,7 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
 
     /// @notice Set alamat marketplace yang diizinkan melakukan transfer.
     ///         Dipanggil setelah TicketMarketplace di-deploy.
-    function setAuthorizedMarketplace(address marketplace)
-        external
-        onlyOwner
-    {
+    function setAuthorizedMarketplace(address marketplace) external onlyOwner {
         authorizedMarketplace = marketplace;
     }
 
@@ -115,7 +117,10 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
     }
 
     /// @notice Set nama kategori tiket.
-    function setTicketCategoryName(uint256 tokenId, string calldata name) external onlyOwner {
+    function setTicketCategoryName(
+        uint256 tokenId,
+        string calldata name
+    ) external onlyOwner {
         ticketCategoryName[tokenId] = name;
     }
 
@@ -132,27 +137,24 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         uint256 supply,
         uint256 price,
         uint256 ceilingBps,
-        uint96  royaltyBps,
+        uint96 royaltyBps,
         uint256 start,
         uint256 end
-    )
-        external
-        onlyOwner
-    {
-        maxSupply[tokenId]       = supply;
-        primaryPrice[tokenId]    = price;
+    ) external onlyOwner {
+        maxSupply[tokenId] = supply;
+        primaryPrice[tokenId] = price;
         priceCeilingBps[tokenId] = ceilingBps;
-        saleStart[tokenId]       = start;
-        saleEnd[tokenId]         = end;
+        saleStart[tokenId] = start;
+        saleEnd[tokenId] = end;
         _setTokenRoyalty(tokenId, owner(), royaltyBps);
     }
 
     /// @notice Mint tiket ke address marketplace (escrow awal).
     ///         Marketplace yang kemudian mendistribusikan ke pembeli.
-    function mintToMarketplace(uint256 tokenId, uint256 amount)
-        external
-        onlyOwner
-    {
+    function mintToMarketplace(
+        uint256 tokenId,
+        uint256 amount
+    ) external onlyOwner {
         if (authorizedMarketplace == address(0)) revert MarketplaceNotSet();
         if (totalMinted[tokenId] + amount > maxSupply[tokenId]) {
             revert ExceedsMaxSupply(
@@ -173,15 +175,16 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         address creator,
         EventParams calldata params
     ) external returns (uint256) {
-        if (msg.sender != authorizedMarketplace && msg.sender != owner()) revert UnauthorizedTransfer();
+        if (msg.sender != authorizedMarketplace && msg.sender != owner())
+            revert UnauthorizedTransfer();
 
         uint256 tokenId = _nextTokenId++;
 
-        maxSupply[tokenId]       = params.supply;
-        primaryPrice[tokenId]    = params.price;
+        maxSupply[tokenId] = params.supply;
+        primaryPrice[tokenId] = params.price;
         priceCeilingBps[tokenId] = params.ceilingBps;
-        saleStart[tokenId]       = params.start;
-        saleEnd[tokenId]         = params.end;
+        saleStart[tokenId] = params.start;
+        saleEnd[tokenId] = params.end;
 
         // Set royalti ERC-2981 langsung mengalir ke dompet creator (bukan owner platform)
         _setTokenRoyalty(tokenId, creator, params.royaltyBps);
@@ -202,9 +205,10 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         return tokenId;
     }
 
-
     /// @notice Dapatkan rentang waktu penjualan tiket.
-    function getSaleWindow(uint256 tokenId) external view returns (uint256, uint256) {
+    function getSaleWindow(
+        uint256 tokenId
+    ) external view returns (uint256, uint256) {
         return (saleStart[tokenId], saleEnd[tokenId]);
     }
 
@@ -219,21 +223,23 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         string calldata nik
     ) external {
         if (msg.sender != authorizedMarketplace) revert UnauthorizedTransfer();
-        _ticketHolders[owner][tokenId].push(TicketHolder({
-            name: name,
-            nik: nik,
-            registered: true,
-            used: false
-        }));
+        _ticketHolders[owner][tokenId].push(
+            TicketHolder({name: name, nik: nik, registered: true, used: false})
+        );
     }
 
-
     /// @notice Dapatkan jumlah tiket yang sudah digunakan (di-check-in).
-    function getUsedTicketCount(address owner, uint256 tokenId) public view returns (uint256) {
+    function getUsedTicketCount(
+        address owner,
+        uint256 tokenId
+    ) public view returns (uint256) {
         uint256 count = 0;
         uint256 length = _ticketHolders[owner][tokenId].length;
         for (uint256 i = 0; i < length; i++) {
-            if (_ticketHolders[owner][tokenId][i].registered && _ticketHolders[owner][tokenId][i].used) {
+            if (
+                _ticketHolders[owner][tokenId][i].registered &&
+                _ticketHolders[owner][tokenId][i].used
+            ) {
                 count++;
             }
         }
@@ -241,11 +247,17 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
     }
 
     /// @notice Dapatkan jumlah tiket yang belum digunakan.
-    function getUnusedTicketCount(address owner, uint256 tokenId) public view returns (uint256) {
+    function getUnusedTicketCount(
+        address owner,
+        uint256 tokenId
+    ) public view returns (uint256) {
         uint256 count = 0;
         uint256 length = _ticketHolders[owner][tokenId].length;
         for (uint256 i = 0; i < length; i++) {
-            if (_ticketHolders[owner][tokenId][i].registered && !_ticketHolders[owner][tokenId][i].used) {
+            if (
+                _ticketHolders[owner][tokenId][i].registered &&
+                !_ticketHolders[owner][tokenId][i].used
+            ) {
                 count++;
             }
         }
@@ -258,7 +270,10 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         uint256 length = _ticketHolders[owner][tokenId].length;
         bool found = false;
         for (uint256 i = 0; i < length; i++) {
-            if (_ticketHolders[owner][tokenId][i].registered && !_ticketHolders[owner][tokenId][i].used) {
+            if (
+                _ticketHolders[owner][tokenId][i].registered &&
+                !_ticketHolders[owner][tokenId][i].used
+            ) {
                 // Hapus dengan delete untuk mempertahankan index array
                 delete _ticketHolders[owner][tokenId][i];
                 found = true;
@@ -276,29 +291,41 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         uint256 index
     ) external {
         address creator = eventDetails[tokenId].creator;
-        if (!isGateKeeper[msg.sender] && msg.sender != owner() && msg.sender != creator) revert NotGateKeeper();
-        
+        if (
+            !isGateKeeper[msg.sender] &&
+            msg.sender != owner() &&
+            msg.sender != creator
+        ) revert NotGateKeeper();
+
         uint256 length = _ticketHolders[from][tokenId].length;
         require(index < length, "Index out of bounds");
-        require(_ticketHolders[from][tokenId][index].registered, "Ticket not registered");
-        require(!_ticketHolders[from][tokenId][index].used, "Ticket already used");
+        require(
+            _ticketHolders[from][tokenId][index].registered,
+            "Ticket not registered"
+        );
+        require(
+            !_ticketHolders[from][tokenId][index].used,
+            "Ticket already used"
+        );
 
         // Invarian: saldo token user tidak boleh kurang dari jumlah unused ticket yang tersisa
         // Mencegah check-in tiket yang sedang di-escrow/listing di marketplace
         uint256 usedCount = getUsedTicketCount(from, tokenId);
-        require(balanceOf(from, tokenId) > usedCount, "Insufficient ticket balance in wallet");
-        
+        require(
+            balanceOf(from, tokenId) > usedCount,
+            "Insufficient ticket balance in wallet"
+        );
+
         _ticketHolders[from][tokenId][index].used = true;
-        
+
         emit TicketCheckedIn(from, tokenId, index);
     }
 
     /// @notice Dapatkan data pembeli tiket terdaftar (read-only untuk panel panitia)
-    function getTicketHolders(address owner, uint256 tokenId)
-        external
-        view
-        returns (TicketHolder[] memory)
-    {
+    function getTicketHolders(
+        address owner,
+        uint256 tokenId
+    ) external view returns (TicketHolder[] memory) {
         return _ticketHolders[owner][tokenId];
     }
 
@@ -317,13 +344,11 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         address to,
         uint256[] memory ids,
         uint256[] memory values
-    )
-        internal
-        override
-    {
-        bool isMint       = (from == address(0));
-        bool isBurn       = (to == address(0));
-        bool isAuthorized = (from == authorizedMarketplace || to == authorizedMarketplace);
+    ) internal override {
+        bool isMint = (from == address(0));
+        bool isBurn = (to == address(0));
+        bool isAuthorized = (from == authorizedMarketplace ||
+            to == authorizedMarketplace);
 
         if (!isMint && !isBurn && !isAuthorized) {
             revert UnauthorizedTransfer();
@@ -334,12 +359,9 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
 
     // ─── Interface Support ───────────────────────────────────────────────────
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC1155, ERC2981)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC1155, ERC2981) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }

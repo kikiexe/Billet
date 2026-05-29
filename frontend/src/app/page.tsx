@@ -202,53 +202,12 @@ const mockEvents: RichEvent[] = [
   }
 ];
 
-// ─── Movies Database ─────────────────────────────────────────────────────
-
-const mockMovies = [
-  {
-    id: 1,
-    title: "Ghost Cell (2026)",
-    genre: "Horor / Sci-Fi",
-    rating: "9.2",
-    price: 45000,
-    duration: "1j 55m",
-    imageUrl: "bg-gradient-to-tr from-[#3D3630] to-[#FF6B35]"
-  },
-  {
-    id: 2,
-    title: "Gudang Merica",
-    genre: "Aksi / Komedi",
-    rating: "8.8",
-    price: 40000,
-    duration: "2j 10m",
-    imageUrl: "bg-gradient-to-tr from-bark to-rose-950"
-  },
-  {
-    id: 3,
-    title: "Lentera Sepatu Merah",
-    genre: "Drama / Romansa",
-    rating: "8.5",
-    price: 42000,
-    duration: "1j 48m",
-    imageUrl: "bg-gradient-to-tr from-[#8A8078] to-amber-700"
-  }
-];
-
-// ─── City List ───────────────────────────────────────────────────────────
-
-const cities = [
-  { name: "Jakarta", count: "12 Event", color: "from-[#FF6B35]/15 to-[#FF8A50]/5", icon: "🏢" },
-  { name: "Bandung", count: "8 Event", color: "from-[#3B82F6]/15 to-blue-500/5", icon: "🏔️" },
-  { name: "Yogyakarta", count: "6 Event", color: "from-[#10B981]/15 to-emerald-500/5", icon: "⛩️" },
-  { name: "Surabaya", count: "9 Event", color: "from-[#8B5CF6]/15 to-indigo-500/5", icon: "🦈" }
-];
 
 export default function Home() {
   const { activeListings, isLoading, refetch } = useListings();
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
-  const [selectedCity, setSelectedCity] = useState<string>("");
   const [selectedListing, setSelectedListing] = useState<ListingWithId | null>(null);
   const [customEvents, setCustomEvents] = useState<RichEvent[]>([]);
   const [selectedTypeFilter, setSelectedTypeFilter] = useState<'all' | 'onchain' | 'sandbox'>('all');
@@ -305,12 +264,10 @@ export default function Home() {
       
       const matchCategory =
         selectedCategory === "Semua" || event.category === selectedCategory;
-      
-      const matchCity = !selectedCity || event.city === selectedCity;
 
-      return matchSearch && matchCategory && matchCity;
+      return matchSearch && matchCategory;
     });
-  }, [allEvents, searchQuery, selectedCategory, selectedCity]);
+  }, [allEvents, searchQuery, selectedCategory]);
 
   // ─── Buy / Simulation Action ────────────────────────────────────────────
 
@@ -515,10 +472,9 @@ export default function Home() {
             </div>
 
             {/* Reset Filter Button */}
-            {(selectedCity || selectedCategory !== "Semua" || searchQuery) && (
+            {(selectedCategory !== "Semua" || searchQuery) && (
               <button
                 onClick={() => {
-                  setSelectedCity("");
                   setSelectedCategory("Semua");
                   setSearchQuery("");
                 }}
@@ -677,117 +633,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ─── Billet Cinema Ticket Category ("Billet Bioskop") ─────────── */}
-        <section className="max-w-7xl mx-auto px-5 sm:px-8 py-8">
-          <div className="bg-white neo-border neo-shadow p-6 mb-8 flex items-center justify-between gap-4">
-            <div>
-              <h2 className="font-pixel-lg text-4xl text-black flex items-center gap-2 uppercase font-bold">
-                Billet Bioskop
-                <Clapperboard className="w-7 h-7 text-[#FF5722] stroke-2" />
-              </h2>
-              <p className="font-pixel-sm text-[10px] text-neutral-700 mt-2">
-                Tonton film blockbuster favorit Anda dengan sistem tiket digital bebas calo.
-              </p>
-            </div>
-            <Link
-              href="/events"
-              className="text-[#FF5722] hover:text-[#E64A19] font-pixel-sm text-[10px] uppercase font-bold flex items-center gap-1 group shrink-0"
-            >
-              Semua
-              <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 stroke-[2.5]" />
-            </Link>
-          </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {mockMovies.map((movie) => (
-              <div
-                key={movie.id}
-                onClick={() => {
-                  toast.success(`[Simulasi Bioskop] Tiket "${movie.title}" berhasil di-booking!`, {
-                    description: "Terima kasih telah menggunakan sistem Billet Cinema.",
-                    icon: <Film className="w-5 h-5 text-[#FF5722]" />
-                  });
-                }}
-                className="group bg-white neo-border neo-shadow p-5 hover:-translate-y-1 active:translate-y-px transition-all duration-200 cursor-pointer flex gap-4"
-              >
-                {/* Poster Placeholder */}
-                <div className={`w-24 h-32 border-3 border-black ${movie.imageUrl} shrink-0 relative overflow-hidden flex flex-col justify-between p-3 text-white shadow-md`}>
-                  <Film className="w-4 h-4 text-white/50" />
-                  <span className="font-pixel-sm text-[7px] font-bold bg-black text-white px-1 py-0.5 text-center">
-                    BIOSKOP
-                  </span>
-                </div>
-
-                {/* Details */}
-                <div className="flex flex-col justify-between py-1">
-                  <div>
-                    <span className="font-pixel-sm text-[8px] font-bold text-neutral-500 uppercase tracking-widest">
-                      {movie.genre}
-                    </span>
-                    <h3 className="font-pixel-lg text-2xl font-bold text-black mt-1 group-hover:text-[#FF5722] transition-colors uppercase">
-                      {movie.title}
-                    </h3>
-                    <p className="font-pixel-sm text-[8px] text-neutral-500 mt-1">Durasi: {movie.duration}</p>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 bg-amber-100 border-2 border-black text-black px-2 py-0.5 font-pixel-sm text-[8px] font-bold">
-                      ★ {movie.rating}
-                    </div>
-                    <p className="font-pixel-lg text-xl font-bold text-black">
-                      Rp {movie.price.toLocaleString("id-ID")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ─── Explore by City ("Jelajahi Event di Kotamu") ─────────────── */}
-        <section className="max-w-7xl mx-auto px-5 sm:px-8 py-8">
-          <div className="bg-white neo-border neo-shadow p-6 mb-8">
-            <h2 className="font-pixel-lg text-4xl text-black flex items-center gap-2 uppercase font-bold">
-              Jelajahi Event di Kotamu
-            </h2>
-            <p className="font-pixel-sm text-[10px] text-neutral-700 mt-2">
-              Temukan keseruan langsung di kota Anda dengan cepat dan praktis.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {cities.map((city) => {
-              const isSelected = selectedCity === city.name;
-              return (
-                <div
-                  key={city.name}
-                  onClick={() => {
-                    if (isSelected) setSelectedCity(""); // toggle off
-                    else {
-                      setSelectedCity(city.name);
-                      document.getElementById("events-section")?.scrollIntoView({ behavior: "smooth" });
-                    }
-                  }}
-                  className={`group p-6 text-center cursor-pointer transition-all duration-200 border-[3.5px] border-black ${
-                    isSelected
-                      ? "bg-[#FF5722] text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] -translate-x-px -translate-y-px"
-                      : `bg-white text-black hover:border-[#FF5722] hover:-translate-y-0.5 shadow-[4px_4px_0_0_rgba(0,0,0,1)]`
-                  }`}
-                >
-                  <div className="text-4xl mb-3 transition-transform group-hover:scale-110">
-                    {city.icon}
-                  </div>
-                  <h3 className={`font-pixel-lg text-2xl font-bold uppercase ${isSelected ? "text-white" : "text-black"}`}>
-                    {city.name}
-                  </h3>
-                  <p className={`font-pixel-sm text-[8px] mt-1 ${isSelected ? "text-white/80" : "text-neutral-500"}`}>
-                    {city.count}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </section>
       </main>
 
       <Footer />

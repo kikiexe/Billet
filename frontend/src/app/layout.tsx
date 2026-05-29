@@ -33,12 +33,12 @@ const pressStart2P = Press_Start_2P({
 });
 
 export const metadata: Metadata = {
-  title: "Billet — Tiket Acara Terdesentralisasi",
+  title: "Billet",
   description:
     "Platform tiket acara terdesentralisasi di Base L2. Beli, jual, dan kelola tiket dengan aman — tanpa calo, harga adil, check-in instan.",
   keywords: ["tiket", "blockchain", "NFT", "Base", "decentralized", "IDRX", "event"],
   openGraph: {
-    title: "Billet — Tiket Acara Terdesentralisasi",
+    title: "Billet",
     description: "Beli tiket acara di blockchain tanpa calo. Harga adil, check-in instan.",
     type: "website",
   },

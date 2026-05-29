@@ -69,7 +69,7 @@ export function Navbar() {
             />
 
             <div
-              className={`flex flex-col whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${scrolled ? "max-w-0 opacity-0" : "max-w-[200px] opacity-100"
+              className={`flex flex-col whitespace-nowrap overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${scrolled ? "max-w-0 opacity-0" : "max-w-50 opacity-100"
                 }`}
             >
               <span className="font-display font-bold text-xl md:text-2xl tracking-tight text-white leading-none">
@@ -81,7 +81,7 @@ export function Navbar() {
                 </span>
               )}
               {isGatekeeperMode && (
-                <span className="font-caption-uppercase text-[9px] text-[#4c98b9] mt-1 tracking-wider">
+                <span className="font-caption-uppercase text-[9px] text-semantic-info mt-1 tracking-wider">
                   GATEKEEPER SCAN
                 </span>
               )}
@@ -99,7 +99,7 @@ export function Navbar() {
                   className={`
                     font-nav-link text-[13px] tracking-[0.65px] transition-all duration-200 py-2 relative
                     ${isActive
-                      ? "text-primary font-bold after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-primary"
+                      ? "text-primary font-bold after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-primary"
                       : "text-body hover:text-white"
                     }
                   `}
@@ -135,7 +135,7 @@ export function Navbar() {
         {/* ─── Mobile Navigation Menu ─────────────────────────────── */}
         {mobileOpen && (
           <div
-            className={`md:hidden absolute left-0 right-0 bg-canvas/95 backdrop-blur-xl border border-hairline p-6 animate-slide-up space-y-6 z-50 shadow-2xl transition-all ${scrolled ? "top-[72px]" : "top-[80px]"
+            className={`md:hidden absolute left-0 right-0 bg-canvas/95 backdrop-blur-xl border border-hairline p-6 animate-slide-up space-y-6 z-50 shadow-2xl transition-all ${scrolled ? "top-18" : "top-20"
               }`}
           >
             <div className="flex flex-col gap-4">

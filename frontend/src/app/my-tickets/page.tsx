@@ -50,7 +50,7 @@ export default function MyTicketsPage() {
                     <span className="text-white">{totalHolders} TIKET</span>
                   </div>
                   <div className="flex items-center gap-2 px-3 py-1.5 border border-hairline bg-canvas-elevated text-xs font-caption-uppercase tracking-wider">
-                    <TicketCheck className="w-4 h-4 text-[#03904a]" />
+                    <TicketCheck className="w-4 h-4 text-semantic-success" />
                     <span className="text-white">{usedCount} TERPAKAI</span>
                   </div>
                 </div>

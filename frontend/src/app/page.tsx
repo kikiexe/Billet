@@ -189,19 +189,15 @@ export default function Home() {
               />
             </div>
 
-            {/* KOREKSI 2: Overlay bg-canvas/40 dihapus total agar tidak memblokir interaksi blend-mode. 
-                Hanya sisakan gradient bawah agar transisi ke section selanjutnya tidak terputus kasar */}
             <div className="absolute inset-0 bg-linear-to-t from-canvas via-transparent to-transparent z-10 pointer-events-none" />
 
-            {/* Container Utama Teks */}
             <div className="section-container relative z-20 w-full flex flex-col">
               <span className="self-start font-caption-uppercase text-[12px] md:text-[14px] tracking-[3px] text-white bg-white/5 border border-white/20 px-4 py-1.5 w-fit block mb-4 md:mb-0 font-bold">
                 DECENTRALIZED TICKETING PROTOCOL
               </span>
 
-              {/* JUDUL & DESKRIPSI */}
               <div className="max-w-5xl mx-auto flex flex-col items-center text-center mt-4">
-                <h1 style={{ fontFamily: 'Roboto, sans-serif' }} className="text-[12vw] sm:text-[100px] md:text-[150px] lg:text-[180px] font-black leading-[0.8] uppercase tracking-[-0.04em] text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/40 pb-2">
+                <h1 style={{ fontFamily: 'Roboto, sans-serif' }} className="text-[12vw] sm:text-[100px] md:text-[150px] lg:text-[180px] font-black leading-[0.8] uppercase tracking-[-0.04em] text-transparent bg-clip-text bg-linear-to-b from-white via-white to-white/40 pb-2">
                   BILLET
                 </h1>
 
@@ -210,7 +206,6 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* TOMBOL AKSI */}
               <div className="flex flex-wrap justify-center gap-4 pt-8 mx-auto">
                 <button
                   onClick={() => {

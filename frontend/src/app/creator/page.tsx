@@ -527,11 +527,11 @@ export default function CreatorPage() {
               <form onSubmit={handleLaunchEvent} className="space-y-6">
                 {/* Mode status indicator */}
                 <div className={`p-4 border text-xs flex gap-3 ${isOwner
-                    ? "bg-[#03904a]/10 border-[#03904a]/30 text-white"
-                    : "bg-primary/10 border-primary/30 text-white"
+                  ? "bg-semantic-success/10 border-semantic-success/30 text-white"
+                  : "bg-primary/10 border-primary/30 text-white"
                   }`}>
                   {isOwner ? (
-                    <CheckCircle2 className="w-5 h-5 text-[#03904a] shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-5 h-5 text-semantic-success shrink-0 mt-0.5" />
                   ) : (
                     <ShieldAlert className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                   )}

@@ -43,9 +43,9 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
   // Determine current step index
   const currentStepIndex =
     txState === "idle" ? 0 :
-    txState === "approving" ? 1 :
-    txState === "buying" ? 2 :
-    txState === "success" ? 3 : 0;
+      txState === "approving" ? 1 :
+        txState === "buying" ? 2 :
+          txState === "success" ? 3 : 0;
 
   // Update holder count when amount changes
   const handleAmountChange = (newAmount: number) => {
@@ -116,7 +116,7 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
 
       {/* Dialog container sharp corners */}
       <div className="relative w-full max-w-lg bg-canvas-elevated shadow-2xl animate-fade-in-up overflow-hidden border border-hairline rounded-none">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-hairline">
           <div>
@@ -147,7 +147,7 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                   className={`
                     w-6 h-6 flex items-center justify-center text-[10px] font-bold shrink-0 transition-all rounded-none border
                     ${i < currentStepIndex
-                      ? "bg-[#03904a] border-[#03904a] text-white"
+                      ? "bg-semantic-success border-semantic-success text-white"
                       : i === currentStepIndex
                         ? "bg-primary border-primary text-white"
                         : "bg-canvas-elevated border-hairline text-body"
@@ -162,9 +162,8 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                 </div>
                 {i < steps.length - 1 && (
                   <div
-                    className={`flex-1 h-[1px] mx-2 transition-colors ${
-                      i < currentStepIndex ? "bg-[#03904a]" : "bg-hairline"
-                    }`}
+                    className={`flex-1 h-px mx-2 transition-colors ${i < currentStepIndex ? "bg-semantic-success" : "bg-hairline"
+                      }`}
                   />
                 )}
               </div>
@@ -174,9 +173,8 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
             {steps.map((step, i) => (
               <span
                 key={step.id}
-                className={`flex-1 text-center ${
-                  i <= currentStepIndex ? "text-white font-bold" : "text-body/30"
-                }`}
+                className={`flex-1 text-center ${i <= currentStepIndex ? "text-white font-bold" : "text-body/30"
+                  }`}
               >
                 {step.label}
               </span>
@@ -189,15 +187,15 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
           {txState === "success" ? (
             /* Success State */
             <div className="text-center py-6 space-y-4">
-              <div className="w-12 h-12 border border-[#03904a]/30 bg-[#03904a]/10 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-6 h-6 text-[#03904a]" />
+              <div className="w-12 h-12 border border-semantic-success/30 bg-semantic-success/10 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="w-6 h-6 text-semantic-success" />
               </div>
               <div className="space-y-2">
                 <h3 className="font-display-md text-xl uppercase tracking-tight text-white">
                   PEMBELIAN SELESAI
                 </h3>
                 <p className="font-body-sm text-[13px] text-body max-w-xs mx-auto">
-                  {amount} tiket {categoryName} berhasil ditransfer ke akun Anda. 
+                  {amount} tiket {categoryName} berhasil ditransfer ke akun Anda.
                   Dapatkan check-in instan on-chain di halaman "Tiket Saya".
                 </p>
               </div>

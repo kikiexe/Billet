@@ -44,9 +44,32 @@ export default function GatekeeperPage() {
     },
   });
 
+  // 1b. Check if the user is the creator of any event
+  const { data: eventDetailsList } = useReadContracts({
+    contracts: TOKEN_IDS.map((id) => ({
+      address: NFT_ADDRESS,
+      abi: NFT_ABI as Abi,
+      functionName: "eventDetails",
+      args: [BigInt(id)],
+      chainId: baseSepolia.id,
+    })),
+    query: {
+      enabled: isConnected && !!address,
+    }
+  });
+
+  const isCreator = !!address && !!eventDetailsList && eventDetailsList.some((res) => {
+    if (res.status === "success" && res.result) {
+      const details = res.result as any;
+      const creatorAddr = details.creator || (Array.isArray(details) ? details[5] : null);
+      return creatorAddr && creatorAddr.toLowerCase() === address.toLowerCase();
+    }
+    return false;
+  });
+
   const checkingRole = checkingExplicitRole || checkingOwnerRole;
   const isOwner = !!address && !!ownerAddress && address.toLowerCase() === (ownerAddress as string).toLowerCase();
-  const isGateKeeper = isExplicitGateKeeper || isOwner;
+  const isGateKeeper = isExplicitGateKeeper || isOwner || isCreator;
 
   // 2. Fetch User Tickets
   const contracts = scannedAddress

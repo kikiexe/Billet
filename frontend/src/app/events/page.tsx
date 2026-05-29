@@ -11,9 +11,9 @@ import { useListings, type ListingWithId } from "@/hooks/useListings";
 type FilterTab = "all" | "primary" | "resale";
 
 const filterTabs: { id: FilterTab; label: string }[] = [
-  { id: "all", label: "Semua" },
-  { id: "primary", label: "Primary" },
-  { id: "resale", label: "Resale" },
+  { id: "all", label: "SEMUA TIKET" },
+  { id: "primary", label: "PENJUALAN UTAMA" },
+  { id: "resale", label: "PASAR SEKUNDER" },
 ];
 
 export default function EventsPage() {
@@ -34,52 +34,46 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-cream">
+    <div className="min-h-screen flex flex-col bg-canvas text-white">
       <Navbar />
 
-      <main className="flex-1">
+      <main className="flex-1 pb-24">
         {/* ─── Page Header ──────────────────────────────────── */}
-        <section className="relative overflow-hidden" id="events-header">
-          {/* Subtle background orb */}
-          <div
-            className="absolute -top-32 -right-32 w-96 h-96 rounded-full opacity-15"
-            style={{
-              background: "radial-gradient(circle, #FFB07A 0%, transparent 60%)",
-            }}
-          />
-
-          <div className="section-container pt-10 pb-8 relative">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
-              <div>
-                <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-bark mb-1.5">
-                  Jelajahi Event
+        <section className="relative overflow-hidden border-b border-hairline">
+          <div className="section-container pt-12 pb-8 relative">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+              <div className="space-y-2">
+                <span className="font-caption-uppercase text-[10px] text-primary tracking-wider">
+                  BILLET CATALOUGE
+                </span>
+                <h1 className="font-display-md text-3xl sm:text-4xl uppercase tracking-tight text-white leading-none">
+                  JELAJAHI EVENT
                 </h1>
-                <p className="text-stone text-sm max-w-md leading-relaxed">
-                  Temukan tiket acara yang tersedia langsung dari organizer
-                  atau penjual resale terverifikasi di Base L2.
+                <p className="font-body-sm text-[13px] text-body max-w-md leading-relaxed">
+                  Temukan tiket acara yang aktif langsung dari organizer resmi maupun penawaran sekunder terverifikasi.
                 </p>
               </div>
 
               {/* Stats badge */}
-              <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/60 border border-bark/6 text-sm shrink-0 shadow-card">
-                <Ticket className="w-4 h-4 text-warm-500" />
-                <span className="text-bark font-medium">
-                  {activeListings.length} listing aktif
+              <div className="flex items-center gap-2 px-3 py-1.5 border border-hairline bg-canvas-elevated text-xs font-caption-uppercase tracking-wider">
+                <Ticket className="w-4 h-4 text-primary" />
+                <span className="text-white">
+                  {activeListings.length} LISTING AKTIF
                 </span>
               </div>
             </div>
 
             {/* Filter tabs */}
-            <div className="flex items-center gap-1.5 mt-7">
+            <div className="flex items-center gap-2 mt-8">
               {filterTabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setFilter(tab.id)}
                   className={`
-                    px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200
+                    px-4 py-2 border font-caption-uppercase text-[11px] tracking-wider transition-all duration-200 cursor-pointer
                     ${filter === tab.id
-                      ? "bg-bark text-white shadow-sm"
-                      : "text-stone hover:text-bark hover:bg-sand/60"
+                      ? "bg-primary border-primary text-white"
+                      : "bg-canvas border-hairline text-body hover:text-white"
                     }
                   `}
                   id={`filter-${tab.id}`}
@@ -97,28 +91,28 @@ export default function EventsPage() {
         </section>
 
         {/* ─── Listings Grid ────────────────────────────────── */}
-        <section className="section-container pb-20" id="events-grid">
+        <section className="section-container py-12" id="events-grid">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 text-warm-500 animate-spin mb-4" />
-              <p className="text-stone text-sm">Memuat listing dari blockchain...</p>
+            <div className="flex flex-col items-center justify-center py-20 border border-hairline bg-canvas-elevated">
+              <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
+              <p className="font-body-sm text-sm text-body">Menyelaraskan saldo blockchain...</p>
             </div>
           ) : displayedListings.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-sand/50 flex items-center justify-center mb-5">
-                <Search className="w-6 h-6 text-stone/30" />
+            <div className="flex flex-col items-center justify-center py-20 text-center border border-hairline bg-canvas-elevated p-8">
+              <div className="w-12 h-12 border border-white/10 bg-canvas flex items-center justify-center mb-4">
+                <Search className="w-5 h-5 text-body" />
               </div>
-              <h3 className="font-heading font-semibold text-lg text-bark mb-1.5">
-                Belum Ada Listing
+              <h3 className="font-display-md text-xl uppercase tracking-tight text-white mb-2">
+                BELUM ADA LISTING
               </h3>
-              <p className="text-stone text-sm max-w-xs leading-relaxed">
+              <p className="font-body-sm text-[13px] text-body max-w-xs leading-relaxed">
                 {filter !== "all"
-                  ? `Tidak ada listing ${filter} yang aktif saat ini. Coba filter lain.`
-                  : "Belum ada tiket yang tersedia. Cek kembali nanti!"}
+                  ? `Tidak ada listing ${filter === "primary" ? "Penjualan Utama" : "Pasar Sekunder"} yang aktif saat ini.`
+                  : "Belum ada tiket yang tersedia di jaringan ini."}
               </p>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {displayedListings.map((listing) => (
                 <EventCard
                   key={listing.listingId}

@@ -23,40 +23,35 @@ export default function MyTicketsPage() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-cream">
+    <div className="min-h-screen flex flex-col bg-canvas text-white">
       <Navbar />
 
-      <main className="flex-1">
+      <main className="flex-1 pb-24">
         {/* ─── Page Header ──────────────────────────────────── */}
-        <section className="relative overflow-hidden" id="my-tickets-header">
-          <div
-            className="absolute -top-28 -left-28 w-80 h-80 rounded-full opacity-10"
-            style={{
-              background: "radial-gradient(circle, #FFCCA3 0%, transparent 60%)",
-            }}
-          />
-
-          <div className="section-container pt-10 pb-8 relative">
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
-              <div>
-                <h1 className="font-heading font-extrabold text-3xl sm:text-4xl text-bark mb-1.5">
-                  Tiket Saya
+        <section className="relative overflow-hidden border-b border-hairline">
+          <div className="section-container pt-12 pb-8 relative">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
+              <div className="space-y-2">
+                <span className="font-caption-uppercase text-[10px] text-primary tracking-wider">
+                  USER TICKETS LIST
+                </span>
+                <h1 className="font-display-md text-3xl sm:text-4xl uppercase tracking-tight text-white leading-none">
+                  TIKET SAYA
                 </h1>
-                <p className="text-stone text-sm max-w-md leading-relaxed">
-                  Kelola tiket acara yang Anda miliki. Lihat status check-in dan
-                  data pemegang tiket.
+                <p className="font-body-sm text-[13px] text-body max-w-md leading-relaxed">
+                  Kelola tiket acara yang Anda miliki. Cek status aktivasi untuk check-in atau daftarkan info pengunjung.
                 </p>
               </div>
 
               {isConnected && totalHolders > 0 && (
                 <div className="flex items-center gap-3 shrink-0">
-                  <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/60 border border-bark/6 text-sm shadow-card">
-                    <Ticket className="w-4 h-4 text-warm-500" />
-                    <span className="text-bark font-medium">{totalHolders} tiket</span>
+                  <div className="flex items-center gap-2 px-3 py-1.5 border border-hairline bg-canvas-elevated text-xs font-caption-uppercase tracking-wider">
+                    <Ticket className="w-4 h-4 text-primary" />
+                    <span className="text-white">{totalHolders} TIKET</span>
                   </div>
-                  <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/60 border border-bark/6 text-sm shadow-card">
-                    <TicketCheck className="w-4 h-4 text-green-500" />
-                    <span className="text-bark font-medium">{usedCount} terpakai</span>
+                  <div className="flex items-center gap-2 px-3 py-1.5 border border-hairline bg-canvas-elevated text-xs font-caption-uppercase tracking-wider">
+                    <TicketCheck className="w-4 h-4 text-[#03904a]" />
+                    <span className="text-white">{usedCount} TERPAKAI</span>
                   </div>
                 </div>
               )}
@@ -64,69 +59,65 @@ export default function MyTicketsPage() {
           </div>
         </section>
 
-        {/* ─── Content ──────────────────────────────────────── */}
-        <section className="section-container pb-20" id="my-tickets-grid">
+        {/* ─── Content Grid ──────────────────────────────────────── */}
+        <section className="section-container py-12" id="my-tickets-grid">
           {!isConnected ? (
-            /* Not Connected */
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-sand/50 flex items-center justify-center mb-5">
-                <Wallet className="w-6 h-6 text-stone/30" />
+            /* Not Connected lock block */
+            <div className="flex flex-col items-center justify-center py-20 text-center border border-hairline bg-canvas-elevated p-8">
+              <div className="w-12 h-12 border border-white/10 bg-canvas flex items-center justify-center mb-4">
+                <Wallet className="w-5 h-5 text-body" />
               </div>
-              <h3 className="font-heading font-semibold text-lg text-bark mb-1.5">
-                Hubungkan Wallet
+              <h3 className="font-display-md text-xl uppercase tracking-tight text-white mb-2">
+                DOMPET BELUM TERHUBUNG
               </h3>
-              <p className="text-stone text-sm max-w-xs mb-6 leading-relaxed">
-                Hubungkan wallet Anda untuk melihat tiket yang Anda miliki.
+              <p className="font-body-sm text-[13px] text-body max-w-xs mb-6 leading-relaxed">
+                Hubungkan dompet Web3 Anda untuk memuat tiket digital yang Anda miliki secara on-chain.
               </p>
-              <ConnectKitButton />
+              <div className="flex justify-center">
+                <ConnectKitButton />
+              </div>
             </div>
           ) : isLoading ? (
-            /* Loading */
-            <div className="flex flex-col items-center justify-center py-20">
-              <Loader2 className="w-8 h-8 text-warm-500 animate-spin mb-4" />
-              <p className="text-stone text-sm">Memuat tiket dari blockchain...</p>
+            <div className="flex flex-col items-center justify-center py-20 border border-hairline bg-canvas-elevated">
+              <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
+              <p className="font-body-sm text-sm text-body">Memuat tiket dari blockchain...</p>
             </div>
           ) : totalHolders === 0 ? (
-            /* Empty State — More engaging */
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-warm-50 border border-warm-100 flex items-center justify-center mb-5">
-                <Ticket className="w-7 h-7 text-warm-400" />
+            /* Empty State */
+            <div className="flex flex-col items-center justify-center py-20 text-center border border-hairline bg-canvas-elevated p-8">
+              <div className="w-12 h-12 border border-white/10 bg-canvas flex items-center justify-center mb-4">
+                <Ticket className="w-5 h-5 text-primary -rotate-45" />
               </div>
-              <h3 className="font-heading font-semibold text-xl text-bark mb-2">
-                Belum Punya Tiket
+              <h3 className="font-display-md text-xl uppercase tracking-tight text-white mb-2">
+                BELUM PUNYA TIKET
               </h3>
-              <p className="text-stone text-sm max-w-xs mb-6 leading-relaxed">
-                Anda belum memiliki tiket. Jelajahi event yang tersedia dan beli
-                tiket pertama Anda!
+              <p className="font-body-sm text-[13px] text-body max-w-xs mb-6 leading-relaxed">
+                Anda belum memiliki tiket terdaftar. Jelajahi event seru kami sekarang!
               </p>
-              <Link
-                href="/events"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-linear-to-r from-warm-500 to-warm-600 text-white font-heading font-semibold text-sm shadow-warm hover:shadow-warm-lg transition-all"
-              >
-                Jelajahi Event
-                <ArrowRight className="w-4 h-4" />
+              <Link href="/events" className="btn-primary">
+                BELI TIKET PERTAMA <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </div>
           ) : (
-            /* Ticket Grid by Category */
-            <div className="space-y-10">
+            /* Ticket Grid categorized */
+            <div className="space-y-12">
               {tickets.map((ticket) => {
                 const registeredHolders = ticket.holders.filter((h) => h.registered);
                 if (registeredHolders.length === 0) return null;
 
                 return (
-                  <div key={ticket.tokenId}>
-                    {/* Category header */}
-                    <div className="flex items-center gap-3 mb-4">
-                      <h2 className="font-heading font-bold text-xl text-bark">
+                  <div key={ticket.tokenId} className="space-y-4">
+                    {/* Category Header */}
+                    <div className="flex items-center gap-3 border-b border-hairline pb-2">
+                      <h2 className="font-display-md text-xl uppercase tracking-tight text-white">
                         {getCategoryName(ticket.tokenId)}
                       </h2>
-                      <span className="px-2.5 py-0.5 rounded-lg bg-sand/60 text-[11px] font-semibold text-stone border border-bark/4">
-                        {registeredHolders.length} tiket
+                      <span className="px-2 py-0.5 border border-hairline bg-canvas-elevated font-caption-uppercase text-[9px] tracking-wider text-body">
+                        {registeredHolders.length} TIKET
                       </span>
                     </div>
 
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
                       {registeredHolders.map((holder, idx) => (
                         <TicketCard
                           key={`${ticket.tokenId}-${idx}`}

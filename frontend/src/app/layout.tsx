@@ -52,19 +52,21 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${outfit.variable} ${dmSans.variable} ${vt323.variable} ${pressStart2P.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
+      className={`${outfit.variable} ${dmSans.variable} ${vt323.variable} ${pressStart2P.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-canvas text-white">
         <Web3Provider>
           {children}
           <Toaster
             position="bottom-right"
             toastOptions={{
               style: {
-                background: "rgba(255,255,255,0.85)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid rgba(26,22,18,0.08)",
-                color: "#1A1612",
+                background: "#303030",
+                border: "1px solid #fc3b10",
+                color: "#ffffff",
+                borderRadius: "0px",
+                fontFamily: "var(--font-dm-sans)",
               },
             }}
           />

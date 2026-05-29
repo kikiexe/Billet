@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CheckCircle2, Clock, User, X, Tag, ArrowUpRight, ShieldAlert, Loader2 } from "lucide-react";
 import { getCategoryName } from "@/lib/format";
 import type { TicketHolder } from "@/hooks/useMyTickets";
-import { useAccount, useReadContract, useWriteContract } from "wagmi";
+import { useAccount, useReadContract, useWriteContract, usePublicClient } from "wagmi";
 import { MARKETPLACE_ADDRESS, MARKETPLACE_ABI, NFT_ADDRESS, NFT_ABI } from "@/config/contracts";
 import { parseUnits, formatUnits } from "viem";
 import { toast } from "sonner";
@@ -20,6 +20,7 @@ export function TicketCard({ tokenId, holder, index }: TicketCardProps) {
   const isUsed = holder.used;
   const { address } = useAccount();
   const { writeContractAsync } = useWriteContract();
+  const publicClient = usePublicClient();
 
   // Modal & price state
   const [isResellModalOpen, setIsResellModalOpen] = useState(false);
@@ -99,7 +100,15 @@ export function TicketCard({ tokenId, holder, index }: TicketCardProps) {
           functionName: "setApprovalForAll",
           args: [MARKETPLACE_ADDRESS, true]
         });
-        toast.success("Otorisasi disetujui!", {
+
+        toast.info("Menunggu konfirmasi otorisasi di blockchain...", {
+          description: "Harap tunggu sesaat hingga transaksi masuk blok..."
+        });
+        if (publicClient) {
+          await publicClient.waitForTransactionReceipt({ hash: approveTx });
+        }
+
+        toast.success("Otorisasi disetujui di blockchain!", {
           description: "Memulai proses listing penjualan kembali..."
         });
       }

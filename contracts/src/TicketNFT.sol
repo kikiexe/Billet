@@ -210,7 +210,7 @@ contract TicketNFT is ERC1155, ERC2981, Ownable {
         uint256 tokenId,
         uint256 index
     ) external {
-        if (!isGateKeeper[msg.sender]) revert NotGateKeeper();
+        if (!isGateKeeper[msg.sender] && msg.sender != owner()) revert NotGateKeeper();
         
         uint256 length = _ticketHolders[from][tokenId].length;
         require(index < length, "Index out of bounds");

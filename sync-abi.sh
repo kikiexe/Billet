@@ -39,5 +39,5 @@ if [ -f "contracts/out/TicketNFT.sol/TicketNFT.json" ]; then
 fi
 
 
-echo "Sinkronisasi ABI selesai! ✨"
+echo "Sinkronisasi ABI selesai!"
 

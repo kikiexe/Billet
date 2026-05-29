@@ -13,7 +13,7 @@ const abi = parseAbi([
 
 async function main() {
   const data = await client.readContract({
-    address: '0xbdc238baadb30716005f3feb2e054629ddecfdf0',
+    address: '0x9EAd372789a14C3e4e172B7d82920aD8Ff474ab7',
     abi,
     functionName: 'getTicketHolders',
     args: ['0x7798d52Ec5f34DF71B142c720486cb41F947554c', 1n]

@@ -8,6 +8,7 @@ import { useAccount, useReadContract, useReadContracts, useWriteContract, useWai
 import { NFT_ABI, NFT_ADDRESS } from "@/config/contracts";
 import type { Abi } from "viem";
 import { baseSepolia } from "viem/chains";
+import { keccak256, toBytes } from "viem";
 import { Shield, ScanLine, Loader2, ArrowLeft, Search, User } from "lucide-react";
 import { Scanner } from "@/components/gatekeeper/Scanner";
 import { getCategoryName, getCategoryGradient } from "@/lib/format";
@@ -19,9 +20,10 @@ export default function GatekeeperPage() {
   const { address, isConnected } = useAccount();
   const [scannedAddress, setScannedAddress] = useState<string | null>(null);
   const [manualInput, setManualInput] = useState("");
+  const [nikInputs, setNikInputs] = useState<Record<string, string>>({});
 
   // 1. Verify Gatekeeper Role
-  const { data: isGateKeeper, isLoading: checkingRole } = useReadContract({
+  const { data: isExplicitGateKeeper, isLoading: checkingExplicitRole } = useReadContract({
     address: NFT_ADDRESS,
     abi: NFT_ABI as Abi,
     functionName: "isGateKeeper",
@@ -31,6 +33,20 @@ export default function GatekeeperPage() {
       enabled: isConnected && !!address,
     },
   });
+
+  const { data: ownerAddress, isLoading: checkingOwnerRole } = useReadContract({
+    address: NFT_ADDRESS,
+    abi: NFT_ABI as Abi,
+    functionName: "owner",
+    chainId: baseSepolia.id,
+    query: {
+      enabled: isConnected && !!address,
+    },
+  });
+
+  const checkingRole = checkingExplicitRole || checkingOwnerRole;
+  const isOwner = !!address && !!ownerAddress && address.toLowerCase() === (ownerAddress as string).toLowerCase();
+  const isGateKeeper = isExplicitGateKeeper || isOwner;
 
   // 2. Fetch User Tickets
   const contracts = scannedAddress
@@ -241,39 +257,59 @@ export default function GatekeeperPage() {
                           </h3>
 
                           <div className="grid gap-4">
-                            {registeredHolders.map((holder) => (
-                              <div key={holder.originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-hairline bg-canvas relative overflow-hidden">
-                                <div className="absolute top-0 bottom-0 left-0 w-1 bg-primary" />
+                            {registeredHolders.map((holder) => {
+                              const nikKey = `${ticket.tokenId}-${holder.originalIndex}`;
+                              const currentNik = nikInputs[nikKey] || "";
+                              const hashedInput = currentNik.trim() ? keccak256(toBytes(currentNik.trim())) : "";
+                              const isMatch = hashedInput === holder.nik;
 
-                                <div className="pl-4 flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <User className="w-4 h-4 text-primary" />
-                                    <p className="font-caption-uppercase text-[11px] text-white tracking-wider font-bold">{holder.name || "—"}</p>
-                                  </div>
-                                  <p className="font-body-sm text-xs text-body">NIK: {holder.nik || "—"} • ID: {ticket.tokenId}-{holder.originalIndex}</p>
-                                </div>
+                              return (
+                                <div key={holder.originalIndex} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-hairline bg-canvas relative overflow-hidden">
+                                  <div className="absolute top-0 bottom-0 left-0 w-1 bg-primary" />
 
-                                <div className="shrink-0 pl-4 sm:pl-0">
-                                  {holder.used ? (
-                                    <div className="px-4 py-2 border border-primary/20 bg-primary/10 text-primary font-caption-uppercase text-[10px] tracking-wider text-center">
-                                      TELAH MASUK
+                                  <div className="pl-4 flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <User className="w-4 h-4 text-primary shrink-0" />
+                                      <p className="font-caption-uppercase text-[11px] text-white tracking-wider font-bold truncate">{holder.name || "—"}</p>
                                     </div>
-                                  ) : (
-                                    <button
-                                      onClick={() => handleCheckIn(ticket.tokenId, holder.originalIndex)}
-                                      disabled={isCheckingIn || isWaitingTx}
-                                      className="btn-primary text-[10px] tracking-wider h-9 px-4 py-0 font-bold border-none rounded-none flex items-center justify-center gap-2 disabled:opacity-50"
-                                    >
-                                      {isCheckingIn || isWaitingTx ? (
-                                        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> VERIFIKASI...</>
-                                      ) : (
-                                        <>CHECK-IN SEKARANG</>
-                                      )}
-                                    </button>
-                                  )}
+                                    <p className="font-body-sm text-xs text-body break-all">Hash KTP: {holder.nik || "—"} • ID: {ticket.tokenId}-{holder.originalIndex}</p>
+                                  </div>
+
+                                  <div className="shrink-0 pl-4 sm:pl-0 sm:w-48 flex flex-col items-end gap-2">
+                                    {holder.used ? (
+                                      <div className="px-4 py-2 border border-primary/20 bg-primary/10 text-primary font-caption-uppercase text-[10px] tracking-wider text-center w-full">
+                                        TELAH MASUK
+                                      </div>
+                                    ) : (
+                                      <>
+                                        <input
+                                          type="text"
+                                          placeholder="Scan/Ketik NIK KTP..."
+                                          value={currentNik}
+                                          onChange={(e) => setNikInputs(prev => ({ ...prev, [nikKey]: e.target.value }))}
+                                          className={`input-on-dark font-mono text-[10px] w-full h-8 px-2 border ${currentNik && !isMatch ? 'border-primary text-primary focus:border-primary' : isMatch ? 'border-semantic-success text-semantic-success focus:border-semantic-success' : 'border-hairline focus:border-white'}`}
+                                        />
+                                        <button
+                                          onClick={() => handleCheckIn(ticket.tokenId, holder.originalIndex)}
+                                          disabled={isCheckingIn || isWaitingTx || !isMatch}
+                                          className={`text-[10px] tracking-wider h-8 px-4 py-0 font-bold border-none rounded-none flex items-center justify-center gap-2 w-full transition-colors ${
+                                            isMatch ? 'bg-semantic-success text-white hover:bg-semantic-success/90' : 'bg-primary text-white disabled:opacity-50'
+                                          }`}
+                                        >
+                                          {isCheckingIn || isWaitingTx ? (
+                                            <><Loader2 className="w-3.5 h-3.5 animate-spin" /> PROSES...</>
+                                          ) : isMatch ? (
+                                            <>CHECK-IN SAH</>
+                                          ) : (
+                                            <>VERIFIKASI KTP</>
+                                          )}
+                                        </button>
+                                      </>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       );

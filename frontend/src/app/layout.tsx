@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Outfit, DM_Sans, VT323, Press_Start_2P } from "next/font/google";
+import { Outfit, DM_Sans } from "next/font/google";
 import { Web3Provider } from "@/components/web3/Web3Provider";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -18,19 +18,7 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
-const vt323 = VT323({
-  variable: "--font-vt323",
-  subsets: ["latin"],
-  weight: ["400"],
-  display: "swap",
-});
 
-const pressStart2P = Press_Start_2P({
-  variable: "--font-press-start",
-  subsets: ["latin"],
-  weight: ["400"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Billet",
@@ -53,7 +41,7 @@ export default function RootLayout({
     <html
       lang="id"
       data-scroll-behavior="smooth"
-      className={`${outfit.variable} ${dmSans.variable} ${vt323.variable} ${pressStart2P.variable} h-full antialiased dark`}
+      className={`${outfit.variable} ${dmSans.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col bg-canvas text-white">
         <Web3Provider>

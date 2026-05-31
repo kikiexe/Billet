@@ -7,7 +7,7 @@ import { listing, sale } from "ponder:schema";
  * Dipanggil setiap kali organizer/user mendaftarkan tiket untuk dijual.
  * Membuat record baru di tabel `listing`.
  */
-ponder.on("TicketMarketplace:TicketListed", async ({ event, context }) => {
+ponder.on("TicketMarketplace:TicketListed", async ({ event, context }): Promise<void> => {
   const { db } = context;
 
   await db.insert(listing).values({
@@ -30,7 +30,7 @@ ponder.on("TicketMarketplace:TicketListed", async ({ event, context }) => {
  * 1. Mencatat transaksi ke tabel `sale`.
  * 2. Mengupdate sisa amount dan status `active` di tabel `listing`.
  */
-ponder.on("TicketMarketplace:TicketSold", async ({ event, context }) => {
+ponder.on("TicketMarketplace:TicketSold", async ({ event, context }): Promise<void> => {
   const { db } = context;
 
   // 1. Catat riwayat penjualan
@@ -67,7 +67,7 @@ ponder.on("TicketMarketplace:TicketSold", async ({ event, context }) => {
  * Dipanggil saat seller membatalkan listing.
  * Mengubah status listing menjadi inactive.
  */
-ponder.on("TicketMarketplace:ListingCancelled", async ({ event, context }) => {
+ponder.on("TicketMarketplace:ListingCancelled", async ({ event, context }): Promise<void> => {
   const { db } = context;
 
   await db

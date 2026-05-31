@@ -133,11 +133,12 @@ export function TicketCard({ tokenId, holder, index, balance, unusedIndex }: Tic
       setIsResellModalOpen(false);
       setResalePrice("");
       // Reload page to refresh state
+      // REVIEW: anti-pattern — sebaiknya gunakan router.refresh() dari next/navigation atau update state lokal secara reaktif.
       window.location.reload();
-    } catch (error: any) {
-      console.error(error);
+    } catch (error: unknown) {
+      const err = error as Error;
       toast.error("Transaksi Gagal!", {
-        description: error.message || "Gagal mengirimkan transaksi on-chain."
+        description: err.message || "Gagal mengirimkan transaksi on-chain."
       });
     } finally {
       setIsSubmitting(false);

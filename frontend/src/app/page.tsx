@@ -9,17 +9,14 @@ import {
   Calendar,
   MapPin,
   Volume2,
-  CheckCircle2,
-  AlertCircle,
-  Tag,
-  Shield,
-  Activity
+  AlertCircle
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Grainient } from "@/components/ui/Grainient";
 import { useListings, type ListingWithId } from "@/hooks/useListings";
 import { formatIDRX } from "@/lib/format";
+import { groupListingsByEvent } from "@/lib/groupListings";
 import { toast } from "sonner";
 
 // ─── Interfaces ──────────────────────────────────────────────────────────
@@ -97,22 +94,9 @@ export default function Home() {
 
   const allEvents = useMemo(() => {
     // Group listings by event identity (name + venue + date)
-    const groups = new Map<string, ListingWithId[]>();
+    const grouped = groupListingsByEvent(activeListings);
 
-    for (const listing of activeListings) {
-      const parsed = listing.parsedEvent;
-      const eventName = parsed?.eventName || listing.eventDetails?.title || `Event-${listing.tokenId.toString()}`;
-      const venue = listing.eventDetails?.venue || "";
-      const date = listing.eventDetails?.date || "";
-      const groupKey = `${eventName}__${venue}__${date}`;
-
-      if (!groups.has(groupKey)) {
-        groups.set(groupKey, []);
-      }
-      groups.get(groupKey)!.push(listing);
-    }
-
-    return Array.from(groups.entries()).map(([key, listings]): RichEvent => {
+    return grouped.map(({ key, listings }): RichEvent => {
       const first = listings[0];
       const details = first.eventDetails;
       const parsed = first.parsedEvent;

@@ -5,16 +5,14 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ConnectKitButton } from "connectkit";
 import { useAccount, useReadContract, useReadContracts, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { NFT_ABI, NFT_ADDRESS } from "@/config/contracts";
+import { NFT_ABI, NFT_ADDRESS, SUPPORTED_TOKEN_IDS } from "@/config/contracts";
 import type { Abi } from "viem";
 import { baseSepolia } from "viem/chains";
 import { keccak256, toBytes } from "viem";
 import { Shield, ScanLine, Loader2, ArrowLeft, Search, User } from "lucide-react";
 import { Scanner } from "@/components/gatekeeper/Scanner";
-import { getCategoryName, getCategoryGradient } from "@/lib/format";
+import { getCategoryName } from "@/lib/format";
 import type { TicketHolder } from "@/hooks/useMyTickets";
-
-const TOKEN_IDS = [1, 2, 3];
 
 export default function GatekeeperPage() {
   const { address, isConnected } = useAccount();
@@ -46,7 +44,7 @@ export default function GatekeeperPage() {
 
   // 1b. Check if the user is the creator of any event
   const { data: eventDetailsList } = useReadContracts({
-    contracts: TOKEN_IDS.map((id) => ({
+    contracts: SUPPORTED_TOKEN_IDS.map((id) => ({
       address: NFT_ADDRESS,
       abi: NFT_ABI as Abi,
       functionName: "eventDetails",
@@ -60,9 +58,9 @@ export default function GatekeeperPage() {
 
   const isCreator = !!address && !!eventDetailsList && eventDetailsList.some((res) => {
     if (res.status === "success" && res.result) {
-      const details = res.result as any;
+      const details = res.result as Record<string, unknown>;
       const creatorAddr = details.creator || (Array.isArray(details) ? details[5] : null);
-      return creatorAddr && creatorAddr.toLowerCase() === address.toLowerCase();
+      return typeof creatorAddr === "string" && creatorAddr.toLowerCase() === address.toLowerCase();
     }
     return false;
   });
@@ -73,7 +71,7 @@ export default function GatekeeperPage() {
 
   // 2. Fetch User Tickets
   const contracts = scannedAddress
-    ? TOKEN_IDS.flatMap((tokenId) => [
+    ? SUPPORTED_TOKEN_IDS.flatMap((tokenId) => [
       {
         address: NFT_ADDRESS,
         abi: NFT_ABI as Abi,
@@ -101,7 +99,7 @@ export default function GatekeeperPage() {
   // 3. Process Ticket Data
   const tickets: { tokenId: number; holders: TicketHolder[] }[] = [];
   if (userTicketsData) {
-    for (let i = 0; i < TOKEN_IDS.length; i++) {
+    for (let i = 0; i < SUPPORTED_TOKEN_IDS.length; i++) {
       const balanceResult = userTicketsData[i * 2];
       const holdersResult = userTicketsData[i * 2 + 1];
 
@@ -109,7 +107,7 @@ export default function GatekeeperPage() {
       const holders = holdersResult?.status === "success" ? (holdersResult.result as unknown as TicketHolder[]) : [];
 
       if (balance > BigInt(0) || holders.length > 0) {
-        tickets.push({ tokenId: TOKEN_IDS[i], holders });
+        tickets.push({ tokenId: SUPPORTED_TOKEN_IDS[i], holders });
       }
     }
   }

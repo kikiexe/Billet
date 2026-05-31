@@ -6,6 +6,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { EventCard } from "@/components/events/EventCard";
 import { useListings, type ListingWithId } from "@/hooks/useListings";
+import { groupListingsByEvent } from "@/lib/groupListings";
 
 type FilterTab = "all" | "primary" | "resale";
 
@@ -14,29 +15,6 @@ const filterTabs: { id: FilterTab; label: string }[] = [
   { id: "primary", label: "PENJUALAN UTAMA" },
   { id: "resale", label: "PASAR SEKUNDER" },
 ];
-
-/**
- * Group listings by event identity (name + venue + date).
- * Returns an array of grouped entries, each containing all listings for that event.
- */
-function groupListingsByEvent(listings: ListingWithId[]): { key: string; listings: ListingWithId[] }[] {
-  const groups = new Map<string, ListingWithId[]>();
-
-  for (const listing of listings) {
-    const parsed = listing.parsedEvent;
-    const eventName = parsed?.eventName || listing.eventDetails?.title || `Event-${listing.tokenId.toString()}`;
-    const venue = listing.eventDetails?.venue || "";
-    const date = listing.eventDetails?.date || "";
-    const groupKey = `${eventName}__${venue}__${date}`;
-
-    if (!groups.has(groupKey)) {
-      groups.set(groupKey, []);
-    }
-    groups.get(groupKey)!.push(listing);
-  }
-
-  return Array.from(groups.entries()).map(([key, listings]) => ({ key, listings }));
-}
 
 export default function EventsPage() {
   const { activeListings, primaryListings, resaleListings, isLoading } =

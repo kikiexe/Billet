@@ -119,7 +119,7 @@ export function TicketCard({ tokenId, holder, index, balance, unusedIndex }: Tic
       toast.info("Mengirimkan listing penjualan kembali...", {
         description: "Harap konfirmasi transaksi listing di wallet Anda."
       });
-      const listTx = await writeContractAsync({
+      await writeContractAsync({
         address: MARKETPLACE_ADDRESS,
         abi: MARKETPLACE_ABI,
         functionName: "listResale",

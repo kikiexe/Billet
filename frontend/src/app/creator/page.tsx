@@ -85,14 +85,36 @@ export default function CreatorPage() {
   // ─── Form State ────────────────────────────────────────────────────────
 
   const [eventName, setEventName] = useState("");
+  const [eventDescription, setEventDescription] = useState("");
   const [eventCategory, setEventCategory] = useState("Musik");
-  const [eventPrice, setEventPrice] = useState<number>(150000);
-  const [eventVolume, setEventVolume] = useState<number>(500);
   const [eventCity, setEventCity] = useState("Jakarta");
   const [eventVenue, setEventVenue] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [priceCeilingMarkup, setPriceCeilingMarkup] = useState<number>(10); // 10%
   const [isLaunching, setIsLaunching] = useState(false);
+
+  // Multi-category ticket classes
+  interface TicketClass {
+    name: string;
+    enabled: boolean;
+    price: number;
+    supply: number;
+  }
+  const [ticketClasses, setTicketClasses] = useState<TicketClass[]>([
+    { name: "Reguler", enabled: true, price: 100000, supply: 500 },
+    { name: "VIP", enabled: false, price: 350000, supply: 100 },
+    { name: "VVIP", enabled: false, price: 750000, supply: 50 },
+  ]);
+
+  const updateTicketClass = (index: number, updates: Partial<TicketClass>) => {
+    setTicketClasses((prev) => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], ...updates };
+      return copy;
+    });
+  };
+
+  const enabledClasses = ticketClasses.filter((tc) => tc.enabled);
 
   // ─── Read Contract Owner (OnlyOwner listPrimary checks) ──────────────────
 
@@ -120,7 +142,7 @@ export default function CreatorPage() {
   const primaryPercentage = Math.min(100, Math.round((grossSales / netEarnings) * 100));
   const royaltyPercentage = Math.min(100, Math.round((resaleRoyalties / netEarnings) * 100));
 
-  // ─── Handle Launch Event (Simulated / On-Chain) ─────────────────────────
+  // ─── Handle Launch Event (Multi-Category On-Chain) ─────────────────────────
 
   const handleLaunchEvent = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,41 +153,63 @@ export default function CreatorPage() {
       return;
     }
 
+    if (enabledClasses.length === 0) {
+      toast.error("Pilih minimal 1 kategori tiket!", {
+        description: "Centang minimal satu kelas tiket (Reguler/VIP/VVIP)."
+      });
+      return;
+    }
+
     setIsLaunching(true);
 
     try {
-      toast.info("Memulai transaksi on-chain ke Base Sepolia...", {
-        description: "Harap setujui permintaan tanda tangan di wallet Anda."
+      toast.info(`Memulai ${enabledClasses.length} transaksi on-chain ke Base Sepolia...`, {
+        description: "Harap setujui setiap permintaan tanda tangan di wallet Anda."
       });
 
-      const priceInWei = parseUnits(eventPrice.toString(), 18);
-      // Category is passed directly as a string parameter (e.g. "Musik", "Seminar", etc.)
+      for (let i = 0; i < enabledClasses.length; i++) {
+        const tc = enabledClasses[i];
+        const priceInWei = parseUnits(tc.price.toString(), 18);
+        // Structured title: "Event Name | Ticket Class | Description"
+        const structuredTitle = eventDescription.trim()
+          ? `${eventName} | ${tc.name} | ${eventDescription.trim()}`
+          : `${eventName} | ${tc.name}`;
 
-      const tx = await writeContractAsync({
-        address: MARKETPLACE_ADDRESS,
-        abi: MARKETPLACE_ABI,
-        functionName: "createAndListEvent",
-        args: [{
-          supply: BigInt(eventVolume),
-          price: priceInWei,
-          ceilingBps: BigInt(10000 + priceCeilingMarkup * 100),
-          royaltyBps: 500n, // 5% royalty to creator
-          start: 0n,
-          end: 0n,
-          title: eventName,
-          venue: eventVenue,
-          date: eventDate,
-          city: eventCity,
-          category: eventCategory
-        }]
-      });
+        toast.info(`Mengirim transaksi ${i + 1}/${enabledClasses.length}: Tiket ${tc.name}...`, {
+          description: `Supply: ${tc.supply} | Harga: ${tc.price.toLocaleString("id-ID")} IDRX`
+        });
 
-      toast.success("Event & Tiket Berhasil Diluncurkan On-Chain!", {
-        description: `Tx Hash: ${tx.slice(0, 10)}...`,
+        const tx = await writeContractAsync({
+          address: MARKETPLACE_ADDRESS,
+          abi: MARKETPLACE_ABI,
+          functionName: "createAndListEvent",
+          args: [{
+            supply: BigInt(tc.supply),
+            price: priceInWei,
+            ceilingBps: BigInt(10000 + priceCeilingMarkup * 100),
+            royaltyBps: 500n, // 5% royalty to creator
+            start: 0n,
+            end: 0n,
+            title: structuredTitle,
+            venue: eventVenue,
+            date: eventDate,
+            city: eventCity,
+            category: eventCategory
+          }]
+        });
+
+        toast.success(`Tiket ${tc.name} berhasil diluncurkan!`, {
+          description: `Tx Hash: ${tx.slice(0, 10)}...`
+        });
+      }
+
+      toast.success("Semua Kategori Tiket Berhasil Diluncurkan On-Chain!", {
+        description: `${enabledClasses.length} kategori tiket terdaftar untuk event "${eventName}".`,
         duration: 5000
       });
 
       setEventName("");
+      setEventDescription("");
       setEventVenue("");
       setEventDate("");
     } catch (error) {
@@ -549,30 +593,6 @@ export default function CreatorPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="font-caption-uppercase text-[10px] text-body block tracking-wider">Harga Tiket (IDRX)</label>
-                    <input
-                      type="number"
-                      min="1000"
-                      value={eventPrice}
-                      onChange={(e) => setEventPrice(Number(e.target.value))}
-                      required
-                      className="w-full input-on-dark font-mono"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="font-caption-uppercase text-[10px] text-body block tracking-wider">Jumlah Tiket</label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={eventVolume}
-                      onChange={(e) => setEventVolume(Number(e.target.value))}
-                      required
-                      className="w-full input-on-dark font-mono"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
                     <label className="font-caption-uppercase text-[10px] text-body block tracking-wider">Kota</label>
                     <div className="relative">
                       <select
@@ -628,6 +648,73 @@ export default function CreatorPage() {
                       <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white pointer-events-none" />
                     </div>
                   </div>
+                </div>
+
+                {/* Description field */}
+                <div className="space-y-2">
+                  <label className="font-caption-uppercase text-[10px] text-body block tracking-wider">Deskripsi Event</label>
+                  <textarea
+                    placeholder="Deskripsikan acara Anda: agenda, syarat & ketentuan, informasi penting bagi pengunjung..."
+                    value={eventDescription}
+                    onChange={(e) => setEventDescription(e.target.value)}
+                    rows={3}
+                    className="w-full input-on-dark resize-none font-body-sm text-sm"
+                  />
+                  <p className="text-[10px] text-muted font-body-sm">Deskripsi ini akan tersimpan permanen di blockchain dan terlihat oleh semua pengunjung.</p>
+                </div>
+
+                {/* Multi-Category Ticket Classes */}
+                <div className="space-y-3">
+                  <label className="font-caption-uppercase text-[10px] text-body block tracking-wider">Kategori Tiket</label>
+                  <p className="text-[11px] text-muted font-body-sm -mt-1">Centang kelas tiket yang ingin diluncurkan dan atur harga serta kuota masing-masing.</p>
+
+                  {ticketClasses.map((tc, idx) => (
+                    <div
+                      key={tc.name}
+                      className={`border p-4 space-y-3 transition-colors ${
+                        tc.enabled
+                          ? "border-primary/40 bg-primary/5"
+                          : "border-hairline bg-canvas opacity-60"
+                      }`}
+                    >
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={tc.enabled}
+                          onChange={(e) => updateTicketClass(idx, { enabled: e.target.checked })}
+                          className="w-4 h-4 accent-primary cursor-pointer"
+                        />
+                        <span className="font-caption-uppercase text-[11px] tracking-wider text-white font-bold">
+                          {tc.name}
+                        </span>
+                      </label>
+
+                      {tc.enabled && (
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1">
+                            <label className="font-caption-uppercase text-[9px] text-muted block tracking-wider">Harga (IDRX)</label>
+                            <input
+                              type="number"
+                              min="1000"
+                              value={tc.price}
+                              onChange={(e) => updateTicketClass(idx, { price: Number(e.target.value) })}
+                              className="w-full input-on-dark font-mono text-xs"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="font-caption-uppercase text-[9px] text-muted block tracking-wider">Jumlah Tiket</label>
+                            <input
+                              type="number"
+                              min="1"
+                              value={tc.supply}
+                              onChange={(e) => updateTicketClass(idx, { supply: Number(e.target.value) })}
+                              className="w-full input-on-dark font-mono text-xs"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
 
                 {/* Submit button sharp corners */}

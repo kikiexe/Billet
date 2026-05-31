@@ -219,15 +219,6 @@ export function TicketCard({ tokenId, holder, index, balance, unusedIndex }: Tic
             </button>
           )}
 
-          {/* ─── Token Footer ─────────────────────────────── */}
-          <div className="mt-4 pt-4 border-t border-hairline flex items-center justify-between font-mono text-[10px] text-muted">
-            <span>
-              TOKEN ID: {tokenId}
-            </span>
-            <span>
-              #{index + 1}
-            </span>
-          </div>
         </div>
       </div>
 

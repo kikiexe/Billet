@@ -20,7 +20,7 @@ export function formatIDRX(weiAmount: bigint): string {
 export function formatIDRXShort(weiAmount: bigint): string {
   const raw = formatUnits(weiAmount, 18);
   const num = parseFloat(raw);
-  
+
   // Jika nilainya mendekati atau lebih dari 1 juta (setelah dibulatkan ke 1 desimal)
   // Contoh: 999.950 akan dibulatkan menjadi 1.0jt -> 1jt
   const millionVal = num / 1_000_000;
@@ -30,7 +30,7 @@ export function formatIDRXShort(weiAmount: bigint): string {
       maximumFractionDigits: 1,
     })}jt`;
   }
-  
+
   // Gunakan "rb" untuk nilai >= 10.000
   if (num >= 10_000) {
     return `${(num / 1_000).toLocaleString("id-ID", {
@@ -38,7 +38,7 @@ export function formatIDRXShort(weiAmount: bigint): string {
       maximumFractionDigits: 1,
     })}rb`;
   }
-  
+
   return num.toLocaleString("id-ID");
 }
 

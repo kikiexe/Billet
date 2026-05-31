@@ -12,7 +12,7 @@ describe("Blockchain Format Helpers", () => {
   describe("formatIDRX", () => {
     it("should format large amounts in wei (18 decimals) to standard Indonesian Rupiah", () => {
       // 500,000 IDRX represented in 18 decimal wei
-      const amount = 500000000000000000000000n; 
+      const amount = 500000000000000000000000n;
       expect(formatIDRX(amount)).toBe("Rp 500.000");
     });
 

@@ -136,9 +136,9 @@ export function TicketCard({ tokenId, holder, index, balance, unusedIndex }: Tic
       // REVIEW: anti-pattern — sebaiknya gunakan router.refresh() dari next/navigation atau update state lokal secara reaktif.
       window.location.reload();
     } catch (error: unknown) {
-      const err = error as Error;
+      const message = error instanceof Error ? error.message : "Gagal mengirimkan transaksi on-chain.";
       toast.error("Transaksi Gagal!", {
-        description: err.message || "Gagal mengirimkan transaksi on-chain."
+        description: message
       });
     } finally {
       setIsSubmitting(false);

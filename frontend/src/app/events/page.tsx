@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Loader2, Ticket, Search } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { EventCard } from "@/components/events/EventCard";
-import { BuyTicketDialog } from "@/components/events/BuyTicketDialog";
 import { useListings, type ListingWithId } from "@/hooks/useListings";
 
 type FilterTab = "all" | "primary" | "resale";
@@ -16,11 +15,33 @@ const filterTabs: { id: FilterTab; label: string }[] = [
   { id: "resale", label: "PASAR SEKUNDER" },
 ];
 
+/**
+ * Group listings by event identity (name + venue + date).
+ * Returns an array of grouped entries, each containing all listings for that event.
+ */
+function groupListingsByEvent(listings: ListingWithId[]): { key: string; listings: ListingWithId[] }[] {
+  const groups = new Map<string, ListingWithId[]>();
+
+  for (const listing of listings) {
+    const parsed = listing.parsedEvent;
+    const eventName = parsed?.eventName || listing.eventDetails?.title || `Event-${listing.tokenId.toString()}`;
+    const venue = listing.eventDetails?.venue || "";
+    const date = listing.eventDetails?.date || "";
+    const groupKey = `${eventName}__${venue}__${date}`;
+
+    if (!groups.has(groupKey)) {
+      groups.set(groupKey, []);
+    }
+    groups.get(groupKey)!.push(listing);
+  }
+
+  return Array.from(groups.entries()).map(([key, listings]) => ({ key, listings }));
+}
+
 export default function EventsPage() {
-  const { activeListings, primaryListings, resaleListings, isLoading, refetch } =
+  const { activeListings, primaryListings, resaleListings, isLoading } =
     useListings();
   const [filter, setFilter] = useState<FilterTab>("all");
-  const [selectedListing, setSelectedListing] = useState<ListingWithId | null>(null);
 
   const displayedListings =
     filter === "primary"
@@ -29,9 +50,11 @@ export default function EventsPage() {
         ? resaleListings
         : activeListings;
 
-  const handleBuySuccess = () => {
-    refetch();
-  };
+  // Group listings by event
+  const groupedEvents = useMemo(
+    () => groupListingsByEvent(displayedListings),
+    [displayedListings]
+  );
 
   return (
     <div className="min-h-screen flex flex-col bg-canvas text-white">
@@ -44,7 +67,7 @@ export default function EventsPage() {
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
               <div className="space-y-2">
                 <span className="font-caption-uppercase text-[10px] text-primary tracking-wider">
-                  BILLET CATALOUGE
+                  BILLET CATALOGUE
                 </span>
                 <h1 className="font-display-md text-3xl sm:text-4xl uppercase tracking-tight text-white leading-none">
                   JELAJAHI EVENT
@@ -55,11 +78,18 @@ export default function EventsPage() {
               </div>
 
               {/* Stats badge */}
-              <div className="flex items-center gap-2 px-3 py-1.5 border border-hairline bg-canvas-elevated text-xs font-caption-uppercase tracking-wider">
-                <Ticket className="w-4 h-4 text-primary" />
-                <span className="text-white">
-                  {activeListings.length} LISTING AKTIF
-                </span>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 px-3 py-1.5 border border-hairline bg-canvas-elevated text-xs font-caption-uppercase tracking-wider">
+                  <Ticket className="w-4 h-4 text-primary" />
+                  <span className="text-white">
+                    {groupedEvents.length} EVENT
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 border border-hairline bg-canvas-elevated text-xs font-caption-uppercase tracking-wider">
+                  <span className="text-body">
+                    {activeListings.length} LISTING
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -79,25 +109,20 @@ export default function EventsPage() {
                   id={`filter-${tab.id}`}
                 >
                   {tab.label}
-                  {tab.id === "all" && activeListings.length > 0 && (
-                    <span className="ml-1.5 text-xs opacity-50">
-                      ({activeListings.length})
-                    </span>
-                  )}
                 </button>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ─── Listings Grid ────────────────────────────────── */}
+        {/* ─── Listings Grid (Grouped) ────────────────────────── */}
         <section className="section-container py-12" id="events-grid">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 border border-hairline bg-canvas-elevated">
               <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
               <p className="font-body-sm text-sm text-body">Menyelaraskan saldo blockchain...</p>
             </div>
-          ) : displayedListings.length === 0 ? (
+          ) : groupedEvents.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center border border-hairline bg-canvas-elevated p-8">
               <div className="w-12 h-12 border border-white/10 bg-canvas flex items-center justify-center mb-4">
                 <Search className="w-5 h-5 text-body" />
@@ -113,26 +138,17 @@ export default function EventsPage() {
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {displayedListings.map((listing) => (
+              {groupedEvents.map((group) => (
                 <EventCard
-                  key={listing.listingId}
-                  listing={listing}
-                  onBuy={setSelectedListing}
+                  key={group.key}
+                  listing={group.listings[0]}
+                  groupedListings={group.listings}
                 />
               ))}
             </div>
           )}
         </section>
       </main>
-
-      {/* Buy Dialog */}
-      {selectedListing && (
-        <BuyTicketDialog
-          listing={selectedListing}
-          onClose={() => setSelectedListing(null)}
-          onSuccess={handleBuySuccess}
-        />
-      )}
 
       <Footer />
     </div>

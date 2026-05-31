@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Search,
   ArrowRight,
@@ -16,22 +17,26 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { BuyTicketDialog } from "@/components/events/BuyTicketDialog";
 import { Grainient } from "@/components/ui/Grainient";
 import { useListings, type ListingWithId } from "@/hooks/useListings";
-import { formatIDRX, getCategoryName, getCategoryGradient } from "@/lib/format";
+import { formatIDRX } from "@/lib/format";
 import { toast } from "sonner";
 
 // ─── Interfaces ──────────────────────────────────────────────────────────
 
-interface RichEvent extends ListingWithId {
+interface RichEvent {
+  key: string;
   title: string;
-  category: "Musik" | "Seminar" | "Olahraga" | "Seni";
-  city: "Jakarta" | "Bandung" | "Yogyakarta" | "Surabaya";
+  category: string;
+  city: string;
   date: string;
   venue: string;
-  isMock: boolean;
   bannerGradient: string;
+  lowestPrice: bigint;
+  totalRemaining: number;
+  classCount: number;
+  isResale: boolean;
+  listings: ListingWithId[];
 }
 
 // ─── Carousel Banners ────────────────────────────────────────────────────
@@ -74,10 +79,10 @@ const carouselBanners = [
 
 export default function Home() {
   const { activeListings, isLoading, refetch } = useListings();
+  const router = useRouter();
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
-  const [selectedListing, setSelectedListing] = useState<ListingWithId | null>(null);
 
   // ─── Carousel Auto-Play ─────────────────────────────────────────────────
 
@@ -88,32 +93,51 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  // ─── Filter Events ──────────────────────────────────────────────────────
+  // ─── Group & Filter Events ──────────────────────────────────────────────
 
   const allEvents = useMemo(() => {
-    const chainEvents: RichEvent[] = activeListings.map((listing) => {
-      const details = listing.eventDetails;
+    // Group listings by event identity (name + venue + date)
+    const groups = new Map<string, ListingWithId[]>();
 
-      const title = details?.title || `Tiket Resmi Billet: #${listing.tokenId.toString()}`;
-      const cat = (details?.category || "Musik") as "Musik" | "Seminar" | "Olahraga" | "Seni";
-      const city = (details?.city || "Jakarta") as "Jakarta" | "Bandung" | "Yogyakarta" | "Surabaya";
-      const date = details?.date || "28 Juni 2026";
-      const venue = details?.venue || "Billet Arena Base L2";
+    for (const listing of activeListings) {
+      const parsed = listing.parsedEvent;
+      const eventName = parsed?.eventName || listing.eventDetails?.title || `Event-${listing.tokenId.toString()}`;
+      const venue = listing.eventDetails?.venue || "";
+      const date = listing.eventDetails?.date || "";
+      const groupKey = `${eventName}__${venue}__${date}`;
+
+      if (!groups.has(groupKey)) {
+        groups.set(groupKey, []);
+      }
+      groups.get(groupKey)!.push(listing);
+    }
+
+    return Array.from(groups.entries()).map(([key, listings]): RichEvent => {
+      const first = listings[0];
+      const details = first.eventDetails;
+      const parsed = first.parsedEvent;
+
+      const lowestPrice = listings.reduce(
+        (min, l) => (l.pricePerUnit < min ? l.pricePerUnit : min),
+        listings[0].pricePerUnit
+      );
+      const totalRemaining = listings.reduce((sum, l) => sum + Number(l.amount), 0);
 
       return {
-        ...listing,
-        title,
-        category: cat,
-        city,
-        date,
-        venue,
-        isMock: false,
-        bannerGradient: "from-red-950 to-neutral-900"
+        key,
+        title: parsed?.eventName || details?.title || `Tiket Resmi Billet`,
+        category: details?.category || "Musik",
+        city: details?.city || "Jakarta",
+        date: details?.date || "28 Juni 2026",
+        venue: details?.venue || "Billet Arena Base L2",
+        bannerGradient: "from-red-950 to-neutral-900",
+        lowestPrice,
+        totalRemaining,
+        classCount: listings.length,
+        isResale: first.isResale,
+        listings,
       };
     });
-
-    // Sandbox mock/localStorage events have been completely removed. Only real on-chain events are returned.
-    return chainEvents;
   }, [activeListings]);
 
   const filteredEvents = useMemo(() => {
@@ -129,15 +153,10 @@ export default function Home() {
     });
   }, [allEvents, searchQuery, selectedCategory]);
 
-  // ─── Checkout Simulation ───────────────────────────────────────────────
+  // ─── Navigation ───────────────────────────────────────────────────────
 
-  const handleBuyClick = (event: RichEvent) => {
-    setSelectedListing(event);
-  };
-
-  const handleBuySuccess = () => {
-    refetch();
-    setSelectedListing(null);
+  const handleEventClick = (event: RichEvent) => {
+    router.push(`/events/${encodeURIComponent(event.key)}`);
   };
 
   return (
@@ -295,12 +314,16 @@ export default function Home() {
 
                 <button
                   onClick={() => {
-                    const matchedEvent = allEvents.find(e => e.title.includes(carouselBanners[carouselIndex].title));
-                    if (matchedEvent) handleBuyClick(matchedEvent);
+                    const matchedEvent = allEvents.find(e => e.title.toLowerCase().includes(carouselBanners[carouselIndex].title.toLowerCase()));
+                    if (matchedEvent) {
+                      handleEventClick(matchedEvent);
+                    } else {
+                      router.push("/events");
+                    }
                   }}
                   className="font-caption-uppercase text-[11px] tracking-[1px] text-white hover:text-primary flex items-center gap-2"
                 >
-                  SIMULASI CHECKOUT <ArrowRight className="w-4 h-4 text-primary" />
+                  LIHAT DETAIL EVENT <ArrowRight className="w-4 h-4 text-primary" />
                 </button>
               </div>
             </div>
@@ -407,11 +430,10 @@ export default function Home() {
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredEvents.map((event) => {
-                const isMusik = event.category === "Musik";
                 return (
                   <div
-                    key={event.listingId}
-                    onClick={() => handleBuyClick(event)}
+                    key={event.key}
+                    onClick={() => handleEventClick(event)}
                     className="group border border-hairline bg-canvas-elevated overflow-hidden hover:border-primary transition-all duration-300 cursor-pointer flex flex-col justify-between"
                   >
                     {/* Header Image representation */}
@@ -419,22 +441,22 @@ export default function Home() {
 
                       {/* Floating Category tag */}
                       <div className="absolute top-4 left-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 border border-primary/20 bg-primary/10 font-caption-uppercase text-[9px] tracking-wider text-primary">
-                          {event.category}
-                        </span>
+                        {event.classCount > 1 ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 border border-primary/20 bg-primary/10 font-caption-uppercase text-[9px] tracking-wider text-primary">
+                            {event.classCount} KELAS TIKET
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 border border-primary/20 bg-primary/10 font-caption-uppercase text-[9px] tracking-wider text-primary">
+                            {event.category}
+                          </span>
+                        )}
                       </div>
 
                       {/* Blockchain Verified Badge */}
                       <div className="absolute top-4 right-4 flex items-center gap-1.5">
-                        {event.isMock ? (
-                          <span className="px-2 py-0.5 border border-hairline bg-canvas text-body font-caption-uppercase text-[9px] tracking-wider">
-                            SANDBOX
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 border border-primary bg-primary text-white font-caption-uppercase text-[9px] tracking-wider animate-pulse-corsa">
-                            ON-CHAIN
-                          </span>
-                        )}
+                        <span className="inline-flex items-center px-2 py-0.5 border border-primary bg-primary text-white font-caption-uppercase text-[9px] tracking-wider animate-pulse-corsa">
+                          ON-CHAIN
+                        </span>
                       </div>
 
                       {/* City Badge Bottom Left */}
@@ -467,16 +489,16 @@ export default function Home() {
                       <div className="pt-4 border-t border-hairline flex items-center justify-between">
                         <div>
                           <p className="font-caption-uppercase text-[9px] text-body tracking-wider mb-0.5">
-                            {event.isResale ? "HARGA RESALE" : "HARGA MULAI"}
+                            {event.classCount > 1 ? "MULAI DARI" : event.isResale ? "HARGA RESALE" : "HARGA TIKET"}
                           </p>
                           <p className="font-title-md text-lg text-white">
-                            {formatIDRX(event.pricePerUnit)}
+                            {formatIDRX(event.lowestPrice)}
                           </p>
                         </div>
 
                         <div className="flex items-center gap-3">
                           <span className="font-caption-uppercase text-[9px] text-body tracking-wider">
-                            <strong className="text-primary">{event.amount.toString()}</strong> TIKET
+                            <strong className="text-primary">{event.totalRemaining}</strong> TIKET
                           </span>
                           <div className="w-9 h-9 border border-hairline bg-canvas flex items-center justify-center transition-all duration-200 group-hover:bg-primary group-hover:border-primary group-hover:text-white">
                             <ArrowRight className="w-4 h-4 text-white" />
@@ -494,15 +516,6 @@ export default function Home() {
       </main>
 
       <Footer />
-
-      {/* Buy Dialog */}
-      {selectedListing && (
-        <BuyTicketDialog
-          listing={selectedListing}
-          onClose={() => setSelectedListing(null)}
-          onSuccess={handleBuySuccess}
-        />
-      )}
     </div>
   );
 }

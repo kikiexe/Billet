@@ -22,9 +22,34 @@ export interface EventDetails {
   creator: `0x${string}`;
 }
 
+/**
+ * Parsed event info extracted from the structured title format:
+ * "Event Name | Ticket Class | Description"
+ */
+export interface ParsedEventInfo {
+  eventName: string;
+  ticketClass: string;
+  description: string;
+}
+
+/**
+ * Parse the on-chain title field into structured event info.
+ * Format: "Event Name | Ticket Class | Description"
+ * Fallback: If no delimiter is found, treats the whole string as the event name.
+ */
+export function parseEventTitle(rawTitle: string): ParsedEventInfo {
+  const parts = rawTitle.split(" | ");
+  return {
+    eventName: parts[0]?.trim() || rawTitle,
+    ticketClass: parts[1]?.trim() || "Reguler",
+    description: parts.slice(2).join(" | ")?.trim() || "",
+  };
+}
+
 export interface ListingWithId extends Listing {
   listingId: number;
   eventDetails?: EventDetails;
+  parsedEvent?: ParsedEventInfo;
 }
 
 /**
@@ -102,18 +127,21 @@ export function useListings(maxId = 20) {
       ? (detailsResult.result as unknown as [string, string, string, string, string, `0x${string}`])
       : null;
 
+    const eventDetails = details
+      ? {
+          title: details[0],
+          venue: details[1],
+          date: details[2],
+          city: details[3],
+          category: details[4],
+          creator: details[5],
+        }
+      : undefined;
+
     return {
       ...listing,
-      eventDetails: details
-        ? {
-            title: details[0],
-            venue: details[1],
-            date: details[2],
-            city: details[3],
-            category: details[4],
-            creator: details[5],
-          }
-        : undefined,
+      eventDetails,
+      parsedEvent: eventDetails ? parseEventTitle(eventDetails.title) : undefined,
     };
   });
 

@@ -1,5 +1,5 @@
 import { useAccount, useReadContracts } from "wagmi";
-import { NFT_ABI, NFT_ADDRESS } from "@/config/contracts";
+import { NFT_ABI, NFT_ADDRESS, SUPPORTED_TOKEN_IDS } from "@/config/contracts";
 import type { Abi } from "viem";
 import { baseSepolia } from "viem/chains";
 
@@ -16,9 +16,6 @@ export interface OwnedTicket {
   holders: TicketHolder[];
 }
 
-// Token IDs to check — REGULER=1, VIP=2, VVIP=3
-const TOKEN_IDS = [1, 2, 3];
-
 /**
  * Fetches all tickets owned by the connected wallet.
  * Reads balanceOf and getTicketHolders for each token category.
@@ -28,7 +25,7 @@ export function useMyTickets() {
 
   // Build multicall: for each tokenId → [balanceOf, getTicketHolders]
   const contracts = isConnected && address
-    ? TOKEN_IDS.flatMap((tokenId) => [
+    ? SUPPORTED_TOKEN_IDS.flatMap((tokenId) => [
         {
           address: NFT_ADDRESS,
           abi: NFT_ABI as Abi,
@@ -57,7 +54,7 @@ export function useMyTickets() {
   const tickets: OwnedTicket[] = [];
 
   if (data) {
-    for (let i = 0; i < TOKEN_IDS.length; i++) {
+    for (let i = 0; i < SUPPORTED_TOKEN_IDS.length; i++) {
       const balanceResult = data[i * 2];
       const holdersResult = data[i * 2 + 1];
 
@@ -73,7 +70,7 @@ export function useMyTickets() {
 
       if (balance > BigInt(0) || holders.length > 0) {
         tickets.push({
-          tokenId: TOKEN_IDS[i],
+          tokenId: SUPPORTED_TOKEN_IDS[i],
           balance,
           holders,
         });

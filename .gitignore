@@ -12,4 +12,4 @@ frontend/.env*
 # Indexer
 indexer/node_modules/
 indexer/.ponder/
-indexer/.env.local
+indexer/.env.localclean-code.md

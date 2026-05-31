@@ -7,7 +7,7 @@ import { checkIn } from "ponder:schema";
  * Dipanggil saat gatekeeper melakukan check-in tiket pengunjung di gerbang.
  * Mencatat aktivitas check-in ke tabel `checkIn`.
  */
-ponder.on("TicketNFT:TicketCheckedIn", async ({ event, context }) => {
+ponder.on("TicketNFT:TicketCheckedIn", async ({ event, context }): Promise<void> => {
   const { db } = context;
 
   await db.insert(checkIn).values({

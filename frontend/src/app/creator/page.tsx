@@ -8,19 +8,16 @@ import {
   Calculator,
   Ticket,
   Percent,
-  ShieldAlert,
   ShieldCheck,
   CheckCircle2,
   TrendingUp,
   Activity,
   PlusCircle,
   Coins,
-  Calendar,
   Layers,
   ChevronDown,
   Info,
-  Zap,
-  ArrowRight
+  Zap
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -212,8 +209,8 @@ export default function CreatorPage() {
       setEventTerms("");
       setEventVenue("");
       setEventDate("");
-    } catch (error) {
-      const err = error as any;
+    } catch (error: unknown) {
+      const err = error instanceof Error ? error : new Error(String(error));
       console.error(err);
       toast.error("Transaksi Gagal!", {
         description: err.message || "Gagal mengirimkan transaksi on-chain."

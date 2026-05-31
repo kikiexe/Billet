@@ -119,7 +119,7 @@ export function TicketCard({ tokenId, holder, index, balance, unusedIndex }: Tic
       toast.info("Mengirimkan listing penjualan kembali...", {
         description: "Harap konfirmasi transaksi listing di wallet Anda."
       });
-      const listTx = await writeContractAsync({
+      await writeContractAsync({
         address: MARKETPLACE_ADDRESS,
         abi: MARKETPLACE_ABI,
         functionName: "listResale",
@@ -133,11 +133,12 @@ export function TicketCard({ tokenId, holder, index, balance, unusedIndex }: Tic
       setIsResellModalOpen(false);
       setResalePrice("");
       // Reload page to refresh state
+      // REVIEW: anti-pattern — sebaiknya gunakan router.refresh() dari next/navigation atau update state lokal secara reaktif.
       window.location.reload();
-    } catch (error: any) {
-      console.error(error);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Gagal mengirimkan transaksi on-chain.";
       toast.error("Transaksi Gagal!", {
-        description: error.message || "Gagal mengirimkan transaksi on-chain."
+        description: message
       });
     } finally {
       setIsSubmitting(false);

@@ -1,10 +1,12 @@
 # Billet: On-Chain Smart Ticketing Protocol
 
-![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white)
-![Solidity](https://img.shields.io/badge/Solidity-e6e6e6?style=flat-square&logo=solidity&logoColor=black)
-![Foundry](https://img.shields.io/badge/Foundry-FF8000?style=flat-square)
-![Ponder](https://img.shields.io/badge/Ponder-8A2BE2?style=flat-square)
-![Base](https://img.shields.io/badge/Base-0052FF?style=flat-square&logo=base&logoColor=white)
+<div align="left" style="display: flex; gap: 8px; margin-bottom: 20px;">
+  <img src="https://img.shields.io/badge/Next.js-000000?style=flat-square" height="20" alt="Next.js" />
+  <img src="https://img.shields.io/badge/Solidity-363636?style=flat-square" height="20" alt="Solidity" />
+  <img src="https://img.shields.io/badge/Foundry-FF8000?style=flat-square" height="20" alt="Foundry" />
+  <img src="https://img.shields.io/badge/Ponder-8A2BE2?style=flat-square" height="20" alt="Ponder" />
+  <img src="https://img.shields.io/badge/Base-0052FF?style=flat-square" height="20" alt="Base" />
+</div>
 
 **Billet** adalah protokol smart ticketing on-chain berbasis **ERC-1155** dengan mekanisme *trustless escrow* dan restriksi ekonomi untuk mitigasi *scalping* tiket. Protokol ini menciptakan ekosistem tertutup yang memberdayakan penyelenggara acara (promotor) dan melindungi konsumen dari praktik calo tiket, kerentanan *bot*, serta penipuan di pasar sekunder.
 
@@ -72,88 +74,67 @@ Billet/
 
 ---
 
-## Panduan Instalasi & Pengembangan
+## Panduan Instalasi & Pengembangan (Local Setup)
 
-Ikuti langkah berikut untuk menjalankan proyek di lingkungan lokal.
+Ikuti langkah-langkah terurut di bawah ini untuk menjalankan seluruh ekosistem Billet (Smart Contract, Indexer, dan Frontend) di lingkungan lokal Anda.
 
-### Prasyarat
+### Prasyarat System
+Sebelum memulai, pastikan perangkat Anda telah terinstal perkakas berikut:
+* **Node.js (v18+)** & **npm**
+* **Foundry (`forge`)** — [Panduan Instalasi Foundry](https://book.getfoundry.sh/getting-started/installation)
+* **jq** — Parser JSON CLI (diperlukan untuk script sinkronisasi ABI). Instal via apt: `sudo apt install jq`
+* **Git**
 
-* Node.js (v18+)
-* Foundry
-* Git
-* Dompet Web3 dengan konfigurasi RPC Base / Base Sepolia.
+---
 
-### 1. Setup Smart Contract (Backend)
+### Alur Eksekusi & Langkah Setup
 
-Masuk ke direktori `contracts`:
+Jalankan perintah berikut secara berurutan sesuai dengan direktori monorepo masing-masing:
 
+#### Langkah 1: Setup Smart Contract & Uji Coba
+Masuk ke direktori `contracts` untuk menginstal library dependencies dan memvalidasi seluruh unit tests:
 ```bash
 cd contracts
-```
-
-Install dependensi dan compile kontrak:
-
-```bash
 forge install
 forge build
-```
-
-Jalankan Unit Test untuk memvalidasi logika:
-
-```bash
 forge test -vv
 ```
 
-*(Catatan: Anda dapat mengonfigurasi file `.env` di direktori ini dengan parameter seperti `RPC_URL` dan `PRIVATE_KEY` sebelum melakukan proses deployment).*
+*(Opsional)* **Deploy ke Base Sepolia (On-Chain):**
+Jika ingin mendeploy smart contract Anda secara nyata ke testnet Base Sepolia dan memverifikasinya secara otomatis:
+1. Lengkapi variabel `PRIVATE_KEY`, `BASE_SEPOLIA_URL`, dan `ETHERSCAN_API_KEY` di file `contracts/.env`.
+2. Jalankan script deployment otomatis berikut dari dalam folder `contracts`:
+```bash
+chmod +x deploy-and-verify.sh
+./deploy-and-verify.sh
+```
 
-### 2. Setup Indexer (Data Layer)
+#### Langkah 2: Sinkronisasi ABI ke Frontend & Indexer (Paling Krusial!)
+Kembali ke root directory proyek dan jalankan script bash `sync-abi.sh` untuk mengekstrak ABI kontrak pintar hasil kompilasi Foundry secara otomatis dan menyebarkannya ke folder konfigurasi frontend serta indexer:
+```bash
+cd ..
+chmod +x sync-abi.sh
+./sync-abi.sh
+```
 
-Masuk ke direktori `indexer`:
-
+#### Langkah 3: Setup Indexer (Data Layer)
+Masuk ke direktori `indexer` untuk melacak event on-chain secara lokal:
 ```bash
 cd indexer
-```
-
-Install dependensi:
-
-```bash
 npm install
-```
-
-Konfigurasi Environment Variable:
-Gandakan file contoh dan sesuaikan kredensial RPC:
-
-```bash
-cp .env.local.example .env.local
-```
-
-Jalankan Server Development Ponder:
-
-```bash
+cp .env.local.example .env.local   # Konfigurasi RPC URL di file .env.local ini
 npm run dev
 ```
 
-### 3. Setup Frontend (Client)
-
-Masuk ke direktori `frontend`:
-
+#### Langkah 4: Setup Frontend (Client UI)
+Masuk ke direktori `frontend` untuk menjalankan antarmuka dApp Billet:
 ```bash
-cd frontend
-```
-
-Install dependensi:
-
-```bash
+cd ../frontend
 npm install
-```
-
-Jalankan Server Development Next.js:
-
-```bash
 npm run dev
 ```
 
-Aplikasi frontend akan dapat diakses secara default melalui `http://localhost:3000`.
+Aplikasi frontend kini aktif dan dapat diakses di browser melalui tautan default: `http://localhost:3000`.
 
 ---
 

@@ -42,6 +42,7 @@ export default function EventDetailPage() {
   const firstListing = eventListings[0];
   const eventName = firstListing?.parsedEvent?.eventName || firstListing?.eventDetails?.title || "Event";
   const eventDescription = firstListing?.parsedEvent?.description || "";
+  const eventTerms = firstListing?.parsedEvent?.terms || "";
   const venue = firstListing?.eventDetails?.venue || "—";
   const date = firstListing?.eventDetails?.date || "—";
   const city = firstListing?.eventDetails?.city || "—";
@@ -132,14 +133,14 @@ export default function EventDetailPage() {
                 <div className="lg:col-span-7 space-y-6">
                   <div className="border border-hairline bg-canvas-elevated p-6 sm:p-8 space-y-4">
                     <h2 className="font-display-md text-xl uppercase tracking-tight text-white">
-                      TENTANG EVENT
+                      DESKRIPSI
                     </h2>
                     {eventDescription ? (
-                      <p className="font-body-sm text-[14px] text-body leading-relaxed whitespace-pre-line">
+                      <p className="font-body-sm text-[12px] text-body leading-relaxed whitespace-pre-line">
                         {eventDescription}
                       </p>
                     ) : (
-                      <p className="font-body-sm text-[14px] text-muted leading-relaxed italic">
+                      <p className="font-body-sm text-[12px] text-muted leading-relaxed italic">
                         Penyelenggara belum menambahkan deskripsi untuk event ini.
                       </p>
                     )}
@@ -147,15 +148,20 @@ export default function EventDetailPage() {
 
                   {/* Terms & Conditions */}
                   <div className="border border-hairline bg-canvas-elevated p-6 sm:p-8 space-y-3">
-                    <h3 className="font-caption-uppercase text-[10px] text-body tracking-wider font-bold">
+                    <h2 className="font-display-md text-xl uppercase tracking-tight text-white">
                       SYARAT & KETENTUAN
-                    </h3>
-                    <ul className="text-[12px] text-body font-body-sm space-y-2 list-disc list-inside">
-                      <li>Tiket bersifat NFT (ERC-1155) dan tersimpan di wallet Anda secara permanen.</li>
-                      <li>Wajib membawa KTP/SIM fisik yang sesuai dengan NIK terdaftar saat check-in.</li>
-                      <li>Harga resale dibatasi oleh Price Ceiling yang telah ditentukan smart contract.</li>
-                      <li>Royalti resale sebesar 5% otomatis dikirimkan ke organizer event.</li>
-                    </ul>
+                    </h2>
+                    {eventTerms ? (
+                      <ul className="text-[12px] text-body font-body-sm space-y-2 list-disc list-inside">
+                        {eventTerms.split("\n").filter(t => t.trim() !== "").map((term, index) => (
+                          <li key={index}>{term}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="font-body-sm text-[12px] text-muted leading-relaxed italic">
+                        Penyelenggara belum menambahkan syarat & ketentuan untuk event ini.
+                      </p>
+                    )}
                   </div>
                 </div>
 

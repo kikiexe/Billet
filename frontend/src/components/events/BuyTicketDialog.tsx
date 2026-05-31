@@ -319,9 +319,9 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                               onBlur={() => setTouchedNik((prev) => new Set(prev).add(i))}
                               className={`w-full input-on-dark font-mono text-xs transition-colors ${
                                 showSuccess
-                                  ? "!border-semantic-success focus:!border-semantic-success"
+                                  ? "border-semantic-success! focus:border-semantic-success!"
                                   : showError
-                                    ? "!border-primary focus:!border-primary"
+                                    ? "border-primary! focus:border-primary!"
                                     : ""
                               }`}
                               id={`holder-nik-${i}`}

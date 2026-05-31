@@ -24,25 +24,29 @@ export interface EventDetails {
 
 /**
  * Parsed event info extracted from the structured title format:
- * "Event Name | Ticket Class | Description"
+ * "Event Name | Ticket Class | Description | Terms"
  */
 export interface ParsedEventInfo {
   eventName: string;
   ticketClass: string;
   description: string;
+  terms?: string;
 }
 
 /**
  * Parse the on-chain title field into structured event info.
- * Format: "Event Name | Ticket Class | Description"
+ * Format: "Event Name | Ticket Class | Description | Terms"
  * Fallback: If no delimiter is found, treats the whole string as the event name.
  */
 export function parseEventTitle(rawTitle: string): ParsedEventInfo {
   const parts = rawTitle.split(" | ");
+  const desc = parts[2]?.trim() || "";
+  const rawTerms = parts[3]?.trim() || "";
   return {
     eventName: parts[0]?.trim() || rawTitle,
     ticketClass: parts[1]?.trim() || "Reguler",
-    description: parts.slice(2).join(" | ")?.trim() || "",
+    description: desc === "—" ? "" : desc,
+    terms: rawTerms === "—" ? "" : rawTerms,
   };
 }
 

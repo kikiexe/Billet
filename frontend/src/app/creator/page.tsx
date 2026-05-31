@@ -86,6 +86,7 @@ export default function CreatorPage() {
 
   const [eventName, setEventName] = useState("");
   const [eventDescription, setEventDescription] = useState("");
+  const [eventTerms, setEventTerms] = useState("");
   const [eventCategory, setEventCategory] = useState("Musik");
   const [eventCity, setEventCity] = useState("Jakarta");
   const [eventVenue, setEventVenue] = useState("");
@@ -170,10 +171,8 @@ export default function CreatorPage() {
       for (let i = 0; i < enabledClasses.length; i++) {
         const tc = enabledClasses[i];
         const priceInWei = parseUnits(tc.price.toString(), 18);
-        // Structured title: "Event Name | Ticket Class | Description"
-        const structuredTitle = eventDescription.trim()
-          ? `${eventName} | ${tc.name} | ${eventDescription.trim()}`
-          : `${eventName} | ${tc.name}`;
+        // Structured title: "Event Name | Ticket Class | Description | Terms"
+        const structuredTitle = `${eventName} | ${tc.name} | ${eventDescription.trim() || "—"} | ${eventTerms.trim() || "—"}`;
 
         toast.info(`Mengirim transaksi ${i + 1}/${enabledClasses.length}: Tiket ${tc.name}...`, {
           description: `Supply: ${tc.supply} | Harga: ${tc.price.toLocaleString("id-ID")} IDRX`
@@ -210,6 +209,7 @@ export default function CreatorPage() {
 
       setEventName("");
       setEventDescription("");
+      setEventTerms("");
       setEventVenue("");
       setEventDate("");
     } catch (error) {
@@ -654,13 +654,26 @@ export default function CreatorPage() {
                 <div className="space-y-2">
                   <label className="font-caption-uppercase text-[10px] text-body block tracking-wider">Deskripsi Event</label>
                   <textarea
-                    placeholder="Deskripsikan acara Anda: agenda, syarat & ketentuan, informasi penting bagi pengunjung..."
+                    placeholder="Deskripsikan acara Anda: agenda, informasi penting bagi pengunjung..."
                     value={eventDescription}
                     onChange={(e) => setEventDescription(e.target.value)}
                     rows={3}
                     className="w-full input-on-dark resize-none font-body-sm text-sm"
                   />
                   <p className="text-[10px] text-muted font-body-sm">Deskripsi ini akan tersimpan permanen di blockchain dan terlihat oleh semua pengunjung.</p>
+                </div>
+
+                {/* Terms field */}
+                <div className="space-y-2">
+                  <label className="font-caption-uppercase text-[10px] text-body block tracking-wider">Syarat & Ketentuan</label>
+                  <textarea
+                    placeholder="Tuliskan syarat & ketentuan kustom (pisahkan dengan baris baru untuk daftar bullet). Kosongkan untuk menggunakan syarat bawaan..."
+                    value={eventTerms}
+                    onChange={(e) => setEventTerms(e.target.value)}
+                    rows={3}
+                    className="w-full input-on-dark resize-none font-body-sm text-sm"
+                  />
+                  <p className="text-[10px] text-muted font-body-sm">Syarat & ketentuan kustom ini akan disimpan di blockchain. Jika kosong, sistem otomatis menampilkan syarat standar.</p>
                 </div>
 
                 {/* Multi-Category Ticket Classes */}

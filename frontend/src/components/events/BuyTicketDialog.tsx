@@ -5,7 +5,7 @@ import { X, Loader2, CheckCircle2, ChevronRight, AlertCircle } from "lucide-reac
 import { useAccount } from "wagmi";
 import { useBuyTicket } from "@/hooks/useBuyTicket";
 import { useHandleContractError } from "@/hooks/useHandleError";
-import { formatIDRX, getCategoryName } from "@/lib/format";
+import { formatIDRX } from "@/lib/format";
 import type { ListingWithId } from "@/hooks/useListings";
 import { formatUnits, keccak256, toBytes } from "viem";
 
@@ -32,6 +32,8 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
     { name: "", nik: "" },
   ]);
   const [errorMsg, setErrorMsg] = useState("");
+  // Track which fields the user has interacted with for validation UX
+  const [touchedNik, setTouchedNik] = useState<Set<number>>(new Set());
 
   if (!listing) return null;
 
@@ -39,7 +41,14 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
   const maxPurchase = Math.min(5, maxAmount);
   const totalPriceWei = listing.pricePerUnit * BigInt(amount);
   const totalPriceFormatted = formatIDRX(totalPriceWei);
-  const categoryName = getCategoryName(listing.tokenId);
+  const categoryName = listing.parsedEvent?.ticketClass || "Reguler";
+  const eventName = listing.parsedEvent?.eventName || listing.eventDetails?.title || "Event";
+
+  // Real-time NIK validation helper
+  const isNikValid = (nik: string) => /^\d{16}$/.test(nik);
+  const allHoldersValid = holderData.every(
+    (h) => h.name.trim().length > 0 && isNikValid(h.nik)
+  );
 
   // Determine current step index
   const currentStepIndex =
@@ -74,9 +83,9 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
   const handleSubmit = async () => {
     setErrorMsg("");
 
-    // Validate all fields
+    // Final validation guard (button should already be disabled but just in case)
     for (let i = 0; i < holderData.length; i++) {
-      if (!holderData[i].name.trim() || !holderData[i].nik.trim()) {
+      if (!holderData[i].name.trim() || !isNikValid(holderData[i].nik)) {
         setErrorMsg(`Lengkapi semua data pemegang tiket #${i + 1}`);
         return;
       }
@@ -125,7 +134,7 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
               BELI TIKET
             </h2>
             <p className="font-body-sm text-[12px] text-body mt-0.5">
-              {categoryName} — LISTING #{listing.listingId}
+              {eventName} — {categoryName}
             </p>
           </div>
           {txState === "idle" && (
@@ -271,36 +280,71 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                     <label className="font-caption-uppercase text-[10px] text-body block tracking-wider">
                       Registrasi Pemegang Tiket
                     </label>
-                    {holderData.map((holder, i) => (
-                      <div
-                        key={i}
-                        className="border border-hairline bg-canvas p-4 space-y-3"
-                      >
-                        <p className="font-caption-uppercase text-[9px] text-primary tracking-wider font-bold">
-                          PEMEGANG TIKET #{i + 1}
-                        </p>
-                        <input
-                          type="text"
-                          placeholder="Nama Lengkap"
-                          value={holder.name}
-                          onChange={(e) =>
-                            handleHolderChange(i, "name", e.target.value)
-                          }
-                          className="w-full input-on-dark"
-                          id={`holder-name-${i}`}
-                        />
-                        <input
-                          type="text"
-                          placeholder="NIK (16 Digit)"
-                          value={holder.nik}
-                          onChange={(e) =>
-                            handleHolderChange(i, "nik", e.target.value)
-                          }
-                          className="w-full input-on-dark font-mono text-xs"
-                          id={`holder-nik-${i}`}
-                        />
-                      </div>
-                    ))}
+                    {holderData.map((holder, i) => {
+                      const nikLen = holder.nik.length;
+                      const nikIsTouched = touchedNik.has(i);
+                      const nikIsEmpty = nikLen === 0;
+                      const nikIsValid = isNikValid(holder.nik);
+                      const showError = nikIsTouched && !nikIsEmpty && !nikIsValid;
+                      const showSuccess = nikIsValid;
+
+                      return (
+                        <div
+                          key={i}
+                          className="border border-hairline bg-canvas p-4 space-y-3"
+                        >
+                          <p className="font-caption-uppercase text-[9px] text-primary tracking-wider font-bold">
+                            PEMEGANG TIKET #{i + 1}
+                          </p>
+                          <input
+                            type="text"
+                            placeholder="Nama Lengkap"
+                            value={holder.name}
+                            onChange={(e) =>
+                              handleHolderChange(i, "name", e.target.value)
+                            }
+                            className="w-full input-on-dark"
+                            id={`holder-name-${i}`}
+                          />
+                          <div className="space-y-1">
+                            <input
+                              type="text"
+                              placeholder="NIK (16 Digit)"
+                              maxLength={16}
+                              value={holder.nik}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(/\D/g, "");
+                                handleHolderChange(i, "nik", val);
+                              }}
+                              onBlur={() => setTouchedNik((prev) => new Set(prev).add(i))}
+                              className={`w-full input-on-dark font-mono text-xs transition-colors ${
+                                showSuccess
+                                  ? "!border-semantic-success focus:!border-semantic-success"
+                                  : showError
+                                    ? "!border-primary focus:!border-primary"
+                                    : ""
+                              }`}
+                              id={`holder-nik-${i}`}
+                            />
+                            {showError && (
+                              <p className="text-[11px] text-primary font-body-sm">
+                                Wajib tepat 16 digit angka (Sekarang: {nikLen} digit)
+                              </p>
+                            )}
+                            {showSuccess && (
+                              <p className="text-[11px] text-semantic-success font-body-sm">
+                                ✓ NIK valid (16 digit)
+                              </p>
+                            )}
+                            {nikIsTouched && nikIsEmpty && (
+                              <p className="text-[11px] text-muted font-body-sm">
+                                Masukkan 16 digit NIK KTP Anda
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
 
                   {/* Error display */}
@@ -337,7 +381,8 @@ export function BuyTicketDialog({ listing, onClose, onSuccess }: BuyTicketDialog
                   {/* Submit Button */}
                   <button
                     onClick={handleSubmit}
-                    className="btn-primary w-full tracking-[1.4px] flex items-center justify-center gap-2 rounded-none font-bold"
+                    disabled={!allHoldersValid}
+                    className="btn-primary w-full tracking-[1.4px] flex items-center justify-center gap-2 rounded-none font-bold disabled:opacity-40 disabled:pointer-events-none"
                     id="buy-submit"
                   >
                     BELI TIKET SEKARANG

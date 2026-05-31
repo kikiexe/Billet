@@ -307,20 +307,23 @@ export default function GatekeeperPage() {
                                       <>
                                         <input
                                           type="text"
-                                          placeholder="Scan/Ketik NIK KTP..."
+                                          placeholder="Scan/Ketik NIK KTP (16 Digit)"
+                                          maxLength={16}
                                           value={currentNik}
-                                          onChange={(e) => setNikInputs(prev => ({ ...prev, [nikKey]: e.target.value }))}
+                                          onChange={(e) => {
+                                            const val = e.target.value.replace(/\D/g, "");
+                                            setNikInputs(prev => ({ ...prev, [nikKey]: val }));
+                                          }}
                                           className={`input-on-dark font-mono text-[10px] w-full h-8 px-2 border ${currentNik && !isMatch ? 'border-primary text-primary focus:border-primary' : isMatch ? 'border-semantic-success text-semantic-success focus:border-semantic-success' : 'border-hairline focus:border-white'}`}
                                         />
                                         <button
                                           onClick={() => handleCheckIn(ticket.tokenId, holder.originalIndex)}
                                           disabled={isCheckingIn || isWaitingTx || !isMatch}
-                                          className={`text-[10px] tracking-wider h-8 px-4 py-0 font-bold border-none rounded-none flex items-center justify-center gap-2 w-full transition-colors ${
-                                            isMatch ? 'bg-semantic-success text-white hover:bg-semantic-success/90' : 'bg-primary text-white disabled:opacity-50'
-                                          }`}
+                                          className={`text-[10px] tracking-wider h-8 px-4 py-0 font-bold border-none rounded-none flex items-center justify-center gap-2 w-full transition-colors ${isMatch ? 'bg-semantic-success text-white hover:bg-semantic-success/90 cursor-pointer' : 'bg-primary text-white disabled:opacity-50'
+                                            }`}
                                         >
                                           {isCheckingIn || isWaitingTx ? (
-                                            <><Loader2 className="w-3.5 h-3.5 animate-spin" /> PROSES...</>
+                                            <><Loader2 className="w-3.5 h-3.5 animate-spin cursor-pointer" /> PROSES...</>
                                           ) : isMatch ? (
                                             <>CHECK-IN SAH</>
                                           ) : (

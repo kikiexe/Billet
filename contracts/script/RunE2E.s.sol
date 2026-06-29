@@ -10,9 +10,9 @@ import "forge-std/console.sol";
 
 contract RunE2E is Script {
     function run() external {
-        address marketplaceAddr = 0x44d565b75Ad385c340538DE9d3be348d7F6B48Fb;
-        address nftAddr = 0x2e8e67aA822D8E2c7FAC95D6B142830C7dbe1Ebc;
-        address idrxAddr = 0x4e08cb232D2EbC355B1298109039DCd665fA42f8;
+        address marketplaceAddr = 0xa8e40f45053d84848C9b24A4175b15D84EEb541e;
+        address nftAddr = 0xb73C817EB4d4b6BA23a8f7a2032c6403B47b5870;
+        address idrxAddr = 0x9C0eE132da6599949ce59E5F3eA2C20d2e238f73;
 
         uint256 organizerPk = vm.envUint("ORGANIZER_PK");
         uint256 user1Pk = vm.envUint("USER1_PK");

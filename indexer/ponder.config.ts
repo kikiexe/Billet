@@ -15,13 +15,13 @@ export default createConfig({
     TicketMarketplace: {
       abi: TicketMarketplaceAbi,
       chain: "baseSepolia",
-      address: (process.env.PONDER_TICKET_MARKETPLACE_ADDRESS || "0x44d565b75Ad385c340538DE9d3be348d7F6B48Fb") as `0x${string}`,
+      address: (process.env.PONDER_TICKET_MARKETPLACE_ADDRESS || "0xa8e40f45053d84848c9b24a4175b15d84eeb541e") as `0x${string}`,
       startBlock: Number(process.env.PONDER_TICKET_MARKETPLACE_START_BLOCK || 42161011),
     },
     TicketNFT: {
       abi: TicketNFTAbi,
       chain: "baseSepolia",
-      address: (process.env.PONDER_TICKET_NFT_ADDRESS || "0x2e8e67aA822D8E2c7FAC95D6B142830C7dbe1Ebc") as `0x${string}`,
+      address: (process.env.PONDER_TICKET_NFT_ADDRESS || "0xb73c817eb4d4b6ba23a8f7a2032c6403b47b5870") as `0x${string}`,
       startBlock: Number(process.env.PONDER_TICKET_NFT_START_BLOCK || 42161011),
     },
   },
